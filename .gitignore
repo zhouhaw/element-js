@@ -1,0 +1,7 @@
+.idea
+node_modules/
+_bundles/
+.cache/
+temp/
+/package-lock.json
+/.idea
