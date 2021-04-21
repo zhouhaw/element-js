@@ -30,3 +30,34 @@ Order 数据结构
     salt: new BigNumber(0) // 订单唯一值
   }
 ```
+
+fork 节点
+```
+module.exports = {
+  apps : [
+    {
+       name: "element-order-serve",
+       script: "./element-order-serve/index.js"
+    },{
+    name: "ganache-rinkeby",
+    script: "/usr/local/node/bin/ganache-cli",
+    error_file:"./logs/node-err.log",
+    out_file: "./logs/node-out.log",
+    args:`-h 0.0.0.0 -p 8555 --fork https://rinkeby.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161 \
+      -m "clutch captain shoe salt awake harvest setup primary inmate ugly among become" \
+      --deterministic --gasPrice 5e9 --gasLimit 800e4 -e 10000 --networkId 1337 --db ./ganache`
+  }],
+  deploy : {
+    production : {
+      user : 'SSH_USERNAME',
+      host : 'SSH_HOSTMACHINE',
+      ref  : 'origin/master',
+      repo : 'GIT_REPOSITORY',
+      path : 'DESTINATION_PATH',
+      'pre-deploy-local': '',
+      'post-deploy' : 'npm install && pm2 reload ecosystem.config.js --env production',
+      'pre-setup': ''
+    }
+  }
+};
+```

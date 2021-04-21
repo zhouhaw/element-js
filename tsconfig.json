@@ -6,6 +6,7 @@
     ],
     "compilerOptions": {
         "outDir": "lib",
+        "noImplicitAny": false,
         "noImplicitThis": false,
         "module": "commonjs",
         "target": "es5",
