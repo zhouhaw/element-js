@@ -6,15 +6,15 @@ import {
   Network,
   HowToCall,
   // Note: Wyvern SaleKind is wrong!
-  ECSignature,
   Order as WyvernOrder
 } from 'wyvern-js/lib/types'
 
 export {
   Network,
   HowToCall,
-  ECSignature
 }
+export type ECSignature = types.ECSignature
+
 
 
 import { Token } from 'wyvern-schemas/dist/types'

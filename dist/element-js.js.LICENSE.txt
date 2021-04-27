@@ -26,6 +26,11 @@ object-assign
  */
 
 /*!
+ * v2.1.4-104-gc868b3a
+ * 
+ */
+
+/*!
  * web3.js - Ethereum JavaScript API
  *
  * @license lgpl-3.0
@@ -58,9 +63,27 @@ object-assign
 /**
  * [js-sha3]{@link https://github.com/emn178/js-sha3}
  *
+ * @version 0.5.7
+ * @author Chen, Yi-Cyuan [emn178@gmail.com]
+ * @copyright Chen, Yi-Cyuan 2015-2016
+ * @license MIT
+ */
+
+/**
+ * [js-sha3]{@link https://github.com/emn178/js-sha3}
+ *
  * @version 0.7.0
  * @author Chen, Yi-Cyuan [emn178@gmail.com]
  * @copyright Chen, Yi-Cyuan 2015-2017
+ * @license MIT
+ */
+
+/**
+ * [js-sha3]{@link https://github.com/emn178/js-sha3}
+ *
+ * @version 0.8.0
+ * @author Chen, Yi-Cyuan [emn178@gmail.com]
+ * @copyright Chen, Yi-Cyuan 2015-2018
  * @license MIT
  */
 
