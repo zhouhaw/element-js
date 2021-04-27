@@ -11,6 +11,7 @@ const MintableNonFungibleToken = require('./abi/MintableNonFungibleToken.json')
 const WyvernProxyRegistry = require('./abi/WyvernProxyRegistry.json')
 const WyvernExchange = require('./abi/WyvernExchange.json')
 const WETH = require('./abi/WETH.json')
+const AuthenticatedProxy = require('./abi/AuthenticatedProxy.json')
 
 const {WyvernProtocol} = require('wyvern-js')
 const {tokens, schemas, encodeSell, encodeBuy} = require('wyvern-schemas')
@@ -160,7 +161,8 @@ const createOrder = async (target1, nft, amount, ower, side) => {
 }
 
 
-const registerProxy = async (contract, account) => {
+const registerProxy = async (account) => {
+    let contract = proxyRegistryContract;
     let proxy = await contract.methods.proxies(account).call()
 
     if (proxy === nullAddr) {
@@ -175,7 +177,8 @@ const registerProxy = async (contract, account) => {
     return proxy
 }
 
-const transferNFT = async (contract, account, tokenId, proxy) => {
+const transferNFT = async (account, tokenId, proxy) => {
+    let contract = nftContract;
     let owner = await contract.methods.ownerOf(tokenId).call();
     if (owner == web3.utils.toChecksumAddress(account)) {
         const txHash = await contract.methods.transfer(proxy, tokenId).send({
@@ -183,16 +186,14 @@ const transferNFT = async (contract, account, tokenId, proxy) => {
         })
         owner = await contract.methods.ownerOf(tokenId).call();
         console.log('Transferring NFT #' + tokenId + ' to proxy: ' + txHash.transactionHash)
-    } else {
-        console.log('Transferring NFT error: account not owner')
-        owner = nullAddr
     }
     return owner;
 }
-const aproveNFT = async (contract, account, tokenId, proxy) => {
+const aproveNFT = async (account, tokenId, proxy) => {
+    let contract = nftContract;
     let owner = await contract.methods.ownerOf(tokenId).call();
     if (owner == nullAddr) {
-        await mintNFT(contract, account, tokenId)
+        await mintNFT(account, tokenId)
     }
 
     let delegateAddr = await contract.methods.getApproved(tokenId).call()
@@ -204,7 +205,8 @@ const aproveNFT = async (contract, account, tokenId, proxy) => {
     return owner
 }
 
-const mintNFT = async (contract, account, tokenId) => {
+const mintNFT = async (account, tokenId) => {
+    let contract = nftContract;
     let foo = await contract.methods.totalSupply().call()
     let numTokensTotal = await contract.methods.numTokensTotal().call();
     let owner = await contract.methods.ownerOf(tokenId).call();
@@ -256,7 +258,7 @@ let orderCanMatch = (buy, sell) => {
         canSettleOrder(sell.listingTime, sell.expirationTime)
 }
 
-let tokenId = "23258"
+let tokenId = "23210"
 let log = console.log;
 const go = async () => {
     const balance = await web3.eth.getBalance(account)
@@ -265,12 +267,6 @@ const go = async () => {
     if (balance === 0) {
         throw new Error('Nonzero balance required!')
     }
-
-
-    let proxy = await registerProxy(proxyRegistryContract, account);
-
-
-    let owner = await transferNFT(nftContract, account, tokenId, proxy)
 
 
     if (owner == web3.utils.toChecksumAddress(account) || owner == proxy) {
@@ -337,9 +333,44 @@ const go = async () => {
     }
 }
 
+
+// 1155 contract 0x5bcfBb0cc48DD3Af0ECC1F8F42beD32Ca1Bd5ab4
+// 0xf242432a000000000000000000000000a0df350d2637096571f7a701cbc1c5fde30df76a0000000000000000000000000271d4a9191c8277632ff0494de8fabb364f93d50000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000a00000000000000000000000000000000000000000000000000000000000000000œ
 (async () => {
     try {
-        await go()
+        // await go()
+        let proxy = await registerProxy(account);
+        let owner = await transferNFT(account, tokenId, proxy)
+        if (owner == nullAddr) {
+            await nftContract.methods.mint(account, tokenId).send();
+            owner = await transferNFT(account, tokenId, proxy);
+        }
+
+        if (owner == proxy) {
+            let target = "0x07a6Dc6E3F1120Ca03658d473D10aEE3aF5f8aBB";
+            let calldata = nftContract.methods.transfer(buyAccount, tokenId).encodeABI();
+
+            const proxyContract = new web3.eth.Contract(AuthenticatedProxy.abi, proxy, {
+                from: account,
+                gas: 80e4.toString()
+            })
+
+            let user = await  proxyContract.methods.user().call()
+
+            if(user.toLowerCase() == account){
+                let tx = await proxyContract.methods.proxy(target, 0, calldata).send({
+                    from: user,
+                    gas: 80e4
+                })
+                // https://rinkeby.etherscan.io/tx/0xeadbbf32ecb4a9d563c5e42a7701b489c1be99301305fa38612a9ec5dfecd7ee
+                log(tx)
+            }
+
+
+        } else {
+
+        }
+
     } catch (e) {
         console.log(e)
     }

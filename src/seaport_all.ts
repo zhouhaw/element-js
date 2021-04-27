@@ -3,49 +3,30 @@ import {WyvernProtocol} from 'wyvern-js'
 import * as WyvernSchemas from 'wyvern-schemas'
 import {Schema} from 'wyvern-schemas/dist/types'
 import {
-    Network, Asset, Order, UnhashedOrder,SaleKind,
-    FeeMethod,
-    UnsignedOrder,OpenSeaAsset,OrderSide,ECSignature,
-    WyvernSchemaName, OpenSeaAPIConfig,HowToCall,EventType,ComputedFees
+    Network, Asset, Order, UnhashedOrder,
+    UnsignedOrder,OpenSeaAsset,
+    WyvernSchemaName, OpenSeaAPIConfig
 } from './types'
 import {
     validateAndFormatWalletAddress,
     makeBigNumber, getOrderHash,
-    getWyvernAsset,
-    isContractAddress,
-    getTransferFeeSettings
+    getWyvernAsset
 } from './utils/utils'
 
 import {
-    encodeAtomicizedTransfer,
-    encodeProxyCall,
-    encodeTransferCall,
-    encodeCall,
-    encodeBuy,
-    encodeSell,
-    encodeAtomicizedBuy,
-    encodeAtomicizedSell
-} from './utils/schema'
-
-import {
     MAINNET_PROVIDER_URL, RINKEBY_PROVIDER_URL,
-    NULL_ADDRESS,DEFAULT_BUYER_FEE_BASIS_POINTS,
-    DEFAULT_SELLER_FEE_BASIS_POINTS,DEFAULT_MAX_BOUNTY,
-    OPENSEA_SELLER_BOUNTY_BASIS_POINTS,
-    OPENSEA_FEE_RECIPIENT
+    NULL_ADDRESS
 } from './constants'
 
-import {OrderBook} from "./orders"
-
-export class OpenSeaPort extends  OrderBook{
+export class OpenSeaPort {
 
     // Logger function to use when debugging
-    // public logger: (arg: string) => void
-    // public web3: any
+    public logger: (arg: string) => void
+    public web3: Web3
 
-    // private _networkName: Network
-    // private _wyvernProtocol: WyvernProtocol
-
+    private _networkName: Network
+    private _wyvernProtocol: WyvernProtocol
+    private _wyvernProtocolReadOnly: WyvernProtocol
 
     /**
      * Your very own seaport.
@@ -56,31 +37,35 @@ export class OpenSeaPort extends  OrderBook{
      * @param logger logger, optional, a function that will be called with debugging
      *  information
      */
-    constructor(provider: Web3.Provider, apiConfig: OpenSeaAPIConfig = {}) {
+    constructor(provider: Web3.Provider, apiConfig: OpenSeaAPIConfig = {}, logger?: (arg: string) => void) {
 
         // API config
         apiConfig.networkName = apiConfig.networkName || Network.Main
         apiConfig.gasPrice = apiConfig.gasPrice || makeBigNumber(300000)
-        let _networkName = apiConfig.networkName
 
-        // const readonlyProvider = new Web3.providers.HttpProvider(_networkName == Network.Main ? MAINNET_PROVIDER_URL : RINKEBY_PROVIDER_URL)
+
+        this._networkName = apiConfig.networkName
+
+        const readonlyProvider = new Web3.providers.HttpProvider(this._networkName == Network.Main ? MAINNET_PROVIDER_URL : RINKEBY_PROVIDER_URL)
 
         // Web3 Config
-        const _web3 = new Web3(provider);
-        super(_web3,_networkName,apiConfig.gasPrice)
-
+        this.web3 = new Web3(provider);
 
 
         // WyvernJS config
-        // this._wyvernProtocol = new WyvernProtocol(provider, {
-        //     network: _networkName,
-        //     gasPrice: apiConfig.gasPrice,
-        // })
+        this._wyvernProtocol = new WyvernProtocol(provider, {
+            network: this._networkName,
+            gasPrice: apiConfig.gasPrice,
+        })
 
-
+        // WyvernJS config for readonly (optimization for infura calls)
+        this._wyvernProtocolReadOnly = new WyvernProtocol(readonlyProvider, {
+            network: this._networkName,
+            gasPrice: apiConfig.gasPrice,
+        })
 
         // Debugging: default to nothing
-        // this.logger = logger || ((arg: string) => arg)
+        this.logger = logger || ((arg: string) => arg)
     }
 
     /**
@@ -169,7 +154,7 @@ export class OpenSeaPort extends  OrderBook{
         const quantityBN = WyvernProtocol.toBaseUnitAmount(makeBigNumber(quantity), asset.decimals || 0)
         const wyAsset = getWyvernAsset(schema, asset, quantityBN)
 
-        const openSeaAsset: OpenSeaAsset = {} as OpenSeaAsset// await this.api.getAsset(asset)
+        const openSeaAsset: OpenSeaAsset = {}// await this.api.getAsset(asset)
 
         const taker = sellOrder
             ? sellOrder.maker
@@ -299,7 +284,7 @@ export class OpenSeaPort extends  OrderBook{
                 await this._approveOrder(order)
                 return null
             } else {
-                return null //return await personalSignAsync(this.web3, message, signerAddress)
+                return await personalSignAsync(this.web3, message, signerAddress)
             }
         } catch (error) {
             this._dispatch(EventType.OrderDenied, {order, accountAddress: signerAddress})
@@ -335,7 +320,15 @@ export class OpenSeaPort extends  OrderBook{
         return confirmedOrder
     }
 
+    private _getSchema(schemaName?: WyvernSchemaName): Schema<any> {
+        const schemaName_ = schemaName || WyvernSchemaName.ERC721
+        const schema = WyvernSchemas.schemas[this._networkName].filter(s => s.name == schemaName_)[0]
 
+        if (!schema) {
+            throw new Error(`Trading for this asset (${schemaName_}) is not yet supported. Please contact us or check back later!`)
+        }
+        return schema
+    }
 
     /**
      * Compute the fees for an order
@@ -360,7 +353,7 @@ export class OpenSeaPort extends  OrderBook{
         let devBuyerFeeBasisPoints = 0
         let devSellerFeeBasisPoints = 0
         let transferFee = makeBigNumber(0)
-        let transferFeeTokenAddress:string = null!
+        let transferFeeTokenAddress = null
         let maxTotalBountyBPS = DEFAULT_MAX_BOUNTY
 
         if (asset) {
@@ -378,7 +371,6 @@ export class OpenSeaPort extends  OrderBook{
             transferFee = asset.transferFee
                 ? makeBigNumber(asset.transferFee)
                 : transferFee
-
             transferFeeTokenAddress = asset.transferFeePaymentToken
                 ? asset.transferFeePaymentToken.address
                 : transferFeeTokenAddress
@@ -463,41 +455,6 @@ export class OpenSeaPort extends  OrderBook{
             feeRecipient: OPENSEA_FEE_RECIPIENT,
             feeMethod: FeeMethod.SplitFee
         }
-    }
-
-    /**
-     * Instead of signing an off-chain order, you can approve an order
-     * with on on-chain transaction using this method
-     * @param order Order to approve
-     * @returns Transaction hash of the approval transaction
-     */
-    public async _approveOrder(order: UnsignedOrder) {
-        const accountAddress = order.maker
-        const gasPrice = await this._computeGasPrice()
-        const includeInOrderBook = true
-
-        this._dispatch(EventType.ApproveOrder, { order, accountAddress })
-
-        const transactionHash = await this._wyvernProtocol.wyvernExchange.approveOrder_.sendTransactionAsync(
-            [order.exchange, order.maker, order.taker, order.feeRecipient, order.target, order.staticTarget, order.paymentToken],
-            [order.makerRelayerFee, order.takerRelayerFee, order.makerProtocolFee, order.takerProtocolFee, order.basePrice, order.extra, order.listingTime, order.expirationTime, order.salt],
-            order.feeMethod,
-            order.side,
-            order.saleKind,
-            order.howToCall,
-            order.calldata,
-            order.replacementPattern,
-            order.staticExtradata,
-            includeInOrderBook,
-            { from: accountAddress, gasPrice }
-        )
-
-        await this._confirmTransaction(transactionHash.toString(), EventType.ApproveOrder, "Approving order", async () => {
-            const isApproved = await this._validateOrder(order)
-            return isApproved
-        })
-
-        return transactionHash
     }
 
 }

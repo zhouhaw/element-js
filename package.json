@@ -2,6 +2,7 @@
   "dependencies": {
     "bignumber.js": "5.0.0",
     "ethereumjs-abi": "git+https://github.com/ProjectWyvern/ethereumjs-abi.git",
+    "fbemitter": "^3.0.0",
     "isomorphic-unfetch": "^3.1.0",
     "query-string": "^6.11.1",
     "wyvern-js": "git+https://github.com/definancer/wyvern-js.git#v3.2.1",

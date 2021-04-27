@@ -1415,6 +1415,12 @@
       "links": {},
       "address": "0xf57b2c51ded3a29e6891aba85459d600256cf317",
       "transactionHash": "0x344dad62b2649a06be2140cf5ac044a684f93619617a53bdd23ba5de140506ac"
+    },
+    "1337": {
+      "events": {},
+      "links": {},
+      "address": "0x04027C8A0a13c0984a7b4e9fdC0e3590C5bf5B0C",
+      "transactionHash": "0x5ce4de9dcb77b74b4829c0d3c516a3e68cf7e4de52cd477b7be9ba2db0d90109"
     }
   },
   "schemaVersion": "2.0.0",

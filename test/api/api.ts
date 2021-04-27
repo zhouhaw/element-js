@@ -1,7 +1,4 @@
 import {assert} from 'chai'
-
-const Web3 = require("web3");
-// import Web3 from "web3";
 import {suite, test} from 'mocha';
 
 import {
@@ -13,12 +10,7 @@ import {
 } from '../constants'
 import {orderToJSON} from '../../src'
 
-var ordersJSONFixture = require('../fixtures/orders.json');
-
-// let web3Provider = new Web3.providers.HttpProvider(provider);
-const provider = new Web3.providers.HttpProvider(MAINNET_PROVIDER_URL)
-// let web = new Web3("http://127.0.0.1:8545");
-// console.log(Web3)
+let ordersJSONFixture = require('../fixtures/orders.json');
 
 suite('api', () => {
     test('API has correct base url', () => {
