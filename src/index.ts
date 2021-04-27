@@ -1,14 +1,16 @@
-import {OpenSeaAPI} from './api'
-import {OpenSeaPort} from './seaport'
-import {Network, EventData, EventType} from './types'
-
-export {orderToJSON, orderFromJSON, WyvernProtocol} from './utils/utils'
+import * as types from './types'
+export { OpenSeaAPI } from './api'
+export { EventType, Network } from './types'
+export { orderToJSON, orderFromJSON, WyvernProtocol } from './utils/utils'
 export {
-    encodeCall,
-    encodeSell, encodeAtomicizedBuy, encodeAtomicizedSell,
-    encodeDefaultCall, encodeReplacementPattern,
-    AbiType,
+  encodeCall,
+  encodeSell, encodeAtomicizedBuy, encodeAtomicizedSell,
+  encodeDefaultCall, encodeReplacementPattern,
+  AbiType,
 } from './utils/schema'
+
+export type EventData = types.EventData
+
 
 /**
  * Example setup:
@@ -20,15 +22,3 @@ export {
  *   networkName: Network.Main
  * })
  */
-
-export {
-    // Main SDK export:
-    OpenSeaPort,
-    // So the API could be used separately:
-    OpenSeaAPI,
-    // Useful for serializing and deserializing orders:
-    // Types to help initialize SDK and listen to events.
-    // Can also be imported using e.g.
-    //   import { EventType } from 'opensea-js/lib/types'
-    EventData, EventType, Network
-}
