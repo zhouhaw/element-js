@@ -5,14 +5,14 @@ const Web3 = require('web3')
 const BigNumber = require('bignumber.js')
 const hdAddress = require("hd-address")
 
-const config = require('./config.json')
-const AssetContractShared = require('./abi/AssetContractShared.json')
-const WyvernProxyRegistry = require('./abi/WyvernProxyRegistry.json')
-const WyvernExchange = require('./abi/WyvernExchange.json')
-const WETH = require('./abi/WETH.json')
+const config = require('../../config.json')
+const AssetContractShared = require('../../abi/AssetContractShared.json')
+const WyvernProxyRegistry = require('../../abi/WyvernProxyRegistry.json')
+const WyvernExchange = require('../../abi/WyvernExchange.json')
+const WETH = require('../../abi/WETH.json')
 
 const {WyvernProtocol} = require('wyvern-js')
-const {tokens, schemas, encodeSell, encodeBuy} = require('../wyvern-schemas')
+const {tokens, schemas, encodeSell, encodeBuy} = require('../../../wyvern-schemas/dist')
 
 let provider = "http://39.102.101.142:8545"
 let web3Provider = new Web3.providers.HttpProvider(provider);

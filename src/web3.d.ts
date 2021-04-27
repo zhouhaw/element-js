@@ -1,9 +1,4 @@
-// import Web3Js from 'web3'
-// export default class Web3s extends Web3Js {
-//     public isAddress(address: string, chainId?: number): boolean {
-//         return this.utils.isAddress(address, chainId)
-//     }
-// }
+
 declare module 'web3' {
     import * as BigNumber from 'bignumber.js';
 

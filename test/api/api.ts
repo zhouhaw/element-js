@@ -1,5 +1,6 @@
-import {assert} from 'chai'
-import {suite, test} from 'mocha';
+let {assert} = require('chai')
+// import {suite, test} from 'mocha';
+let { suite, test } = require('mocha')
 
 import {
     MAINNET_PROVIDER_URL,

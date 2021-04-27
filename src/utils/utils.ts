@@ -183,7 +183,7 @@ interface LogEntry {
     topics: string[];
 }
 
-export type TxnCallback = (result: boolean) => void
+// export type TxnCallback = (result: boolean) => void
 
 
 const track = (web3: any, txHash: string, onFinalized: TxnCallback) => {

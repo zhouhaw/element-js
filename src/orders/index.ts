@@ -2,16 +2,18 @@ import * as Web3 from 'web3'
 import {WyvernProtocol} from 'wyvern-js'
 import * as WyvernSchemas from 'wyvern-schemas'
 import {Schema} from 'wyvern-schemas/dist/types'
-import { EventEmitter, EventSubscription } from 'fbemitter'
-import { BigNumber } from 'bignumber.js'
+import {EventEmitter, EventSubscription} from 'fbemitter'
+import {BigNumber} from 'bignumber.js'
 
 import {
-    Network, Asset, Order, UnhashedOrder,EventType,
+    Network, Asset, Order, UnhashedOrder, EventType,
     UnsignedOrder, OpenSeaAsset, OrderSide,
-    WyvernSchemaName, OpenSeaAPIConfig,EventData
+    WyvernSchemaName, OpenSeaAPIConfig, EventData
 } from '../types'
-import {  StaticCheckTxOrigin, StaticCheckCheezeWizards, StaticCheckDecentralandEstates,
-    CheezeWizardsBasicTournament, DecentralandEstates, getMethod,ERC20 } from '../abi/contracts'
+import {
+    StaticCheckTxOrigin, StaticCheckCheezeWizards, StaticCheckDecentralandEstates,
+    CheezeWizardsBasicTournament, DecentralandEstates, getMethod, ERC20
+} from '../abi/contracts'
 import {
     confirmTransaction,
     estimateCurrentPrice,
@@ -73,13 +75,13 @@ import {
 export class OrderBook {
     public gasPriceAddition = new BigNumber(3)
     public web3: any
-    public _networkName:Network
+    public _networkName: Network
     private _emitter: EventEmitter
     public _wyvernProtocolReadOnly: WyvernProtocol
-    public logger:any
+    public logger: any
     public _wyvernProtocol: WyvernProtocol
 
-    constructor(web3: any,networkName:Network,gasPrice:BigNumber) {
+    constructor(web3: any, networkName: Network, gasPrice: BigNumber) {
 
         this.web3 = web3;
         this._networkName = networkName
@@ -92,7 +94,7 @@ export class OrderBook {
             gasPrice: gasPrice,
         })
 
-        this._wyvernProtocol = new WyvernProtocol(web3.provider, {
+        this._wyvernProtocol = new WyvernProtocol(readonlyProvider, {
             network: networkName,
             gasPrice: gasPrice,
         })
@@ -118,9 +120,11 @@ export class OrderBook {
      * @param retries How many times to retry if balance is 0
      */
     public async getAssetBalance(
-        { accountAddress, asset }:
-            { accountAddress: string;
-                asset: Asset; },
+        {accountAddress, asset}:
+            {
+                accountAddress: string;
+                asset: Asset;
+            },
         retries = 1
     ): Promise<BigNumber> {
         const schema = this._getSchema(asset.schemaName)
@@ -179,10 +183,12 @@ export class OrderBook {
      * @param retries Number of times to retry if balance is undefined
      */
     public async getTokenBalance(
-        { accountAddress, tokenAddress, schemaName = WyvernSchemaName.ERC20 }:
-            { accountAddress: string;
+        {accountAddress, tokenAddress, schemaName = WyvernSchemaName.ERC20}:
+            {
+                accountAddress: string;
                 tokenAddress: string;
-                schemaName?: WyvernSchemaName },
+                schemaName?: WyvernSchemaName
+            },
         retries = 1
     ) {
 
@@ -191,7 +197,7 @@ export class OrderBook {
             tokenAddress,
             schemaName
         }
-        return this.getAssetBalance({ accountAddress, asset }, retries)
+        return this.getAssetBalance({accountAddress, asset}, retries)
     }
 
     /**
@@ -220,8 +226,8 @@ export class OrderBook {
         const isEther = tokenAddress == NULL_ADDRESS
 
         const tokens = WyvernSchemas.tokens
-        const tokenList = [].concat.apply(tokens[this._networkName].canonicalWrappedEther, tokens[this._networkName].otherTokens)
-        const token = tokenList.find((t) => t.address.toLowerCase() === paymentToken);
+        const tokenList = [tokens[this._networkName].canonicalWrappedEther, ...tokens[this._networkName].otherTokens]
+        const token = tokenList.find((t) => t.address.toLowerCase() === paymentToken) || {decimals: 18};
 
 
         // Validation
@@ -320,9 +326,11 @@ export class OrderBook {
     }
 
     public async _getStaticCallTargetAndExtraData(
-        { asset, useTxnOriginStaticCall }:
-            { asset: OpenSeaAsset;
-                useTxnOriginStaticCall: boolean; }
+        {asset, useTxnOriginStaticCall}:
+            {
+                asset: OpenSeaAsset;
+                useTxnOriginStaticCall: boolean;
+            }
     ): Promise<{
         staticTarget: string;
         staticExtradata: string;
@@ -438,8 +446,9 @@ export class OrderBook {
      * @param proxyAddress User's proxy address. If undefined, uses the token transfer proxy address
      */
     public async _getApprovedTokenCount(
-        { accountAddress, tokenAddress, proxyAddress }:
-            { accountAddress: string;
+        {accountAddress, tokenAddress, proxyAddress}:
+            {
+                accountAddress: string;
                 tokenAddress?: string;
                 proxyAddress?: string;
             }
@@ -456,6 +465,7 @@ export class OrderBook {
         })
         return makeBigNumber(approved)
     }
+
     /**
      * Approve a fungible token (e.g. W-ETH) for use in trades.
      * Called internally, but exposed for dev flexibility.
@@ -468,14 +478,18 @@ export class OrderBook {
      * @returns Transaction hash if a new transaction occurred, otherwise null
      */
     public async approveFungibleToken(
-        { accountAddress,
+        {
+            accountAddress,
             tokenAddress,
             proxyAddress,
-            minimumAmount = WyvernProtocol.MAX_UINT_256 }:
-            { accountAddress: string;
+            minimumAmount = WyvernProtocol.MAX_UINT_256
+        }:
+            {
+                accountAddress: string;
                 tokenAddress: string;
                 proxyAddress?: string;
-                minimumAmount?: BigNumber }
+                minimumAmount?: BigNumber
+            }
     ): Promise<string | null> {
         proxyAddress = proxyAddress || WyvernProtocol.getTokenTransferProxyAddress(this._networkName)
 
@@ -502,7 +516,7 @@ export class OrderBook {
 
         if (minimumAmount.greaterThan(0) && hasOldApproveMethod) {
             // Older erc20s require initial approval to be 0
-            await this.unapproveFungibleToken({ accountAddress, tokenAddress, proxyAddress })
+            await this.unapproveFungibleToken({accountAddress, tokenAddress, proxyAddress})
         }
 
         const gasPrice = await this._computeGasPrice()
@@ -515,7 +529,7 @@ export class OrderBook {
                 [proxyAddress, WyvernProtocol.MAX_UINT_256.toString()]),
             gasPrice
         }, error => {
-            this._dispatch(EventType.TransactionDenied, { error, accountAddress })
+            this._dispatch(EventType.TransactionDenied, {error, accountAddress})
         })
 
         await this._confirmTransaction(txHash, EventType.ApproveCurrency, "Approving currency for trading", async () => {
@@ -542,12 +556,16 @@ export class OrderBook {
      * @returns Transaction hash
      */
     public async unapproveFungibleToken(
-        { accountAddress,
+        {
+            accountAddress,
             tokenAddress,
-            proxyAddress }:
-            { accountAddress: string;
+            proxyAddress
+        }:
+            {
+                accountAddress: string;
                 tokenAddress: string;
-                proxyAddress?: string; }
+                proxyAddress?: string;
+            }
     ): Promise<string> {
         proxyAddress = proxyAddress || WyvernProtocol.getTokenTransferProxyAddress(this._networkName)
 
@@ -559,7 +577,7 @@ export class OrderBook {
             data: encodeCall(getMethod(ERC20, 'approve'), [proxyAddress, 0]),
             gasPrice
         }, error => {
-            this._dispatch(EventType.TransactionDenied, { error, accountAddress })
+            this._dispatch(EventType.TransactionDenied, {error, accountAddress})
         })
 
         await this._confirmTransaction(txHash, EventType.UnapproveCurrency, "Resetting Currency Approval", async () => {
@@ -585,12 +603,12 @@ export class OrderBook {
 
     public async _confirmTransaction(transactionHash: string, event: EventType, description: string, testForSuccess?: () => Promise<boolean>): Promise<void> {
 
-        const transactionEventData = { transactionHash, event }
+        const transactionEventData = {transactionHash, event}
         this.logger(`Transaction started: ${description}`)
 
         if (transactionHash == NULL_BLOCK_HASH) {
             // This was a smart contract wallet that doesn't know the transaction
-            this._dispatch(EventType.TransactionCreated, { event })
+            this._dispatch(EventType.TransactionCreated, {event})
 
             if (!testForSuccess) {
                 // Wait if test not implemented
@@ -628,7 +646,7 @@ export class OrderBook {
                 const wasSuccessful = await testForSuccess()
                 if (wasSuccessful) {
                     this.logger(`Transaction succeeded: ${description}`)
-                    this._dispatch(EventType.TransactionConfirmed, { event })
+                    this._dispatch(EventType.TransactionConfirmed, {event})
                     return resolve()
                 } else if (retries <= 0) {
                     return reject()

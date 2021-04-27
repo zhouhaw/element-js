@@ -1,4 +1,4 @@
-import {assert} from 'chai'
+let {assert} = require('chai')
 
 const Web3 = require("web3");
 import {suite, test} from 'mocha';
@@ -25,7 +25,7 @@ const rinkebyProvider = new Web3.providers.HttpProvider(RINKEBY_PROVIDER_URL)
 const rinkebyClient = new OpenSeaPort(rinkebyProvider, {
     networkName: Network.Rinkeby,
     apiKey: RINKEBY_API_KEY
-}, line => console.info(`RINKEBY: ${line}`))
+})
 
 suite('api', () => {
     test('API has correct base url', () => {

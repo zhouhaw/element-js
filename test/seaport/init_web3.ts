@@ -1,12 +1,6 @@
-import * as WyvernSchemas from 'wyvern-schemas'
-import {
-  assert,
-} from 'chai'
 
-import {
-  suite,
-  test,
-} from 'mocha'
+
+let { suite, test } = require('mocha')
 
 import { OpenSeaPort } from '../../src/index'
 import * as Web3 from 'web3'
@@ -21,17 +15,17 @@ import {
   apiToTest
 } from '../constants'
 
-console.log(RINKEBY_PROVIDER_URL)
+// console.log(RINKEBY_PROVIDER_URL)
 const provider = new Web3.providers.HttpProvider(MAINNET_PROVIDER_URL)
 const rinkebyProvider = new Web3.providers.HttpProvider(RINKEBY_PROVIDER_URL)
 
 
-console.log(rinkebyProvider)
+// console.log(rinkebyProvider)
 
 const rinkebyClient = new OpenSeaPort(rinkebyProvider, {
   networkName: Network.Rinkeby,
   apiKey: RINKEBY_API_KEY
-}, line => console.info(`RINKEBY: ${line}`))
+})
 
 suite('seaport: static calls', () => {
   test("Testnet StaticCall CheezeWizards", async () => {

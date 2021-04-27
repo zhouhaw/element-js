@@ -1,5 +1,6 @@
 import * as types from './types'
 export { OpenSeaAPI } from './api'
+export { OpenSeaPort } from './seaport'
 export { EventType, Network } from './types'
 export { orderToJSON, orderFromJSON, WyvernProtocol } from './utils/utils'
 export {

@@ -1,14 +1,24 @@
 import BigNumber from 'bignumber.js'
 // import * as Web3 from 'web3'
 import * as types from 'wyvern-js/lib/types'
-export { Network } from 'wyvern-js/lib/types'
+
+import {
+  Network,
+  HowToCall,
+  // Note: Wyvern SaleKind is wrong!
+  ECSignature,
+  Order as WyvernOrder
+} from 'wyvern-js/lib/types'
+
+export {
+  Network,
+  HowToCall,
+  ECSignature
+}
+
 
 import { Token } from 'wyvern-schemas/dist/types'
 
-type WyvernOrder = types.Order
-export type HowToCall= types.HowToCall
-// Note: Wyvern SaleKind is wrong!
-export type ECSignature = types.HowToCall
 
 /**
  * Events emitted by the SDK. There are five types:
