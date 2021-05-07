@@ -1,6 +1,7 @@
 import {
   Asset,
   ECSignature,
+  ElementSchemaName,
   FeeMethod,
   HowToCall,
   Network,
@@ -8,22 +9,21 @@ import {
   OrderJSON,
   OrderSide,
   SaleKind,
-  UnhashedOrder,
-  ElementSchemaName
+  UnhashedOrder
 } from './types'
 
 import {
-  NULL_ADDRESS,
   encodeBuy,
   encodeSell,
   generatePseudoRandomSalt,
+  getElementAsset,
   getOrderHash,
   getPriceParameters,
   getSchema,
   getTimeParameters,
   getTokenList,
-  getElementAsset,
   makeBigNumber,
+  NULL_ADDRESS,
   orderCanMatch,
   orderParamsEncode,
   orderSigEncode,
@@ -33,24 +33,21 @@ import {
   validateOrder
 } from './utils'
 
-import {
-  Contracts
-} from "./contracts"
-
+import { Contracts } from './contracts'
 
 export { ElementSchemaName, Network, getTokenList }
 
-export class Orders extends Contracts{
+export class Orders extends Contracts {
   public async matchOrder({
-                            asset,
-                            accountAddress,
-                            startAmount,
-                            quantity = 1,
-                            expirationTime = 0,
-                            paymentTokenAddress = NULL_ADDRESS,
-                            sellOrder,
-                            referrerAddress
-                          }: {
+    asset,
+    accountAddress,
+    startAmount,
+    quantity = 1,
+    expirationTime = 0,
+    paymentTokenAddress = NULL_ADDRESS,
+    sellOrder,
+    referrerAddress
+  }: {
     asset: Asset
     accountAddress: string
     startAmount: number
@@ -100,8 +97,6 @@ export class Orders extends Contracts{
       ...signature
     }
 
-
-
     const buyIsValid: boolean = await validateOrder(this.exchangeHelper, buyOrderWithSignature)
 
     const sellIsValid: boolean = await validateOrder(this.exchangeHelper, sellOrder)
@@ -116,13 +111,13 @@ export class Orders extends Contracts{
 
       let isMatch = orderCanMatch(buyOrderWithSignature, sellOrder)
       let canMatch = await this.exchangeHelper.methods.ordersCanMatch(buyOrderParamArray, sellOrderParamArray).call()
-      console.log('canMatch', isMatch,canMatch)
-      if (!canMatch&&!isMatch) {
+      console.log('canMatch', isMatch, canMatch)
+      if (!canMatch && !isMatch) {
         return false
       }
 
-      console.log("buyOrderParamArray",buyOrderParamArray)
-      console.log("sellOrderParamArray",sellOrderParamArray)
+      console.log('buyOrderParamArray', buyOrderParamArray)
+      console.log('sellOrderParamArray', sellOrderParamArray)
 
       const matchTx = await this.exchange.methods
         .orderMatch(
@@ -148,15 +143,15 @@ export class Orders extends Contracts{
 
   // -------------- Buy ---------------------
   public async createBuyOrder({
-                                asset,
-                                accountAddress,
-                                startAmount,
-                                quantity = 1,
-                                expirationTime = 0,
-                                paymentTokenAddress = this.WETHAddr,
-                                sellOrder,
-                                referrerAddress
-                              }: {
+    asset,
+    accountAddress,
+    startAmount,
+    quantity = 1,
+    expirationTime = 0,
+    paymentTokenAddress = this.WETHAddr,
+    sellOrder,
+    referrerAddress
+  }: {
     asset: Asset
     accountAddress: string
     startAmount: number
@@ -203,16 +198,16 @@ export class Orders extends Contracts{
   }
 
   public async _makeBuyOrder({
-                               asset,
-                               quantity,
-                               accountAddress,
-                               startAmount,
-                               expirationTime = 0,
-                               paymentTokenAddress,
-                               extraBountyBasisPoints = 0,
-                               sellOrder,
-                               referrerAddress
-                             }: {
+    asset,
+    quantity,
+    accountAddress,
+    startAmount,
+    expirationTime = 0,
+    paymentTokenAddress,
+    extraBountyBasisPoints = 0,
+    sellOrder,
+    referrerAddress
+  }: {
     asset: Asset
     quantity: number
     accountAddress: string
@@ -284,20 +279,20 @@ export class Orders extends Contracts{
 
   // ------------- Sell-------------------------
   public async createSellOrder({
-                                 asset,
-                                 accountAddress,
-                                 startAmount,
-                                 endAmount,
-                                 quantity = 1,
-                                 listingTime,
-                                 expirationTime = 0,
-                                 waitForHighestBid = false,
-                                 englishAuctionReservePrice,
-                                 paymentTokenAddress,
-                                 extraBountyBasisPoints = 0,
-                                 buyerAddress,
-                                 buyerEmail
-                               }: {
+    asset,
+    accountAddress,
+    startAmount,
+    endAmount,
+    quantity = 1,
+    listingTime,
+    expirationTime = 0,
+    waitForHighestBid = false,
+    englishAuctionReservePrice,
+    paymentTokenAddress,
+    extraBountyBasisPoints = 0,
+    buyerAddress,
+    buyerEmail
+  }: {
     asset: Asset
     accountAddress: string
     startAmount: number
@@ -351,19 +346,19 @@ export class Orders extends Contracts{
   }
 
   public async _makeSellOrder({
-                                asset,
-                                quantity,
-                                accountAddress,
-                                startAmount,
-                                endAmount,
-                                listingTime,
-                                expirationTime,
-                                waitForHighestBid,
-                                englishAuctionReservePrice = 0,
-                                paymentTokenAddress,
-                                extraBountyBasisPoints,
-                                buyerAddress
-                              }: {
+    asset,
+    quantity,
+    accountAddress,
+    startAmount,
+    endAmount,
+    listingTime,
+    expirationTime,
+    waitForHighestBid,
+    englishAuctionReservePrice = 0,
+    paymentTokenAddress,
+    extraBountyBasisPoints,
+    buyerAddress
+  }: {
     asset: Asset
     quantity: number
     accountAddress: string
@@ -383,7 +378,7 @@ export class Orders extends Contracts{
     const quantityBN = makeBigNumber(quantity)
     const wyAsset = getElementAsset(schema, asset, quantityBN)
 
-    console.log("_makeSellOrder",wyAsset)
+    console.log('_makeSellOrder', wyAsset)
     // const isPrivate = buyerAddress !== NULL_ADDRESS
 
     const { target, dataToCall, replacementPattern } = encodeSell(schema, wyAsset, accountAddress)
@@ -440,16 +435,4 @@ export class Orders extends Contracts{
       }
     }
   }
-}
-
-if (typeof window !== 'undefined') {
-  (window as any).ElementOrders = Orders;
-  (window as any).ElementSchemaName = ElementSchemaName;
-  (window as any).Network = Network;
-  (window as any).getTokenList = getTokenList
-} else {
-  (global as any).ElementOrders = Orders;
-  (global as any).ElementSchemaName = ElementSchemaName;
-  (global as any).Network = Network;
-  (global as any).getTokenList = getTokenList
 }

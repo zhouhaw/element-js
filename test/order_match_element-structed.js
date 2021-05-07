@@ -20,7 +20,7 @@ const AuthenticatedProxy = require(abiPath + 'AuthenticatedProxy.json')
 const MakeTokenID = require(abiPath + 'MakeTokenID.json')
 
 
-const { tokens, schemas, encodeSell, encodeBuy } = require('../src/schema/lib')
+const { tokens, schemas, encodeSell, encodeBuy } = require('../lib/schema')
 
 
 let provider = 'http://39.102.101.142:8545'
