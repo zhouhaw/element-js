@@ -6,4 +6,3 @@ temp/
 /package-lock.json
 package-lock.json
 /.idea
-lib/*
