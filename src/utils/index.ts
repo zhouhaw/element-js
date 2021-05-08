@@ -237,7 +237,7 @@ export const orderFromJSON = (order: any): Order => {
     exchange: order.exchange,
     makerAccount: order.maker,
     takerAccount: order.taker,
-    // Use string address to conform to Wyvern Order schema
+    // Use string address to conform to Element Order schema
     maker: order.maker,
     taker: order.taker,
     makerRelayerFee: new BigNumber(order.makerRelayerFee),

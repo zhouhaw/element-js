@@ -14,7 +14,7 @@ export const testRinkebyNFTSchema: Schema<TestRinkebyNFTType> = {
   version: 1,
   deploymentBlock: 0,
   name: 'TestRinkebyNFT',
-  description: 'Rinkeby ERC721 non-fungible token for Wyvern Exchange testing',
+  description: 'Rinkeby ERC721 non-fungible token for Element Exchange testing',
   thumbnail: 'https://cointelegraph.com/storage/uploads/view/f88e17e41f607dc0aef238230dd40cc6.png',
   website: 'https://projectwyvern.com',
   fields: [

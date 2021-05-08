@@ -64,7 +64,7 @@ interface ElementFTAsset {
     quantity: string;
 }
 export declare type ElementAsset = ElementNFTAsset | ElementFTAsset;
-export interface WyvernBundle {
+export interface ElementBundle {
     assets: ElementAsset[];
     schemas: ElementSchemaName[];
     name?: string;
@@ -77,7 +77,7 @@ export interface ExchangeMetadataForAsset {
     referrerAddress?: string;
 }
 export interface ExchangeMetadataForBundle {
-    bundle: WyvernBundle;
+    bundle: ElementBundle;
     referrerAddress?: string;
 }
 export declare type ExchangeMetadata = ExchangeMetadataForAsset | ExchangeMetadataForBundle;
@@ -135,7 +135,7 @@ export interface OrderJSON extends Partial<ECSignature> {
     metadata: ExchangeMetadata;
     hash: string;
 }
-export interface WyvernOrder {
+export interface ElementOrder {
     exchange: string;
     maker: string;
     taker: string;
@@ -179,7 +179,7 @@ export declare enum HowToCall {
     StaticCall = 2,
     Create = 3
 }
-export interface UnhashedOrder extends WyvernOrder {
+export interface UnhashedOrder extends ElementOrder {
     feeMethod: FeeMethod;
     side: OrderSide;
     saleKind: SaleKind;

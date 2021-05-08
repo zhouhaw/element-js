@@ -56,7 +56,7 @@ interface FallbackAbi {
 
 export type FunctionAbi = MethodAbi | ConstructorAbi | FallbackAbi;
 
-// Wyvern Schemas (see https://github.com/ProjectOpenSea/wyvern-schemas)
+// Element Schemas (see https://github.com/ProjectOpenSea/wyvern-schemas)
 export enum ElementSchemaName {
   ERC20 = 'ERC20',
   ERC721 = 'ERC721',
@@ -80,8 +80,8 @@ interface ElementFTAsset {
 
 export type ElementAsset = ElementNFTAsset | ElementFTAsset
 
-// Abstractions over Wyvern assets for bundles
-export interface WyvernBundle {
+// Abstractions over Element assets for bundles
+export interface ElementBundle {
   assets: ElementAsset[]
   schemas: ElementSchemaName[]
   name?: string
@@ -96,7 +96,7 @@ export interface ExchangeMetadataForAsset {
 }
 
 export interface ExchangeMetadataForBundle {
-  bundle: WyvernBundle
+  bundle: ElementBundle
   referrerAddress?: string
 }
 
@@ -119,7 +119,7 @@ export interface Asset {
   tokenId: string | null
   // The asset's contract address
   tokenAddress: string
-  // The Wyvern schema name (e.g. "ERC721") for this asset
+  // The Element schema name (e.g. "ERC721") for this asset
   schemaName?: ElementSchemaName
   // The token standard version of this asset
   version?: TokenStandardVersion
@@ -177,7 +177,7 @@ export interface OrderJSON extends Partial<ECSignature> {
 
 //---------- Orderbook-----------
 
-export interface WyvernOrder {
+export interface ElementOrder {
   exchange: string
   maker: string
   taker: string
@@ -226,7 +226,7 @@ export enum HowToCall {
   Create = 3
 }
 
-export interface UnhashedOrder extends WyvernOrder {
+export interface UnhashedOrder extends ElementOrder {
   feeMethod: FeeMethod
   side: OrderSide
   saleKind: SaleKind
