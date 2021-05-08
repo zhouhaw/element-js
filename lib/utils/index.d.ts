@@ -1,7 +1,7 @@
 import BigNumber from 'bignumber.js';
-import { Network } from '../schema/types';
-import { ECSignature, Order, OrderJSON, UnhashedOrder, UnsignedOrder } from '../types';
-export { encodeBuy, encodeSell } from '../schema';
+import { Network, ECSignature, Order, OrderJSON, UnhashedOrder, UnsignedOrder } from '../types';
+import { schemas, encodeBuy, encodeSell } from '../schema';
+export { schemas, encodeBuy, encodeSell };
 export { registerProxy, getAccountBalance, getAccountNFTsBalance, approveTokenTransferProxy, approveERC1155TransferProxy, checkSenderOfAuthenticatedProxy } from './check';
 export { _makeBuyOrder, _makeSellOrder } from './order';
 export declare const NULL_ADDRESS = "0x0000000000000000000000000000000000000000";
