@@ -96,7 +96,6 @@ let canSettleOrder = (listingTime: BigNumber, expirationTime: BigNumber) => {
 }
 
 export function orderCanMatch(buy: Order, sell: Order) {
-  console.log(NULL_ADDRESS)
   return (
     buy.side == 0 &&
     sell.side == 1 &&
@@ -322,4 +321,15 @@ export function estimateCurrentPrice(order: Order, secondsToBacktrack = 30, shou
 export function getTokenList(network: Network): Array<any> {
   const payTokens = tokens[network]
   return [payTokens.canonicalWrappedEther, ...payTokens.otherTokens]
+}
+
+export async function transferFromERC1155(
+  nftsContract: any,
+  from: string,
+  to: string,
+  tokenId: any,
+  amount: number = 1
+): Promise<boolean> {
+  let tx = await nftsContract.methods.safeTransferFrom(from, to, tokenId, amount, '0x').send({ from: from })
+  return tx.status
 }

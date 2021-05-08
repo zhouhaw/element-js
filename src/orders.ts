@@ -90,11 +90,11 @@ export class Orders extends Contracts {
       const buyOrderSigArray = orderSigEncode(buyOrderWithSignature)
 
       let isMatch = orderCanMatch(buyOrderWithSignature, sellOrder)
-      // let canMatch = await this.exchangeHelper.methods.ordersCanMatch(buyOrderParamArray, sellOrderParamArray).call()
-      //
-      // if (!canMatch && !isMatch) {
-      //   return false
-      // }
+      let canMatch = await this.exchangeHelper.methods.ordersCanMatch(buyOrderParamArray, sellOrderParamArray).call()
+
+      if (!canMatch && !isMatch) {
+        return false
+      }
 
       // console.log('buyOrderParamArray', buyOrderParamArray)
       // console.log('sellOrderParamArray', sellOrderParamArray)

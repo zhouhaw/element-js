@@ -1,6 +1,7 @@
 import { Base } from './base'
 
 import {
+  transferFromERC1155,
   getAccountBalance,
   getAccountNFTsBalance,
   registerProxy,
@@ -9,17 +10,6 @@ import {
   orderFromJSON
 } from '../src/utils'
 import { Asset, ElementSchemaName, Network, Orders } from '../src'
-
-async function transferFromERC1155(
-  nftsContract: any,
-  from: string,
-  to: string,
-  tokenId: any,
-  amount: number = 1
-): Promise<boolean> {
-  let tx = await nftsContract.methods.safeTransferFrom(from, to, tokenId, amount, '0x').call()
-  return tx.status
-}
 ;(async () => {
   let base = new Base()
   await base.init()
@@ -30,8 +20,9 @@ async function transferFromERC1155(
   let wETHAddr = order.WETHAddr
   payToken.options.address = wETHAddr
   let bal = await getAccountBalance(order.web3, buyAccount, payToken)
+
   let tokenId = '52110910509117159886520023034677676808462086871028572901793699248975699247105'
-  let assetAddr = order.elementSharedAssetAddr.toLowerCase() // ElementSharedAsset.networks[100].address
+  let assetAddr = order.elementSharedAssetAddr.toLowerCase()
 
   let asset = {
     tokenId,

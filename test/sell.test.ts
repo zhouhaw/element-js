@@ -1,6 +1,7 @@
 import { Base } from './base'
 
 import {
+  transferFromERC1155,
   getAccountBalance,
   getAccountNFTsBalance,
   registerProxy,
@@ -8,17 +9,6 @@ import {
   approveERC1155TransferProxy
 } from '../src/utils'
 import { Asset, ElementSchemaName, Network, Orders } from '../src'
-
-async function transferFromERC1155(
-  nftsContract: any,
-  from: string,
-  to: string,
-  tokenId: any,
-  amount: number = 1
-): Promise<boolean> {
-  let tx = await nftsContract.methods.safeTransferFrom(from, to, tokenId, amount, '0x').call()
-  return tx.status
-}
 ;(async () => {
   let base = new Base()
   await base.init()
@@ -40,7 +30,7 @@ async function transferFromERC1155(
   let assetBal = await getAccountNFTsBalance(buyNFTs, sellAccount, tokenId)
 
   if (assetBal == 0) {
-    await transferFromERC1155(buyNFTs, buyAccount, sellAccount, tokenId)
+    await transferFromERC1155(buyNFTs, buyAccount, sellAccount, tokenId, 1)
     return
   }
   console.log(assetBal)
