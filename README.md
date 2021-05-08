@@ -1,5 +1,7 @@
 ### element-js
 
+ let ERC1155Mintable = '0x626743a83D7daD4896F08f06dAf4066F1A20bF24'
+ 
 Order 数据结构
  
 

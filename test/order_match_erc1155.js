@@ -7,7 +7,7 @@ BigNumber.config({ EXPONENTIAL_AT: 1e9 })
 
 const abiPath = '../abi/'
 
-const ERC1155Mintable = require(abiPath + 'ERC1155Mintable.json')
+const ERC1155Mintable = require(abiPath + 'ERC1155.json')
 
 const ElementSharedAsset = require(abiPath + 'ElementSharedAsset.json')
 
@@ -19,16 +19,13 @@ const ExchangeHelper = require(abiPath + 'ExchangeHelper.json')
 const AuthenticatedProxy = require(abiPath + 'AuthenticatedProxy.json')
 const MakeTokenID = require(abiPath + 'MakeTokenID.json')
 
-
 const { tokens, schemas, encodeSell, encodeBuy } = require('../lib/src/schema')
-
 
 let provider = 'http://39.102.101.142:8545'
 // let provider = "http://127.0.0.1:8545"
 
 let web3Provider = new Web3.providers.HttpProvider(provider)
 const web3 = new Web3(web3Provider)
-
 
 // let mnemonic
 // try {
@@ -50,7 +47,6 @@ const web3 = new Web3(web3Provider)
 web3.eth.accounts.wallet.add('0x078bad8a23809d79c021f84e6c56e900f8082b05e51872e32361ada65a144dea')
 web3.eth.accounts.wallet.add('0x59ae5462c42c8b9e4a7c760f4021fdfd1ae551a42ae3a7261ecd21c747bfef89')
 
-
 const sellAccount = web3.eth.accounts.wallet[0].address
 const buyAccount = web3.eth.accounts.wallet[1].address
 const account = sellAccount
@@ -60,9 +56,7 @@ console.log('sellAccount:%s, buyAccount: %s', sellAccount, buyAccount)
 // TODO: 需要修改的参数， tokenId和sellerAccountAddress有关，需要单独计算生成
 const networkID = '100'
 
-
 web3.eth.defaultAccount = account
-
 
 let feeRecipient = '0x049FE7c378aaF7a7eD1df544aAff7ABa35EE40dB'
 let nullAddr = '0x0000000000000000000000000000000000000000'
@@ -75,45 +69,43 @@ let nullAddr = '0x0000000000000000000000000000000000000000'
 // })
 // const ERC1155Type = schemas.private.find(x => x.name === 'ElementShardType')
 
-let tokenId = "1"
+let tokenId = '1'
 
-let nftAddr = "0x626743a83D7daD4896F08f06dAf4066F1A20bF24"
+let nftAddr = '0x626743a83D7daD4896F08f06dAf4066F1A20bF24'
 const nftContract = new web3.eth.Contract(ERC1155Mintable.abi, nftAddr, {
   from: account,
-  gas: 80e4.toString()
+  gas: (80e4).toString()
 })
-const ERC1155Type = schemas.private.find(x => x.name === 'ERC1155')
+const ERC1155Type = schemas.private.find((x) => x.name === 'ERC1155')
 
 let proxyRegistryAddr = ElementixProxyRegistry.networks[networkID].address
 const proxyRegistryContract = new web3.eth.Contract(ElementixProxyRegistry.abi, proxyRegistryAddr, {
   from: account,
-  gas: 80e4.toString()
+  gas: (80e4).toString()
 })
 
 let exchangeAddr = ElementixExchange.networks[networkID].address
 const exchangeContract = new web3.eth.Contract(ElementixExchange.abi, exchangeAddr, {
   from: account,
-  gas: 80e4.toString()
+  gas: (80e4).toString()
 })
-
 
 let exchangeHelperAddr = ExchangeHelper.networks[networkID].address
 const exchangeHelper = new web3.eth.Contract(ExchangeHelper.abi, exchangeHelperAddr, {
   from: account,
-  gas: 80e4.toString()
+  gas: (80e4).toString()
 })
 // const payToken = tokens.private.canonicalWrappedEther
 
 let wETHAddr = WETH.networks[networkID].address
 let payToken = {
-  'address': wETHAddr,
-  'decimals': '18'
+  address: wETHAddr,
+  decimals: '18'
 }
 
 const WETHContract = new web3.eth.Contract(WETH.abi, payToken.address, {
-  gas: 80e4.toString()
+  gas: (80e4).toString()
 })
-
 
 const getOrderHash = async (order) => {
   let orderParamValueArray = orderParamsEncode(order)
@@ -140,23 +132,22 @@ const validateOrder = async (order) => {
 
 let cover = (amount, decimals) => {
   // amount = amount.toString()
-  return (new BigNumber(amount)).times((new BigNumber(10)).pow(decimals)).toString()
+  return new BigNumber(amount).times(new BigNumber(10).pow(decimals)).toString()
   // return 10e18.toString()
 }
 
 let coverDiv = (amount, decimals) => {
   // amount = amount.toString()
-  return (new BigNumber(amount)).div((new BigNumber(10)).pow(decimals)).toString()
+  return new BigNumber(amount).div(new BigNumber(10).pow(decimals)).toString()
 }
-
 
 const createSellOrder = async (tokenAddress, tokenId, quantity, ower, sellPrice) => {
   let asset = ERC1155Type.assetFromFields({
-    'ID': tokenId,
-    'Quantity': quantity.toString(),
-    'Address': tokenAddress.toLowerCase(),
-    'Name': '',
-    'Data': '' /*'element.market/' + tokenAddress.toString() +'/'+ */
+    ID: tokenId,
+    Quantity: quantity.toString(),
+    Address: tokenAddress.toLowerCase(),
+    Name: '',
+    Data: '' /*'element.market/' + tokenAddress.toString() +'/'+ */
   })
 
   let { target, dataToCall, replacementPattern } = encodeSell(ERC1155Type, asset, ower) //target,
@@ -182,7 +173,7 @@ const createSellOrder = async (tokenAddress, tokenId, quantity, ower, sellPrice)
     basePrice: cover(sellPrice, payToken.decimals),
     extra: new BigNumber(0).toString(),
     listingTime: new BigNumber(Math.round(Date.now() / 1000 - 6000)).toString(),
-    expirationTime: '0',//new BigNumber(Math.round((Date.now() / 1000) + 86400)).toString(),
+    expirationTime: '0', //new BigNumber(Math.round((Date.now() / 1000) + 86400)).toString(),
     salt: generatePseudoRandomSalt().toString(),
     metadata: {
       schema: 'ERC1155',
@@ -200,16 +191,14 @@ const createSellOrder = async (tokenAddress, tokenId, quantity, ower, sellPrice)
   return Object.assign({}, order)
 }
 
-
 const createBuyOrder = async (tokenAddress, tokenId, quantity, ower, buyPrice) => {
   let asset = ERC1155Type.assetFromFields({
-    'ID': tokenId,
-    'Quantity': quantity.toString(),
-    'Address': tokenAddress.toLowerCase(),
-    'Name': '',
-    'Data': ''/*'element.market/' + tokenAddress.toString() + '/'+*/
+    ID: tokenId,
+    Quantity: quantity.toString(),
+    Address: tokenAddress.toLowerCase(),
+    Name: '',
+    Data: '' /*'element.market/' + tokenAddress.toString() + '/'+*/
   })
-
 
   let { target, dataToCall, replacementPattern } = encodeBuy(ERC1155Type, asset, ower)
 
@@ -235,7 +224,7 @@ const createBuyOrder = async (tokenAddress, tokenId, quantity, ower, buyPrice) =
     basePrice: cover(buyPrice, payToken.decimals),
     extra: new BigNumber(0).toString(),
     listingTime: new BigNumber(Math.round(Date.now() / 1000 - 6000)).toString(),
-    expirationTime: '0',//new BigNumber(Math.round((Date.now() / 1000) + 86400)).toString(),
+    expirationTime: '0', //new BigNumber(Math.round((Date.now() / 1000) + 86400)).toString(),
     salt: generatePseudoRandomSalt().toString(),
     metadata: {
       schema: 'ERC1155',
@@ -253,11 +242,8 @@ const createBuyOrder = async (tokenAddress, tokenId, quantity, ower, buyPrice) =
   return Object.assign({}, order)
 }
 
-
 const registerProxy = async (account) => {
-
   let proxy = await proxyRegistryContract.methods.proxies(account).call()
-
 
   if (proxy != nullAddr) {
     console.log('Proxy: ' + account + ':' + proxy)
@@ -279,67 +265,68 @@ const signatureObj = async (message, account) => {
   const result = signature.substring(2)
   const r = '0x' + result.substring(0, 64)
   const s = '0x' + result.substring(64, 128)
-  const v = parseInt(result.substring(128, 130), 16)// The signature is now comprised of r, s, and v.
+  const v = parseInt(result.substring(128, 130), 16) // The signature is now comprised of r, s, and v.
   // const v = "0x" + result.substring(128, 130)//
   let addr = await web3.eth.accounts.recover(message, signature)
   if (addr.toLowerCase() != account.toLowerCase()) return {}
   return {
-    message, messageHash, r, s, v, signature
+    message,
+    messageHash,
+    r,
+    s,
+    v,
+    signature
   }
 }
 let canSettleOrder = (listingTime, expirationTime) => {
-  let now = (new Date().getTime()) / 1000
-  return (Number(listingTime) < now) && (Number(expirationTime) == 0 || now < Number(expirationTime))
+  let now = new Date().getTime() / 1000
+  return Number(listingTime) < now && (Number(expirationTime) == 0 || now < Number(expirationTime))
 }
 
 let orderCanMatch = (buy, sell) => {
-  return (buy.side == 0 && sell.side == 1) &&
+  return (
+    buy.side == 0 &&
+    sell.side == 1 &&
     /* Must use same fee method. */
-    (buy.feeMethod == sell.feeMethod) &&
+    buy.feeMethod == sell.feeMethod &&
     /* Must use same payment token. */
-    (buy.paymentToken == sell.paymentToken) &&
+    buy.paymentToken == sell.paymentToken &&
     /* Must match maker/taker addresses. */
     (sell.taker == nullAddr || sell.taker == buy.maker) &&
     (buy.taker == nullAddr || buy.taker == sell.maker) &&
     /* One must be maker and the other must be taker (no bool XOR in Solidity). */
-    ((sell.feeRecipient == nullAddr && buy.feeRecipient != nullAddr) || (sell.feeRecipient != nullAddr && buy.feeRecipient == nullAddr)) &&
+    ((sell.feeRecipient == nullAddr && buy.feeRecipient != nullAddr) ||
+      (sell.feeRecipient != nullAddr && buy.feeRecipient == nullAddr)) &&
     /* Must match target. */
-    (buy.target == sell.target) &&
+    buy.target == sell.target &&
     /* Must match howToCall. */
-    (buy.howToCall == sell.howToCall) &&
+    buy.howToCall == sell.howToCall &&
     /* Buy-side order must be settleable. */
     canSettleOrder(buy.listingTime, buy.expirationTime) &&
     /* Sell-side order must be settleable. */
     canSettleOrder(sell.listingTime, sell.expirationTime)
+  )
 }
 
 let orderApprove = async (buy, sell) => {
-  let buyApproveTx = await exchangeContract.methods.approveOrder(
-    orderParamsEncode(buy),
-    true
-  ).send({
+  let buyApproveTx = await exchangeContract.methods.approveOrder(orderParamsEncode(buy), true).send({
     from: buy.maker,
-    gas: 80e4.toString()
+    gas: (80e4).toString()
   })
 
   console.log('buyApproveTx', buyApproveTx.transactionHash)
 
-  let sellApproveTx = await exchangeContract.methods.approveOrder(
-    orderParamsEncode(sell),
-    true
-  ).send({
+  let sellApproveTx = await exchangeContract.methods.approveOrder(orderParamsEncode(sell), true).send({
     from: sell.maker,
-    gas: 80e4.toString()
+    gas: (80e4).toString()
   })
   console.log('sellApproveTx', sellApproveTx.transactionHash)
 }
 
-var sleep = function(time) {
+var sleep = function (time) {
   var startTime = new Date().getTime() + parseInt(time, 10)
-  while (new Date().getTime() < startTime) {
-  }
+  while (new Date().getTime() < startTime) {}
 }
-
 
 // element
 let tokenAmount = 1
@@ -351,7 +338,6 @@ const go = async () => {
   if (balance === 0) {
     throw new Error('Nonzero balance required!')
   }
-
 
   // 检查买/卖家NFT余额
   let sellerNFTbalance = await nftContract.methods.balanceOf(sellAccount, tokenId).call()
@@ -415,19 +401,22 @@ const go = async () => {
   // console.log(sellOrderParamArray);
   // console.log(sellOrderSigArray);
 
-  let matchTx = await exchangeContract.methods.orderMatch(
-    buyOrderParamArray,
-    buyOrderSigArray,
-    sellOrderParamArray,
-    sellOrderSigArray,
-    '0x0000000000000000000000000000000000000000000000000000000000000000'
-  ).send({
-    value: buy.paymentToken != nullAddr ? 0 : buy.basePrice,
-    from: buy.maker,
-    gas: 80e4.toString()
-  }).catch(e => {
-    console.log(e.receipt, e.message)
-  })
+  let matchTx = await exchangeContract.methods
+    .orderMatch(
+      buyOrderParamArray,
+      buyOrderSigArray,
+      sellOrderParamArray,
+      sellOrderSigArray,
+      '0x0000000000000000000000000000000000000000000000000000000000000000'
+    )
+    .send({
+      value: buy.paymentToken != nullAddr ? 0 : buy.basePrice,
+      from: buy.maker,
+      gas: (80e4).toString()
+    })
+    .catch((e) => {
+      console.log(e.receipt, e.message)
+    })
   console.log('orderMatch', matchTx.status)
 
   // 检查买、卖方token余额
@@ -441,7 +430,7 @@ const go = async () => {
 let makeTokenIdForOwner = async (account, index, supply) => {
   const exchangeContract = new web3.eth.Contract(MakeTokenID.abi, MakeTokenID.networks[networkID].address, {
     from: account,
-    gas: 80e4.toString()
+    gas: (80e4).toString()
   })
 
   await exchangeContract.methods.makeID(account, index, supply).send()
@@ -450,68 +439,64 @@ let makeTokenIdForOwner = async (account, index, supply) => {
 }
 
 let encodeTransferFrom = async (account) => {
-
   let transferABI = {
-    'constant': false,
-    'inputs': [
+    constant: false,
+    inputs: [
       {
-        'internalType': 'address',
-        'name': '_from',
-        'type': 'address'
+        internalType: 'address',
+        name: '_from',
+        type: 'address'
       },
       {
-        'internalType': 'address',
-        'name': '_to',
-        'type': 'address'
+        internalType: 'address',
+        name: '_to',
+        type: 'address'
       },
       {
-        'internalType': 'uint256',
-        'name': '_id',
-        'type': 'uint256'
+        internalType: 'uint256',
+        name: '_id',
+        type: 'uint256'
       },
       {
-        'internalType': 'uint256',
-        'name': '_amount',
-        'type': 'uint256'
+        internalType: 'uint256',
+        name: '_amount',
+        type: 'uint256'
       },
       {
-        'internalType': 'bytes',
-        'name': '_data',
-        'type': 'bytes'
+        internalType: 'bytes',
+        name: '_data',
+        type: 'bytes'
       }
     ],
-    'name': 'safeTransferFrom',
-    'outputs': [],
-    'payable': false,
-    'stateMutability': 'nonpayable',
-    'type': 'function'
+    name: 'safeTransferFrom',
+    outputs: [],
+    payable: false,
+    stateMutability: 'nonpayable',
+    type: 'function'
   }
 
   // private
-  let dataToCall = web3.eth.abi.encodeFunctionCall(transferABI,
-    [
-      '0x180BbD8601D56d6b654ec352A4A73b54917d9f3c',
-      '0xEd32e2c154De6963eA520CBBB76C414a411eb604',
-      tokenId,
-      1,
-      tokenId
-    ]
-  )
+  let dataToCall = web3.eth.abi.encodeFunctionCall(transferABI, [
+    '0x180BbD8601D56d6b654ec352A4A73b54917d9f3c',
+    '0xEd32e2c154De6963eA520CBBB76C414a411eb604',
+    tokenId,
+    1,
+    tokenId
+  ])
 
   console.log(dataToCall)
-
 
   let proxy = await proxyRegistryContract.methods.proxies(account).call()
   console.log('Proxy: ' + proxy)
 
   const AuthenticatedProxyContract = new web3.eth.Contract(AuthenticatedProxy.abi, proxy, {
     from: account,
-    gas: 80e4.toString()
+    gas: (80e4).toString()
   })
 
   const nftContract = new web3.eth.Contract(ElementSharedAsset.abi, ElementSharedAsset.networks[networkID].address, {
     from: account,
-    gas: 80e4.toString()
+    gas: (80e4).toString()
   })
 
   let nftAmount = await nftContract.methods.balanceOf(account, tokenId).call()
@@ -522,32 +507,33 @@ let encodeTransferFrom = async (account) => {
   }
 
   let destAddr = ElementSharedAsset.networks[networkID].address
-  let proxyAssetRun = await AuthenticatedProxyContract.methods.proxyAssert(destAddr, 0, dataToCall).send({
-    value: 0,
-    from: account,
-    gas: 80e4.toString()
-  }).catch(e => {
-    console.log(e.receipt, e.message)
-  })
+  let proxyAssetRun = await AuthenticatedProxyContract.methods
+    .proxyAssert(destAddr, 0, dataToCall)
+    .send({
+      value: 0,
+      from: account,
+      gas: (80e4).toString()
+    })
+    .catch((e) => {
+      console.log(e.receipt, e.message)
+    })
 
   console.log(proxyAssetRun)
 }
 
-
 const CheckSenderOfAuthenticatedProxy = async (account) => {
-
   let proxy = await proxyRegistryContract.methods.proxies(account).call()
   console.log('Proxy: ' + proxy)
 
   const AuthenticatedProxyContract = new web3.eth.Contract(AuthenticatedProxy.abi, proxy, {
     from: account,
-    gas: 80e4.toString()
+    gas: (80e4).toString()
   })
 
   let _proxyRegistryAddr = await AuthenticatedProxyContract.methods.registry().call()
   const _proxyRegistryContract = new web3.eth.Contract(ElementixProxyRegistry.abi, proxyRegistryAddr, {
     from: account,
-    gas: 80e4.toString()
+    gas: (80e4).toString()
   })
 
   let exchangeInclude = await _proxyRegistryContract.methods.contracts(exchangeAddr).call()
@@ -556,13 +542,12 @@ const CheckSenderOfAuthenticatedProxy = async (account) => {
   return exchangeInclude
 }
 
-
 const checkAccountBalance = async (buyAccount, sellAccount, mint) => {
   let buyBal = await WETHContract.methods.balanceOf(buyAccount).call()
   if (Number(buyBal) < 1e18) {
     await WETHContract.methods.deposit().send({
       from: buyAccount,
-      value: 2e18.toString()
+      value: (2e18).toString()
     })
     buyBal = await WETHContract.methods.balanceOf(buyAccount).call()
   }
@@ -572,28 +557,25 @@ const checkAccountBalance = async (buyAccount, sellAccount, mint) => {
   if (Number(sellBal) < 1e18) {
     await WETHContract.methods.deposit().send({
       from: sellAccount,
-      value: 2e18.toString()
+      value: (2e18).toString()
     })
     sellBal = await WETHContract.methods.balanceOf(sellAccount).call()
   }
   console.log('sellAccount %s WETH balance %s', sellAccount, sellBal)
 }
 
-
 const approveTokenTransferProxy = async (account) => {
-
   let exchangeAddr = ElementixExchange.networks[networkID].address
   const exchangeContract = new web3.eth.Contract(ElementixExchange.abi, exchangeAddr, {
     from: account,
-    gas: 80e4.toString()
+    gas: (80e4).toString()
   })
 
   let tokenTransferProxyAddr = await exchangeContract.methods.tokenTransferProxy().call()
 
-
   const amount = await WETHContract.methods.allowance(account, tokenTransferProxyAddr).call()
   if (Number(amount) <= 100e18) {
-    let approveResult = await WETHContract.methods.approve(tokenTransferProxyAddr, 101e18.toString()).send({
+    let approveResult = await WETHContract.methods.approve(tokenTransferProxyAddr, (101e18).toString()).send({
       from: account
     })
 
@@ -601,8 +583,7 @@ const approveTokenTransferProxy = async (account) => {
   }
 }
 
-const approveNftsTransferProxy = async (nftsContract, account, tokenID) => {
-
+const approveERC1155TransferProxy = async (nftsContract, account, tokenID) => {
   let operator = await proxyRegistryContract.methods.proxies(account).call()
 
   let isApprove = await nftsContract.methods.isApprovedForAll(account, operator).call()
@@ -616,7 +597,6 @@ const approveNftsTransferProxy = async (nftsContract, account, tokenID) => {
 
   return isApprove
 }
-
 
 const orderParamsEncode = (order) => {
   let orderParamKeys = [
@@ -659,7 +639,7 @@ const orderSigEncode = (order) => {
   return orderSigValueArray
 }
 
-(async () => {
+;(async () => {
   try {
     // 创新新tokenId
     // makeTokenIdForOwner(sellAccount,1,1)
@@ -677,13 +657,11 @@ const orderSigEncode = (order) => {
     await approveTokenTransferProxy(buyAccount)
     await approveTokenTransferProxy(sellAccount)
 
-    await approveNftsTransferProxy(nftContract, buyAccount, tokenId)
+    await approveERC1155TransferProxy(nftContract, buyAccount, tokenId)
 
     await go()
     await checkAccountBalance(buyAccount, sellAccount)
-
   } catch (e) {
     console.log(e)
   }
 })()
-

@@ -3883,102 +3883,12 @@
   },
   "networks": {
     "8555": {
-      "events": {
-        "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925": {
-          "anonymous": false,
-          "inputs": [
-            {
-              "indexed": true,
-              "internalType": "address",
-              "name": "src",
-              "type": "address"
-            },
-            {
-              "indexed": true,
-              "internalType": "address",
-              "name": "guy",
-              "type": "address"
-            },
-            {
-              "indexed": false,
-              "internalType": "uint256",
-              "name": "wad",
-              "type": "uint256"
-            }
-          ],
-          "name": "Approval",
-          "type": "event"
-        },
-        "0xe1fffcc4923d04b559f4d29a8bfc6cda04eb5b0d3c460751c2402c5c5cc9109c": {
-          "anonymous": false,
-          "inputs": [
-            {
-              "indexed": true,
-              "internalType": "address",
-              "name": "dst",
-              "type": "address"
-            },
-            {
-              "indexed": false,
-              "internalType": "uint256",
-              "name": "wad",
-              "type": "uint256"
-            }
-          ],
-          "name": "Deposit",
-          "type": "event"
-        },
-        "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef": {
-          "anonymous": false,
-          "inputs": [
-            {
-              "indexed": true,
-              "internalType": "address",
-              "name": "src",
-              "type": "address"
-            },
-            {
-              "indexed": true,
-              "internalType": "address",
-              "name": "dst",
-              "type": "address"
-            },
-            {
-              "indexed": false,
-              "internalType": "uint256",
-              "name": "wad",
-              "type": "uint256"
-            }
-          ],
-          "name": "Transfer",
-          "type": "event"
-        },
-        "0x7fcf532c15f0a6db0bd6d0e038bea71d30d808c7d98cb3bf7268a95bf5081b65": {
-          "anonymous": false,
-          "inputs": [
-            {
-              "indexed": true,
-              "internalType": "address",
-              "name": "src",
-              "type": "address"
-            },
-            {
-              "indexed": false,
-              "internalType": "uint256",
-              "name": "wad",
-              "type": "uint256"
-            }
-          ],
-          "name": "Withdrawal",
-          "type": "event"
-        }
-      },
       "links": {},
       "address": "0x5183508549eb612f42c2BEf3daA823C07d5C14eE",
       "transactionHash": "0x2fd0ef7c69402e8c6ac5d82d1981fb5e0be53f698db5ffbaff6a0933f7f086e8"
     },
     "100": {
-      "address": "0x92893Ed51e36243d30BD51f805A7eC3b83fD938c",
+      "address": "0x37e5C2ADEcAfb0f5d9335d69c62dBae0aD610E3c",
       "transactionHash": "0x2fd0ef7c69402e8c6ac5d82d1981fb5e0be53f698db5ffbaff6a0933f7f086e8"
     }
   },
