@@ -21,40 +21,40 @@ export enum AbiType {
   Function = 'function',
   Constructor = 'constructor',
   Event = 'event',
-  Fallback = 'fallback',
+  Fallback = 'fallback'
 }
 
 interface FunctionParameter {
-  name: string;
-  type: string;
+  name: string
+  type: string
 }
 
-type ConstructorStateMutability = 'nonpayable' | 'payable';
-type StateMutability = 'pure' | 'view' | ConstructorStateMutability;
+type ConstructorStateMutability = 'nonpayable' | 'payable'
+type StateMutability = 'pure' | 'view' | ConstructorStateMutability
 
 interface MethodAbi {
-  type: AbiType.Function;
-  name: string;
-  inputs: FunctionParameter[];
-  outputs: FunctionParameter[];
-  constant: boolean;
-  stateMutability: StateMutability;
-  payable: boolean;
+  type: AbiType.Function
+  name: string
+  inputs: FunctionParameter[]
+  outputs: FunctionParameter[]
+  constant: boolean
+  stateMutability: StateMutability
+  payable: boolean
 }
 
 interface ConstructorAbi {
-  type: AbiType.Constructor;
-  inputs: FunctionParameter[];
-  payable: boolean;
-  stateMutability: ConstructorStateMutability;
+  type: AbiType.Constructor
+  inputs: FunctionParameter[]
+  payable: boolean
+  stateMutability: ConstructorStateMutability
 }
 
 interface FallbackAbi {
-  type: AbiType.Fallback;
-  payable: boolean;
+  type: AbiType.Fallback
+  payable: boolean
 }
 
-export type FunctionAbi = MethodAbi | ConstructorAbi | FallbackAbi;
+export type FunctionAbi = MethodAbi | ConstructorAbi | FallbackAbi
 
 // Element Schemas (see https://github.com/ProjectOpenSea/wyvern-schemas)
 export enum ElementSchemaName {
@@ -233,7 +233,7 @@ export interface UnhashedOrder extends ElementOrder {
   howToCall: HowToCall
   quantity: BigNumber
 
-  // OpenSea-specific 
+  // OpenSea-specific
   makerReferrerFee: BigNumber
   waitingForBestCounterOrder?: boolean
   englishAuctionReservePrice?: BigNumber
@@ -266,10 +266,10 @@ export interface Order extends UnsignedOrder, Partial<ECSignature> {
 
 // Asset
 export interface Token {
-  name: string;
-  symbol: string;
-  decimals: number;
-  address: string;
+  name: string
+  symbol: string
+  decimals: number
+  address: string
 }
 
 export interface ElementFungibleToken extends Token {
@@ -298,5 +298,3 @@ export interface ElementAccount {
   // More information explicitly set by this account's owner on Element
   user: ElementUser | null
 }
-
-
