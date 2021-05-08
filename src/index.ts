@@ -1,5 +1,8 @@
 export { Asset, ElementSchemaName, FeeMethod, HowToCall, Network, Order, OrderSide, SaleKind } from './types'
 export {
+  schemas,
+  encodeBuy,
+  encodeSell,
   getAccountBalance,
   getTokenList,
   registerProxy,

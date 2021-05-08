@@ -1,9 +1,8 @@
 import BigNumber from 'bignumber.js'
 
 BigNumber.config({ EXPONENTIAL_AT: 1e9 })
-import { Network, Schema } from '../schema/types'
-import { tokens } from '../schema/tokens'
 import {
+  Network,
   Asset,
   ECSignature,
   ElementAsset,
@@ -16,7 +15,9 @@ import {
   UnsignedOrder
 } from '../types'
 
-export { encodeBuy, encodeSell } from '../schema'
+import { schemas, tokens, encodeBuy, encodeSell } from '../schema'
+
+export { schemas, encodeBuy, encodeSell }
 export {
   registerProxy,
   getAccountBalance,
