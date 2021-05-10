@@ -1,5 +1,8 @@
+import { orderFromJSON } from './utils'
+
 export { Asset, ElementSchemaName, FeeMethod, HowToCall, Network, Order, OrderSide, SaleKind } from './types'
 export {
+  orderFromJSON,
   getTokenList,
   getSchemaList,
   encodeBuy,
