@@ -18,5 +18,6 @@ export declare function signOrderHash(web3: any, hashedOrder: UnsignedOrder): Pr
 export declare const orderToJSON: (order: Order) => OrderJSON;
 export declare const orderFromJSON: (order: any) => Order;
 export declare function estimateCurrentPrice(order: Order, secondsToBacktrack?: number, shouldRoundUp?: boolean): BigNumber;
-export declare function getTokenList(network: Network): Array<any>;
+export declare function getTokenList(network: Network, symbol?: string): Array<any>;
+export declare function getSchemaList(network: Network, schemaName?: string): Array<any>;
 export declare function transferFromERC1155(nftsContract: any, from: string, to: string, tokenId: any, amount?: number): Promise<boolean>;

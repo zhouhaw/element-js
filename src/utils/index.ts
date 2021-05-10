@@ -319,9 +319,22 @@ export function estimateCurrentPrice(order: Order, secondsToBacktrack = 30, shou
   return shouldRoundUp ? exactPrice.abs() : exactPrice
 }
 
-export function getTokenList(network: Network): Array<any> {
+export function getTokenList(network: Network, symbol?: string): Array<any> {
   const payTokens = tokens[network]
-  return [payTokens.canonicalWrappedEther, ...payTokens.otherTokens]
+  if (symbol) {
+    return [payTokens.canonicalWrappedEther, ...payTokens.otherTokens].filter((x: any) => x.symbol === symbol)
+  } else {
+    return [payTokens.canonicalWrappedEther, ...payTokens.otherTokens]
+  }
+}
+
+export function getSchemaList(network: Network, schemaName?: string): Array<any> {
+  // @ts-ignore
+  let schemaList = schemas[network]
+  if (schemaName) {
+    schemaList = schemaList.filter((x: any) => x.name === schemaName)
+  }
+  return schemaList
 }
 
 export async function transferFromERC1155(
