@@ -47,6 +47,7 @@ import { Asset, ElementSchemaName, Network, Orders } from '../src'
     asset,
     startAmount: 0.12
   }
+  base.web3.eth.defaultAccount = sellAccount
   let sellOrderJson = await order.createSellOrder(sellParm)
   console.log(sellOrderJson)
 })()

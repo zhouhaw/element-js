@@ -4,18 +4,18 @@ import { ElementAPIConfig } from './types'
 const abiPath = '../abi/'
 
 // abi
-const AuthenticatedProxy = require(`${abiPath}AuthenticatedProxy.json`)
-const ERC20 = require(`${abiPath}ERC20.json`)
-const ERC721 = require(`${abiPath}ERC721v3.json`)
-const ERC1155 = require(`${abiPath}ERC1155.json`)
+const AuthenticatedProxy = require(`../abi/AuthenticatedProxy.json`)
+const ERC20 = require(`../abi/ERC20.json`)
+const ERC721 = require(`../abi/ERC721v3.json`)
+const ERC1155 = require(`../abi/ERC1155.json`)
 // contract addr
-const ElementSharedAsset = require(`${abiPath}ElementSharedAsset.json`)
-const ElementixProxyRegistry = require(`${abiPath}ElementixProxyRegistry.json`)
-const ElementixExchange = require(`${abiPath}ElementixExchange.json`)
-const ExchangeHelper = require(`${abiPath}ExchangeHelper.json`)
-const ElementixTokenTransferProxy = require(`${abiPath}ElementixTokenTransferProxy.json`)
-const WEHT = require(`${abiPath}WETH9Mocked.json`)
-const MakeTokenID = require(`${abiPath}MakeTokenID.json`)
+const ElementSharedAsset = require(`../abi/ElementSharedAsset.json`)
+const ElementixProxyRegistry = require(`../abi/ElementixProxyRegistry.json`)
+const ElementixExchange = require(`../abi/ElementixExchange.json`)
+const ExchangeHelper = require(`../abi/ExchangeHelper.json`)
+const ElementixTokenTransferProxy = require(`../abi/ElementixTokenTransferProxy.json`)
+const WEHT = require(`../abi/WETH9Mocked.json`)
+const MakeTokenID = require(`../abi/MakeTokenID.json`)
 
 export class Contracts {
   public web3: any
