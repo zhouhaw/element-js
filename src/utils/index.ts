@@ -20,13 +20,14 @@ import { schemas, tokens, encodeBuy, encodeSell } from '../schema'
 export { schemas, encodeBuy, encodeSell }
 export {
   registerProxy,
+  getTokenIDOwner,
   getAccountBalance,
   getAccountNFTsBalance,
   approveTokenTransferProxy,
   approveERC1155TransferProxy,
   checkSenderOfAuthenticatedProxy
 } from './check'
-export { _makeBuyOrder, _makeSellOrder } from './order'
+export { _makeBuyOrder, _makeSellOrder, getTokenList, getSchemaList } from './order'
 
 export const NULL_ADDRESS = '0x0000000000000000000000000000000000000000'
 export const MAX_DIGITS_IN_UNSIGNED_256_INT = 78 // 78 solt
@@ -85,10 +86,40 @@ export async function getOrderHash(web3: any, exchangeHelper: any, order: Unhash
   return hash
 }
 
-export async function validateOrder(exchangeHelper: any, order: UnhashedOrder): Promise<any> {
+export async function validateOrder(exchangeHelper: any, order: any): Promise<any> {
   const orderParamValueArray = orderParamsEncode(order)
   const orderSigArray = orderSigEncode(order)
   return exchangeHelper.methods.validateOrder(orderParamValueArray, orderSigArray).call()
+}
+
+{
+}
+
+export async function hashAndValidateOrder(web3: any, exchangeHelper: any, order: UnhashedOrder): Promise<any> {
+  // const orderHash = await getOrderHash(web3, exchangeHelper, order)
+  let orderHash = hashOrder(web3, order)
+  const hashedOrder = {
+    ...order,
+    hash: orderHash
+  }
+  let signature: ECSignature
+  if (web3.eth.defaultAccount == hashedOrder.maker) {
+    signature = await signOrderHash(web3, hashedOrder)
+  } else {
+    return false
+  }
+
+  let orderWithSignature = {
+    ...hashedOrder,
+    ...signature
+  }
+
+  const isValid: boolean = await validateOrder(exchangeHelper, orderWithSignature)
+  if (isValid) {
+    return orderToJSON(orderWithSignature)
+  } else {
+    return false
+  }
 }
 
 let canSettleOrder = (listingTime: BigNumber, expirationTime: BigNumber) => {
@@ -317,24 +348,6 @@ export function estimateCurrentPrice(order: Order, secondsToBacktrack = 30, shou
   }
 
   return shouldRoundUp ? exactPrice.abs() : exactPrice
-}
-
-export function getTokenList(network: Network, symbol?: string): Array<any> {
-  const payTokens = tokens[network]
-  if (symbol) {
-    return [payTokens.canonicalWrappedEther, ...payTokens.otherTokens].filter((x: any) => x.symbol === symbol)
-  } else {
-    return [payTokens.canonicalWrappedEther, ...payTokens.otherTokens]
-  }
-}
-
-export function getSchemaList(network: Network, schemaName?: string): Array<any> {
-  // @ts-ignore
-  let schemaList = schemas[network]
-  if (schemaName) {
-    schemaList = schemaList.filter((x: any) => x.name === schemaName)
-  }
-  return schemaList
 }
 
 export async function transferFromERC1155(

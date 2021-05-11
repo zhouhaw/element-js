@@ -14,7 +14,7 @@ export class Base {
     _web3.eth.accounts.wallet.add('0x078bad8a23809d79c021f84e6c56e900f8082b05e51872e32361ada65a144dea')
     _web3.eth.accounts.wallet.add('0x59ae5462c42c8b9e4a7c760f4021fdfd1ae551a42ae3a7261ecd21c747bfef89')
     this.accounts = _web3.eth.accounts.wallet
-    _web3.eth.defaultAccount = _web3.eth.accounts.wallet[0].address
+
     this.web3 = _web3
   }
 

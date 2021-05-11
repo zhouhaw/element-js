@@ -10,10 +10,11 @@ import {
   SaleKind,
   UnhashedOrder
 } from '../types'
-import { encodeBuy, encodeSell, getTokenList, MAX_DIGITS_IN_UNSIGNED_256_INT, NULL_ADDRESS } from './index'
+import { encodeBuy, encodeSell, MAX_DIGITS_IN_UNSIGNED_256_INT, NULL_ADDRESS } from './index'
 import { Schema } from '../schema/types'
 import { schemas } from '../schema/schemas'
 import BigNumber from 'bignumber.js'
+import { tokens } from '../schema/tokens'
 BigNumber.config({ EXPONENTIAL_AT: 1e9 })
 
 export function makeBigNumber(arg: number | string | BigNumber): BigNumber {
@@ -296,14 +297,10 @@ export async function _makeSellOrder({
   extraBountyBasisPoints: number
   buyerAddress: string
 }): Promise<UnhashedOrder> {
-  // accountAddress = validateAndFormatWalletAddress(this.web3, accountAddress)
   const schema = getSchema(networkName, asset.schemaName)
 
   const quantityBN = makeBigNumber(quantity)
   const wyAsset = getElementAsset(schema, asset, quantityBN)
-
-  // console.log('_makeSellOrder', wyAsset)
-  // const isPrivate = buyerAddress !== NULL_ADDRESS
 
   const { target, dataToCall, replacementPattern } = encodeSell(schema, wyAsset, accountAddress)
 
@@ -358,4 +355,22 @@ export async function _makeSellOrder({
       schema: schema.name as ElementSchemaName
     }
   }
+}
+
+export function getTokenList(network: Network, symbol?: string): Array<any> {
+  const payTokens = tokens[network]
+  if (symbol) {
+    return [payTokens.canonicalWrappedEther, ...payTokens.otherTokens].filter((x: any) => x.symbol === symbol)
+  } else {
+    return [payTokens.canonicalWrappedEther, ...payTokens.otherTokens]
+  }
+}
+
+export function getSchemaList(network: Network, schemaName?: string): Array<any> {
+  // @ts-ignore
+  let schemaList = schemas[network]
+  if (schemaName) {
+    schemaList = schemaList.filter((x: any) => x.name === schemaName)
+  }
+  return schemaList
 }

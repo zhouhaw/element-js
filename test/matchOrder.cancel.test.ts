@@ -4,10 +4,9 @@ import {
   transferFromERC1155,
   getAccountBalance,
   getAccountNFTsBalance,
-  registerProxy,
+  orderFromJSON,
   approveTokenTransferProxy,
-  approveERC1155TransferProxy,
-  orderFromJSON
+  approveERC1155TransferProxy
 } from '../src/utils'
 import { Asset, ElementSchemaName, Network, Orders } from '../src'
 ;(async () => {
@@ -21,8 +20,20 @@ import { Asset, ElementSchemaName, Network, Orders } from '../src'
   payToken.options.address = wETHAddr
   let bal = await getAccountBalance(order.web3, buyAccount, payToken)
 
+  console.log(bal)
+
   let tokenId = '52110910509117159886520023034677676808462086871028572901793699248975699247105'
-  let assetAddr = order.elementSharedAssetAddr.toLowerCase()
+  let assetAddr = order.elementSharedAssetAddr.toLowerCase() // ElementSharedAsset.networks[100].address
+
+  const buyNFTs = order.erc1155.clone()
+  buyNFTs.options.address = assetAddr
+  let assetBal = await getAccountNFTsBalance(buyNFTs, sellAccount, tokenId)
+
+  if (assetBal == 0) {
+    await transferFromERC1155(buyNFTs, buyAccount, sellAccount, tokenId, 1)
+    return
+  }
+  console.log(assetBal)
 
   let asset = {
     tokenId,
@@ -30,6 +41,7 @@ import { Asset, ElementSchemaName, Network, Orders } from '../src'
     schemaName: ElementSchemaName.ERC1155
   } as Asset
 
+  base.web3.eth.defaultAccount = sellAccount
   const sellParm = {
     accountAddress: sellAccount,
     paymentTokenAddress: wETHAddr,
@@ -38,29 +50,10 @@ import { Asset, ElementSchemaName, Network, Orders } from '../src'
   }
   let sellOrderJson = await order.createSellOrder(sellParm)
 
-  //---------- match order buy--------
+  if (sellOrderJson) {
+    let sellOrder = orderFromJSON(sellOrderJson)
 
-  // 检查买家是否有 资产
-  const buyNFTs = order.erc1155.clone()
-  buyNFTs.options.address = assetAddr
-  let assetBal = await getAccountNFTsBalance(buyNFTs, sellAccount, tokenId)
-
-  if (assetBal == 0) {
-    await transferFromERC1155(buyNFTs, buyAccount, sellAccount, tokenId)
-    console.log('transferFromERC1155 Sell to NFTs')
-    return
+    let match = await order.cancelOrder({ order: sellOrder, accountAddress: base.web3.eth.defaultAccount })
+    console.log(match, sellOrderJson)
   }
-
-  let sellOrder = orderFromJSON(sellOrderJson)
-  const matchParm = {
-    sellOrder,
-    accountAddress: buyAccount,
-    paymentTokenAddress: wETHAddr,
-    asset,
-    startAmount: 0.12
-  }
-
-  const match = await order.matchOrder(matchParm)
-
-  console.log('order match success')
 })()

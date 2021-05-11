@@ -15,6 +15,7 @@ const ElementixExchange = require(`${abiPath}ElementixExchange.json`)
 const ExchangeHelper = require(`${abiPath}ExchangeHelper.json`)
 const ElementixTokenTransferProxy = require(`${abiPath}ElementixTokenTransferProxy.json`)
 const WEHT = require(`${abiPath}WETH9Mocked.json`)
+const MakeTokenID = require(`${abiPath}MakeTokenID.json`)
 
 export class Contracts {
   public web3: any
@@ -36,6 +37,7 @@ export class Contracts {
   public exchangeProxyRegistry: any
   public exchangeHelper: any
   public elementSharedAsset: any
+  public makeTokenID: any
 
   // let networkID: number = await web3.eth.net.getId()
   constructor(web3: any, apiConfig: ElementAPIConfig = { networkName: Network.Rinkeby, networkID: 1 }) {
@@ -47,6 +49,7 @@ export class Contracts {
     const exchangeAddr = ElementixExchange.networks[networkID].address
     const proxyRegistryAddr = ElementixProxyRegistry.networks[networkID].address
     const elementSharedAssetAddr = ElementSharedAsset.networks[networkID].address
+    const makeTokenIDAddr = MakeTokenID.networks[networkID].address
 
     this.WETHAddr = WEHT.networks[networkID].address
     this.elementSharedAssetAddr = elementSharedAssetAddr
@@ -60,13 +63,16 @@ export class Contracts {
       this.exchangeHelper = new web3.eth.Contract(ExchangeHelper.abi, exchangeHelperAddr, options)
       this.exchangeProxyRegistry = new web3.eth.Contract(ElementixProxyRegistry.abi, proxyRegistryAddr, options)
       this.exchange = new web3.eth.Contract(ElementixExchange.abi, exchangeAddr, options)
+
       // asset
+      this.makeTokenID = new web3.eth.Contract(MakeTokenID.abi, makeTokenIDAddr, options)
       this.elementSharedAsset = new web3.eth.Contract(ElementSharedAsset.abi, elementSharedAssetAddr, options)
       // abi
       this.erc20 = new web3.eth.Contract(ERC20.abi, options)
       this.erc721 = new web3.eth.Contract(ERC721.abi, options)
       this.erc1155 = new web3.eth.Contract(ERC1155.abi, options)
       this.authenticatedProxy = new web3.eth.Contract(AuthenticatedProxy.abi, options)
+
       this.web3 = web3
     } else {
       // eslint-disable-next-line no-throw-literal

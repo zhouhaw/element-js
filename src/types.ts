@@ -100,7 +100,7 @@ export interface ExchangeMetadataForBundle {
   referrerAddress?: string
 }
 
-export type ExchangeMetadata = ExchangeMetadataForAsset | ExchangeMetadataForBundle
+export type ExchangeMetadata = ExchangeMetadataForAsset //| ExchangeMetadataForBundle
 
 export enum TokenStandardVersion {
   Unsupported = 'unsupported',

@@ -50,7 +50,13 @@ export async function getAccountNFTsBalance(nftsContract: any, account: string, 
   return Number(bal)
 }
 
-//1.
+export async function getTokenIDOwner(elementAssetContract: any, tokenId: any): Promise<string> {
+  // token id 的 creator
+  // let exists = await elementAssetContract.methods.exists(tokenId).call()
+  return await elementAssetContract.methods.creator(tokenId).call()
+}
+
+//1. check register
 export async function registerProxy(proxyRegistryContract: any, account: string): Promise<boolean> {
   let proxy = await proxyRegistryContract.methods.proxies(account).call()
   if (proxy === NULL_ADDRESS) {

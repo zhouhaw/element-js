@@ -2,6 +2,7 @@ import { orderFromJSON } from './utils'
 
 export { Asset, ElementSchemaName, FeeMethod, HowToCall, Network, Order, OrderSide, SaleKind } from './types'
 export {
+  getTokenIDOwner,
   orderFromJSON,
   getTokenList,
   getSchemaList,
