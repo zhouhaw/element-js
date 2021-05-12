@@ -6,7 +6,7 @@ export declare class Orders extends Contracts {
         sell: Order;
         accountAddress: string;
         metadata?: string;
-    }): Promise<boolean>;
+    }): Promise<any>;
     createBuyOrder({ asset, accountAddress, startAmount, quantity, expirationTime, paymentTokenAddress, sellOrder, referrerAddress }: {
         asset: Asset;
         accountAddress: string;
@@ -32,12 +32,6 @@ export declare class Orders extends Contracts {
         buyerAddress?: string;
         buyerEmail?: string;
     }): Promise<OrderJSON | boolean>;
-    /**
-     * Cancel an order on-chain, preventing it from ever being fulfilled.
-     * @param param0 __namedParameters Object
-     * @param order The order to cancel
-     * @param accountAddress The order maker's wallet address
-     */
     cancelOrder({ order, accountAddress }: {
         order: Order;
         accountAddress: string;

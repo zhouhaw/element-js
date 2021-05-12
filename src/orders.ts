@@ -1,18 +1,13 @@
-import { Asset, ECSignature, Order, OrderJSON } from './types'
+import { Asset, Order, OrderJSON } from './types'
 
 import {
-  getTokenIDOwner,
-  approveTokenTransferProxy,
-  getOrderHash,
   NULL_ADDRESS,
-  orderCanMatch,
   orderParamsEncode,
   orderSigEncode,
-  orderToJSON,
   registerProxy,
-  signOrderHash,
   validateOrder,
   hashAndValidateOrder,
+  ordersCanMatch,
   _makeBuyOrder,
   _makeSellOrder
 } from './utils'
@@ -33,34 +28,40 @@ export class Orders extends Contracts {
     accountAddress: string
     metadata?: string
   }) {
+    const equalPrice: boolean = buy.basePrice == sell.basePrice
+    if (!equalPrice) {
+      console.log('matchOrder:buy.basePrice and sell.basePrice not equal!')
+      return false
+    }
     const buyIsValid: boolean = await validateOrder(this.exchangeHelper, buy)
     const sellIsValid: boolean = await validateOrder(this.exchangeHelper, sell)
-    if (sellIsValid && buyIsValid) {
-      const sellOrderParamArray = orderParamsEncode(sell)
-      const sellOrderSigArray = orderSigEncode(sell)
-      const buyOrderParamArray = orderParamsEncode(buy)
-      const buyOrderSigArray = orderSigEncode(buy)
-
-      let canMatch = await this.exchangeHelper.methods.ordersCanMatch(buyOrderParamArray, sellOrderParamArray).call()
-
-      if (!canMatch) {
-        return false
-      }
-
-      const matchTx = await this.exchange.methods
-        .orderMatch(buyOrderParamArray, buyOrderSigArray, sellOrderParamArray, sellOrderSigArray, metadata)
-        .send({
-          value: buy.paymentToken !== NULL_ADDRESS ? 0 : buy.basePrice,
-          from: accountAddress,
-          gas: (80e4).toString()
-        })
-        .catch((error: any) => {
-          console.error(error.receipt) //, error.message
-          return false
-        })
-      console.log('exchange.methods.orderMatch', matchTx.status)
+    if (!sellIsValid && !buyIsValid) {
+      console.log('matchOrder: validateOrder false')
+      return false
     }
-    return true
+
+    let canMatch = await ordersCanMatch(buy, sell)
+    if (!canMatch) {
+      console.log('matchOrder: canMatch false')
+      return false
+    }
+
+    const sellOrderParamArray = orderParamsEncode(sell)
+    const sellOrderSigArray = orderSigEncode(sell)
+    const buyOrderParamArray = orderParamsEncode(buy)
+    const buyOrderSigArray = orderSigEncode(buy)
+    const matchTx = await this.exchange.methods
+      .orderMatch(buyOrderParamArray, buyOrderSigArray, sellOrderParamArray, sellOrderSigArray, metadata)
+      .send({
+        value: buy.paymentToken !== NULL_ADDRESS ? 0 : buy.basePrice,
+        from: accountAddress,
+        gas: (80e4).toString()
+      })
+      .catch((error: any) => {
+        console.error(error.receipt) //, error.message
+        return false
+      })
+    return matchTx.status
   }
 
   public async createBuyOrder({
@@ -154,12 +155,6 @@ export class Orders extends Contracts {
     return hashAndValidateOrder(this.web3, this.exchangeHelper, sellOrder)
   }
 
-  /**
-   * Cancel an order on-chain, preventing it from ever being fulfilled.
-   * @param param0 __namedParameters Object
-   * @param order The order to cancel
-   * @param accountAddress The order maker's wallet address
-   */
   public async cancelOrder({ order, accountAddress }: { order: Order; accountAddress: string }) {
     if (order.maker.toLowerCase() != accountAddress.toLowerCase()) {
       return false
@@ -174,8 +169,7 @@ export class Orders extends Contracts {
       })
       .catch((error: any) => {
         console.error(error.receipt) //, error.message
-        return false
       })
-    console.log('exchange.methods.orderMatch', cancelTx.status)
+    console.log('cancelOrder ', cancelTx.status)
   }
 }

@@ -25,6 +25,7 @@ export {
   getAccountNFTsBalance,
   approveTokenTransferProxy,
   approveERC1155TransferProxy,
+  approveERC721TransferProxy,
   checkSenderOfAuthenticatedProxy
 } from './check'
 export { _makeBuyOrder, _makeSellOrder, getTokenList, getSchemaList } from './order'
@@ -92,9 +93,6 @@ export async function validateOrder(exchangeHelper: any, order: any): Promise<an
   return exchangeHelper.methods.validateOrder(orderParamValueArray, orderSigArray).call()
 }
 
-{
-}
-
 export async function hashAndValidateOrder(web3: any, exchangeHelper: any, order: UnhashedOrder): Promise<any> {
   // const orderHash = await getOrderHash(web3, exchangeHelper, order)
   let orderHash = hashOrder(web3, order)
@@ -103,7 +101,7 @@ export async function hashAndValidateOrder(web3: any, exchangeHelper: any, order
     hash: orderHash
   }
   let signature: ECSignature
-  if (web3.eth.defaultAccount == hashedOrder.maker) {
+  if (web3.eth.defaultAccount.toLowerCase() == hashedOrder.maker.toLowerCase()) {
     signature = await signOrderHash(web3, hashedOrder)
   } else {
     return false
@@ -122,12 +120,23 @@ export async function hashAndValidateOrder(web3: any, exchangeHelper: any, order
   }
 }
 
-let canSettleOrder = (listingTime: BigNumber, expirationTime: BigNumber) => {
+let canSettleOrder = (listingTime: any, expirationTime: any) => {
   let now = new Date().getTime() / 1000
-  return listingTime.toNumber() < now && (expirationTime.toNumber() == 0 || now < expirationTime.toNumber())
+  if (BigNumber.isBigNumber(listingTime)) {
+    listingTime = listingTime.toNumber()
+  } else {
+    listingTime = Number(listingTime)
+  }
+
+  if (BigNumber.isBigNumber(expirationTime)) {
+    expirationTime = expirationTime.toNumber()
+  } else {
+    expirationTime = Number(expirationTime)
+  }
+  return listingTime < now && (expirationTime == 0 || now < expirationTime)
 }
 
-export function orderCanMatch(buy: Order, sell: Order) {
+export function ordersCanMatch(buy: Order, sell: Order) {
   return (
     buy.side == 0 &&
     sell.side == 1 &&
@@ -150,6 +159,12 @@ export function orderCanMatch(buy: Order, sell: Order) {
     /* Sell-side order must be settleable. */
     canSettleOrder(sell.listingTime, sell.expirationTime)
   )
+}
+
+export async function _ordersCanMatch(exchangeHelper: any, buy: Order, sell: Order): Promise<any> {
+  const buyOrderParamArray = orderParamsEncode(buy)
+  const sellOrderParamArray = orderParamsEncode(sell)
+  return exchangeHelper.methods.ordersCanMatch(buyOrderParamArray, sellOrderParamArray).call()
 }
 
 export function hashOrder(web3: any, order: any): string {
@@ -351,6 +366,17 @@ export function estimateCurrentPrice(order: Order, secondsToBacktrack = 30, shou
 }
 
 export async function transferFromERC1155(
+  nftsContract: any,
+  from: string,
+  to: string,
+  tokenId: any,
+  amount: number = 1
+): Promise<boolean> {
+  let tx = await nftsContract.methods.safeTransferFrom(from, to, tokenId, amount, '0x').send({ from: from })
+  return tx.status
+}
+
+export async function transferFromERC721(
   nftsContract: any,
   from: string,
   to: string,

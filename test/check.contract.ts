@@ -1,15 +1,21 @@
 import { Base } from './base'
 
 import {
-  checkSenderOfAuthenticatedProxy,
-  registerProxy,
+  approveERC1155TransferProxy,
   approveTokenTransferProxy,
-  approveERC1155TransferProxy
+  checkSenderOfAuthenticatedProxy,
+  getTokenList,
+  registerProxy
 } from '../src/utils'
+import { Network } from '../src'
 ;(async () => {
   let base = new Base()
   await base.init()
   let account = base.accounts[0].address
+
+  let tokenList = getTokenList(Network.Private, 'WETH')
+
+  console.log(tokenList)
 
   let erc1155Contract = base.contracts.erc1155.clone()
   erc1155Contract.options.address = base.contracts.elementSharedAssetAddr

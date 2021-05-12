@@ -35,7 +35,7 @@ import { Asset, ElementSchemaName, Network, Orders } from '../src'
 
   if (assetBal == 0) {
     let tx = await transferFromERC1155(buyNFTs, buyAccount, sellAccount, tokenId)
-    console.log('transferFromERC1155 Sell to NFTs', tx)
+    console.log('transferFromERC1155 to Sell', tx)
     return
   }
 

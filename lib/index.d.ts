@@ -1,4 +1,4 @@
 export { Asset, ElementSchemaName, FeeMethod, HowToCall, Network, Order, OrderSide, SaleKind } from './types';
-export { getTokenIDOwner, orderFromJSON, getTokenList, getSchemaList, encodeBuy, encodeSell, getAccountBalance, registerProxy, approveTokenTransferProxy, approveERC1155TransferProxy } from './utils';
+export { getTokenIDOwner, orderFromJSON, getTokenList, getSchemaList, encodeBuy, encodeSell, getAccountBalance, registerProxy, approveTokenTransferProxy, approveERC1155TransferProxy, approveERC721TransferProxy, transferFromERC1155, transferFromERC721 } from './utils';
 export { Orders } from './orders';
 export { Contracts } from './contracts';

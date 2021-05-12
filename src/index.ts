@@ -1,5 +1,3 @@
-import { orderFromJSON } from './utils'
-
 export { Asset, ElementSchemaName, FeeMethod, HowToCall, Network, Order, OrderSide, SaleKind } from './types'
 export {
   getTokenIDOwner,
@@ -11,7 +9,10 @@ export {
   getAccountBalance,
   registerProxy,
   approveTokenTransferProxy,
-  approveERC1155TransferProxy
+  approveERC1155TransferProxy,
+  approveERC721TransferProxy,
+  transferFromERC1155,
+  transferFromERC721
 } from './utils'
 
 export { Orders } from './orders'

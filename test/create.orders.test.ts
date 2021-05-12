@@ -1,12 +1,13 @@
 import { Base } from './base'
 
 import {
-  transferFromERC1155,
   getAccountBalance,
   getAccountNFTsBalance,
   registerProxy,
   approveTokenTransferProxy,
-  approveERC1155TransferProxy
+  approveERC1155TransferProxy,
+  orderFromJSON,
+  transferFromERC1155
 } from '../src/utils'
 import { Asset, ElementSchemaName, Network, Orders } from '../src'
 ;(async () => {
@@ -19,11 +20,28 @@ import { Asset, ElementSchemaName, Network, Orders } from '../src'
   let wETHAddr = order.WETHAddr
   payToken.options.address = wETHAddr
   let bal = await getAccountBalance(order.web3, buyAccount, payToken)
-
-  console.log(bal)
-
   let tokenId = '52110910509117159886520023034677676808462086871028572901793699248975699247105'
   let assetAddr = order.elementSharedAssetAddr.toLowerCase() // ElementSharedAsset.networks[100].address
+
+  let asset = {
+    tokenId,
+    tokenAddress: assetAddr,
+    schemaName: ElementSchemaName.ERC1155
+  } as Asset
+
+  //------createBuyOrder
+  const buyParm = {
+    accountAddress: buyAccount,
+    paymentTokenAddress: wETHAddr,
+    asset,
+    startAmount: 0.12
+  }
+
+  base.web3.eth.defaultAccount = buyAccount
+  const buyOrder = await order.createBuyOrder(buyParm)
+  console.log('buyOrder', buyOrder)
+
+  //------createSellOrder
 
   const buyNFTs = order.erc1155.clone()
   buyNFTs.options.address = assetAddr
@@ -35,19 +53,15 @@ import { Asset, ElementSchemaName, Network, Orders } from '../src'
   }
   console.log(assetBal)
 
-  let asset = {
-    tokenId,
-    tokenAddress: assetAddr,
-    schemaName: ElementSchemaName.ERC1155
-  } as Asset
-
   const sellParm = {
-    accountAddress: sellAccount,
-    paymentTokenAddress: wETHAddr,
     asset,
-    startAmount: 0.12
+    accountAddress: sellAccount,
+    startAmount: 0.12,
+    paymentTokenAddress: wETHAddr,
+    expirationTime: 0
   }
   base.web3.eth.defaultAccount = sellAccount
   let sellOrderJson = await order.createSellOrder(sellParm)
-  console.log(sellOrderJson)
+
+  console.log('createSellOrder', sellOrderJson)
 })()
