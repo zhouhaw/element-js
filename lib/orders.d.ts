@@ -35,5 +35,5 @@ export declare class Orders extends Contracts {
     cancelOrder({ order, accountAddress }: {
         order: Order;
         accountAddress: string;
-    }): Promise<false | undefined>;
+    }): Promise<any>;
 }

@@ -1,16 +1,21 @@
-import { Asset, Order, OrderJSON } from './types'
+import { Asset, ElementSchemaName, Order, OrderJSON } from './types'
 
 import {
-  toBaseUnitAmount,
+  _makeBuyOrder,
+  _makeSellOrder,
+  checkApproveTokenTransferProxy,
+  approveTokenTransferProxy,
+  checkApproveERC1155TransferProxy,
+  approveERC1155TransferProxy,
+  getAccountBalance,
+  getAccountNFTsBalance,
+  hashAndValidateOrder,
   NULL_ADDRESS,
   orderParamsEncode,
+  ordersCanMatch,
   orderSigEncode,
   registerProxy,
-  validateOrder,
-  hashAndValidateOrder,
-  ordersCanMatch,
-  _makeBuyOrder,
-  _makeSellOrder
+  validateOrder
 } from './utils'
 
 import { Contracts } from './contracts'
@@ -34,6 +39,46 @@ export class Orders extends Contracts {
       console.log('matchOrder:buy.basePrice and sell.basePrice not equal!')
       return false
     }
+
+    let bal = await getAccountNFTsBalance(this.elementSharedAsset, sell.maker, sell.metadata.asset.id)
+    if (bal == 0) {
+      console.log('matchOrder:elementSharedAsset balanceOf equal 0 !')
+      return false
+    }
+
+    let { ethBal } = await getAccountBalance(this.web3, accountAddress)
+    if (ethBal == 0) {
+      console.log('matchOrder:ETH balance equal 0')
+      return false
+    }
+
+    if (buy.paymentToken != NULL_ADDRESS) {
+      let erc20Contract = this.erc20.clone()
+      erc20Contract.options.address = buy.paymentToken
+      let { erc20Bal } = await getAccountBalance(this.web3, buy.maker, erc20Contract)
+      if (erc20Bal == 0) {
+        console.log('matchOrder:erc20Bal balance equal 0')
+        return false
+      }
+      let isApproveTokenTransfer = await checkApproveTokenTransferProxy(this.exchange, erc20Contract, buy.maker)
+      if (!isApproveTokenTransfer) {
+        console.log('matchOrder:isApproveTokenTransfer ')
+        return false
+      }
+    }
+
+    if (sell.metadata.schema == ElementSchemaName.ERC1155) {
+      let isApproveAssetTransfer = await checkApproveERC1155TransferProxy(
+        this.exchangeProxyRegistry,
+        this.elementSharedAsset,
+        sell.maker
+      )
+      if (!isApproveAssetTransfer) {
+        console.log('matchOrder:isApproveAssetTransfer ')
+        return false
+      }
+    }
+
     const buyIsValid: boolean = await validateOrder(this.exchangeHelper, buy)
     const sellIsValid: boolean = await validateOrder(this.exchangeHelper, sell)
     if (!sellIsValid && !buyIsValid) {
@@ -86,7 +131,19 @@ export class Orders extends Contracts {
     referrerAddress?: string
   }): Promise<OrderJSON | boolean> {
     // exchangeProxyRegistry
-    await registerProxy(this.exchangeProxyRegistry, accountAddress)
+    let isRegister = await registerProxy(this.exchangeProxyRegistry, accountAddress)
+
+    if (!isRegister) {
+      console.log('isRegister false')
+      return false
+    }
+
+    let isApproveWETH = await approveTokenTransferProxy(this.exchange, this.WETH, accountAddress)
+
+    if (!isApproveWETH) {
+      console.log('isApproveWETH false')
+      return false
+    }
 
     let networkName = this.networkName
     let exchangeAddr = this.exchange.options.address
@@ -103,6 +160,21 @@ export class Orders extends Contracts {
       sellOrder,
       referrerAddress
     })
+
+    if (buyOrder.paymentToken != NULL_ADDRESS) {
+      let erc20Contract = this.erc20.clone()
+      erc20Contract.options.address = buyOrder.paymentToken
+      let { erc20Bal } = await getAccountBalance(this.web3, buyOrder.maker, erc20Contract)
+      if (erc20Bal == 0) {
+        console.log('matchOrder:erc20Bal balance equal 0')
+        return false
+      }
+      let isApproveTokenTransfer = await approveTokenTransferProxy(this.exchange, erc20Contract, buyOrder.maker)
+      if (!isApproveTokenTransfer) {
+        console.log('matchOrder:isApproveTokenTransfer ')
+        return false
+      }
+    }
     return hashAndValidateOrder(this.web3, this.exchangeHelper, buyOrder)
   }
 
@@ -138,6 +210,31 @@ export class Orders extends Contracts {
     let networkName = this.networkName
     let exchangeAddr = this.exchange.options.address
 
+    let bal = await getAccountNFTsBalance(this.elementSharedAsset, accountAddress, asset.tokenId)
+    if (bal == 0) {
+      console.log('createSellOrder :elementSharedAsset balanceOf equal 0 !')
+      return false
+    }
+
+    let isRegister = await registerProxy(this.exchangeProxyRegistry, accountAddress)
+
+    if (!isRegister) {
+      console.log('isRegister false')
+      return false
+    }
+
+    if (asset.schemaName == ElementSchemaName.ERC1155) {
+      let isApproveAssetTransfer = await approveERC1155TransferProxy(
+        this.exchangeProxyRegistry,
+        this.elementSharedAsset,
+        accountAddress
+      )
+      if (!isApproveAssetTransfer) {
+        console.log('matchOrder:isApproveAssetTransfer ')
+        return false
+      }
+    }
+
     const sellOrder = await _makeSellOrder({
       networkName,
       exchangeAddr,
@@ -159,6 +256,7 @@ export class Orders extends Contracts {
 
   public async cancelOrder({ order, accountAddress }: { order: Order; accountAddress: string }) {
     if (order.maker.toLowerCase() != accountAddress.toLowerCase()) {
+      console.log('order.maker must be accountAddress')
       return false
     }
     const orderParamArray = orderParamsEncode(order)

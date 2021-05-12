@@ -1,9 +1,13 @@
 import { Asset, ElementAsset, ElementSchemaName, Network, Order, OrderSide, UnhashedOrder } from '../types';
 import { Schema } from '../schema/types';
 import BigNumber from 'bignumber.js';
-export declare function makeBigNumber(arg: number | string | BigNumber): BigNumber;
 export declare function getSchema(network: Network, schemaName?: ElementSchemaName): Schema<any>;
 export declare function getElementAsset(schema: Schema<ElementAsset>, asset: Asset, quantity?: BigNumber): ElementAsset;
+export declare function getSchemaAndAsset(networkName: Network, asset: Asset, quantity: number): {
+    schema: Schema<any>;
+    elementAsset: ElementAsset;
+    quantityBN: BigNumber;
+};
 export declare function generatePseudoRandomSalt(): BigNumber;
 export declare function getPriceParameters(network: Network, orderSide: OrderSide, tokenAddress: string, expirationTime: number, startAmount: number, endAmount?: number, waitingForBestCounterOrder?: boolean, englishAuctionReservePrice?: number): {
     basePrice: BigNumber;
@@ -45,4 +49,9 @@ export declare function _makeSellOrder({ networkName, exchangeAddr, asset, quant
     buyerAddress: string;
 }): Promise<UnhashedOrder>;
 export declare function getTokenList(network: Network, symbol?: string): Array<any>;
-export declare function getSchemaList(network: Network, schemaName?: string): Array<any>;
+export declare function getSchemaList(network: Network, schemaName?: string): Array<Schema<any>>;
+export declare function schemaEncodeSell(network: Network, schema: ElementSchemaName, owner: string, data: any): {
+    target: string;
+    dataToCall: string;
+    replacementPattern: string;
+};

@@ -53,7 +53,6 @@ import { Asset, ElementSchemaName, Network, Orders } from '../src'
     console.log('transferFromERC1155 to Sell', tx)
     return
   }
-  console.log(assetBal)
 
   const sellParm = {
     asset,

@@ -30,21 +30,14 @@ export async function checkSenderOfAuthenticatedProxy(
   return proxyRegistryContract.methods.contracts(exchangeContract.options.address).call()
 }
 
-export async function getAccountBalance(web3: any, account: string, erc20?: any): Promise<boolean | Object> {
-  const ethBal = await web3.eth.getBalance(account)
-  if (Number(ethBal) == 0) {
-    console.log('ETH balance equal 0')
-    return false
-  }
-  let erc20Bal = 0
+export async function getAccountBalance(web3: any, account: string, erc20?: any): Promise<any> {
+  let ethBal: number = await web3.eth.getBalance(account)
+
+  let erc20Bal: number = 0
   if (erc20) {
-    erc20Bal = await erc20.methods.balanceOf(account).call()
-    if (Number(erc20Bal) == 0) {
-      console.log('pay token balance equal 0')
-      return false
-    }
+    erc20Bal = erc20Bal = await erc20.methods.balanceOf(account).call()
   }
-  return { ethBal, erc20Bal }
+  return { ethBal: Number(ethBal), erc20Bal: Number(erc20Bal) }
 }
 
 export async function getAccountNFTsBalance(nftsContract: any, account: string, tokenId: any): Promise<Number> {
@@ -71,14 +64,28 @@ export async function registerProxy(proxyRegistryContract: any, account: string)
 }
 
 //2 approve pay token
-export async function approveTokenTransferProxy(
+export async function checkApproveTokenTransferProxy(
   exchangeContract: any,
   erc20Contract: any,
   account: string
 ): Promise<boolean> {
   let tokenTransferProxyAddr = await exchangeContract.methods.tokenTransferProxy().call()
   const amount = await erc20Contract.methods.allowance(account, tokenTransferProxyAddr).call()
-  if (Number(amount) <= 100e18) {
+  if (Number(amount) <= 1e18) {
+    return false
+  }
+  return true
+}
+
+//2 approve pay token
+export async function approveTokenTransferProxy(
+  exchangeContract: any,
+  erc20Contract: any,
+  account: string
+): Promise<boolean> {
+  let isApprove = await checkApproveTokenTransferProxy(exchangeContract, erc20Contract, account)
+  if (!isApprove) {
+    let tokenTransferProxyAddr = await exchangeContract.methods.tokenTransferProxy().call()
     let approveResult = await erc20Contract.methods.approve(tokenTransferProxyAddr, MAX_UINT_256).send({
       from: account
     })
@@ -87,15 +94,24 @@ export async function approveTokenTransferProxy(
   return true
 }
 
+export async function checkApproveERC1155TransferProxy(
+  proxyRegistryContract: any,
+  nftsContract: any,
+  account: string
+): Promise<boolean> {
+  let operator = await proxyRegistryContract.methods.proxies(account).call()
+  return nftsContract.methods.isApprovedForAll(account, operator).call()
+}
+
 //3  approve 1155 NFTs to proxy
 export async function approveERC1155TransferProxy(
   proxyRegistryContract: any,
   nftsContract: any,
   account: string
 ): Promise<boolean> {
-  let operator = await proxyRegistryContract.methods.proxies(account).call()
-  let isApprove = await nftsContract.methods.isApprovedForAll(account, operator).call()
+  let isApprove = await checkApproveERC1155TransferProxy(proxyRegistryContract, nftsContract, account)
   if (!isApprove) {
+    let operator = await proxyRegistryContract.methods.proxies(account).call()
     let res = await nftsContract.methods.setApprovalForAll(operator, true).send({ from: account })
     return res.status
   }

@@ -14,7 +14,7 @@ const ElementixProxyRegistry = require(`../abi/ElementixProxyRegistry.json`)
 const ElementixExchange = require(`../abi/ElementixExchange.json`)
 const ExchangeHelper = require(`../abi/ExchangeHelper.json`)
 const ElementixTokenTransferProxy = require(`../abi/ElementixTokenTransferProxy.json`)
-const WEHT = require(`../abi/WETH9Mocked.json`)
+const WETH = require(`../abi/WETH9Mocked.json`)
 const MakeTokenID = require(`../abi/MakeTokenID.json`)
 
 export class Contracts {
@@ -37,6 +37,7 @@ export class Contracts {
   public exchangeProxyRegistry: any
   public exchangeHelper: any
   public elementSharedAsset: any
+  public WETH: any
   public makeTokenID: any
 
   // let networkID: number = await web3.eth.net.getId()
@@ -51,7 +52,7 @@ export class Contracts {
     const elementSharedAssetAddr = ElementSharedAsset.networks[networkID].address
     const makeTokenIDAddr = MakeTokenID.networks[networkID].address
 
-    this.WETHAddr = WEHT.networks[networkID].address
+    this.WETHAddr = WETH.networks[networkID].address
     this.elementSharedAssetAddr = elementSharedAssetAddr
 
     this.tokenTransferProxyAddr = ElementixTokenTransferProxy.networks[networkID].address
@@ -65,6 +66,7 @@ export class Contracts {
       this.exchange = new web3.eth.Contract(ElementixExchange.abi, exchangeAddr, options)
 
       // asset
+      this.WETH = new web3.eth.Contract(WETH.abi, this.WETHAddr, options)
       this.makeTokenID = new web3.eth.Contract(MakeTokenID.abi, makeTokenIDAddr, options)
       this.elementSharedAsset = new web3.eth.Contract(ElementSharedAsset.abi, elementSharedAssetAddr, options)
       // abi

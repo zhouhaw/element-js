@@ -23,7 +23,9 @@ export {
   getTokenIDOwner,
   getAccountBalance,
   getAccountNFTsBalance,
+  checkApproveTokenTransferProxy,
   approveTokenTransferProxy,
+  checkApproveERC1155TransferProxy,
   approveERC1155TransferProxy,
   approveERC721TransferProxy,
   checkSenderOfAuthenticatedProxy
