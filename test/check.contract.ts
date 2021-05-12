@@ -11,11 +11,11 @@ import { Network } from '../src'
 ;(async () => {
   let base = new Base()
   await base.init()
-  let account = base.accounts[0].address
+  let account = base.accounts[1].address
 
   let tokenList = getTokenList(Network.Private, 'WETH')
 
-  console.log(tokenList)
+  // console.log(tokenList)
 
   let erc1155Contract = base.contracts.erc1155.clone()
   erc1155Contract.options.address = base.contracts.elementSharedAssetAddr
@@ -28,8 +28,8 @@ import { Network } from '../src'
 
   let erc20Contract = base.contracts.erc20.clone()
   erc20Contract.options.address = base.contracts.WETHAddr
-  let isTransferApprove = await approveTokenTransferProxy(base.contracts.exchange, erc20Contract, account)
-  console.log(isTransferApprove)
+  let isTokenApprove = await approveTokenTransferProxy(base.contracts.exchange, erc20Contract, account)
+  console.log('isTokenApprove', isTokenApprove)
 
   let isRegister = await registerProxy(base.contracts.exchangeProxyRegistry, account)
   console.log('isRegister', isRegister)

@@ -1,4 +1,4 @@
-import { Asset, ElementSchemaName, Order, OrderJSON } from './types'
+import { Asset, ElementSchemaName, Network, Order, OrderJSON } from './types'
 
 import {
   _makeBuyOrder,
@@ -15,7 +15,9 @@ import {
   ordersCanMatch,
   orderSigEncode,
   registerProxy,
-  validateOrder
+  validateOrder,
+  getSchemaList,
+  encodeSell
 } from './utils'
 
 import { Contracts } from './contracts'
@@ -35,12 +37,17 @@ export class Orders extends Contracts {
     metadata?: string
   }) {
     const equalPrice: boolean = buy.basePrice.eq(sell.basePrice)
+    // const equalPrice: boolean = buy.basePrice == sell.basePrice
     if (!equalPrice) {
       console.log('matchOrder:buy.basePrice and sell.basePrice not equal!')
       return false
     }
 
-    let bal = await getAccountNFTsBalance(this.elementSharedAsset, sell.maker, sell.metadata.asset.id)
+    const sellNFTs = this.erc1155.clone()
+    sellNFTs.options.address = sell.metadata.asset.address
+    let bal = await getAccountNFTsBalance(sellNFTs, sell.maker, sell.metadata.asset.id)
+
+    // let bal = await getAccountNFTsBalance(this.elementSharedAsset, sell.maker, sell.metadata.asset.id)
     if (bal == 0) {
       console.log('matchOrder:elementSharedAsset balanceOf equal 0 !')
       return false
@@ -70,7 +77,7 @@ export class Orders extends Contracts {
     if (sell.metadata.schema == ElementSchemaName.ERC1155) {
       let isApproveAssetTransfer = await checkApproveERC1155TransferProxy(
         this.exchangeProxyRegistry,
-        this.elementSharedAsset,
+        sellNFTs,
         sell.maker
       )
       if (!isApproveAssetTransfer) {
@@ -93,6 +100,22 @@ export class Orders extends Contracts {
       return false
     }
 
+    // encodeSell
+    let schemas = getSchemaList(Network.Private, sell.metadata.schema)
+    let { target, dataToCall, replacementPattern } = encodeSell(schemas[0], sell.metadata.asset, sell.maker)
+
+    if (dataToCall != sell.dataToCall) {
+      console.log('sell.dataToCall error')
+    }
+
+    if (target != sell.target) {
+      console.log('sell.target error')
+    }
+
+    if (replacementPattern != sell.replacementPattern) {
+      console.log('sell.replacementPattern error')
+    }
+
     const sellOrderParamArray = orderParamsEncode(sell)
     const sellOrderSigArray = orderSigEncode(sell)
     const buyOrderParamArray = orderParamsEncode(buy)
@@ -105,10 +128,13 @@ export class Orders extends Contracts {
         gas: (80e4).toString()
       })
       .catch((error: any) => {
-        console.error(error.receipt) //, error.message
-        return false
+        console.error('orderMatch', error.receipt) //, error.message
       })
-    return matchTx.status
+    if (matchTx) {
+      return matchTx.status
+    } else {
+      return false
+    }
   }
 
   public async createBuyOrder({
@@ -210,7 +236,9 @@ export class Orders extends Contracts {
     let networkName = this.networkName
     let exchangeAddr = this.exchange.options.address
 
-    let bal = await getAccountNFTsBalance(this.elementSharedAsset, accountAddress, asset.tokenId)
+    const sellNFTs = this.erc1155.clone()
+    sellNFTs.options.address = asset.tokenAddress
+    let bal = await getAccountNFTsBalance(sellNFTs, accountAddress, asset.tokenId)
     if (bal == 0) {
       console.log('createSellOrder :elementSharedAsset balanceOf equal 0 !')
       return false

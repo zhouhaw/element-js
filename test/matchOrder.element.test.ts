@@ -71,11 +71,13 @@ import { Asset, ElementSchemaName, Network, Orders } from '../src'
   }
 
   // sell accept
+  sell = orderFromJSON(sell)
   buy = orderFromJSON(buy)
   base.web3.eth.defaultAccount = sellAccount
   let match = await order.matchOrder({ buy, sell, accountAddress: sellAccount })
 
   // // buy 一口价
+  // buy = orderFromJSON(buy)
   // sell = orderFromJSON(sell)
   // base.web3.eth.defaultAccount = buyAccount
   // let match = await order.matchOrder({ buy, sell, accountAddress: buyAccount })
