@@ -120,6 +120,9 @@ export class Orders extends Contracts {
     const sellOrderSigArray = orderSigEncode(sell)
     const buyOrderParamArray = orderParamsEncode(buy)
     const buyOrderSigArray = orderSigEncode(buy)
+
+    console.log('buyOrderParamArray', buyOrderParamArray)
+    console.log('sellOrderParamArray', sellOrderParamArray)
     const matchTx = await this.exchange.methods
       .orderMatch(buyOrderParamArray, buyOrderSigArray, sellOrderParamArray, sellOrderSigArray, metadata)
       .send({
