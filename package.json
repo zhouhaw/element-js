@@ -1,6 +1,6 @@
 {
   "name": "element-js",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Javascript SDK for the Element ",
   "main": "lib/index.js",
   "author": "Project Element Developers",

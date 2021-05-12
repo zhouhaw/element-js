@@ -80,7 +80,7 @@ export interface ExchangeMetadataForBundle {
     bundle: ElementBundle;
     referrerAddress?: string;
 }
-export declare type ExchangeMetadata = ExchangeMetadataForAsset | ExchangeMetadataForBundle;
+export declare type ExchangeMetadata = ExchangeMetadataForAsset;
 export declare enum TokenStandardVersion {
     Unsupported = "unsupported",
     Locked = "locked",

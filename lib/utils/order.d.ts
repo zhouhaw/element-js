@@ -44,3 +44,5 @@ export declare function _makeSellOrder({ networkName, exchangeAddr, asset, quant
     extraBountyBasisPoints: number;
     buyerAddress: string;
 }): Promise<UnhashedOrder>;
+export declare function getTokenList(network: Network, symbol?: string): Array<any>;
+export declare function getSchemaList(network: Network, schemaName?: string): Array<any>;

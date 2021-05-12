@@ -14,5 +14,6 @@ export declare class Contracts {
     exchangeProxyRegistry: any;
     exchangeHelper: any;
     elementSharedAsset: any;
+    makeTokenID: any;
     constructor(web3: any, apiConfig?: ElementAPIConfig);
 }

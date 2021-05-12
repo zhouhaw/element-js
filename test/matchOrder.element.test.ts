@@ -71,14 +71,14 @@ import { Asset, ElementSchemaName, Network, Orders } from '../src'
   }
 
   // sell accept
-  // buy = orderFromJSON(buy)
-  // base.web3.eth.defaultAccount = sellAccount
-  // let match = await order._matchOrder({ buy, sell, accountAddress: sellAccount })
+  buy = orderFromJSON(buy)
+  base.web3.eth.defaultAccount = sellAccount
+  let match = await order.matchOrder({ buy, sell, accountAddress: sellAccount })
 
-  // buy 一口价
-  sell = orderFromJSON(sell)
-  base.web3.eth.defaultAccount = buyAccount
-  let match = await order.matchOrder({ buy, sell, accountAddress: buyAccount })
+  // // buy 一口价
+  // sell = orderFromJSON(sell)
+  // base.web3.eth.defaultAccount = buyAccount
+  // let match = await order.matchOrder({ buy, sell, accountAddress: buyAccount })
 
   let newAssetBal = await getAccountNFTsBalance(buyNFTs, sellAccount, tokenId)
 
