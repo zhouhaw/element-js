@@ -10,41 +10,38 @@ import {
   SaleKind,
   UnhashedOrder
 } from '../types'
-import { encodeBuy, encodeSell, MAX_DIGITS_IN_UNSIGNED_256_INT, NULL_ADDRESS } from './index'
+import {
+  toBaseUnitAmount,
+  makeBigNumber,
+  encodeBuy,
+  encodeSell,
+  MAX_DIGITS_IN_UNSIGNED_256_INT,
+  NULL_ADDRESS
+} from './index'
 import { Schema } from '../schema/types'
 import { schemas } from '../schema/schemas'
 import BigNumber from 'bignumber.js'
 import { tokens } from '../schema/tokens'
-BigNumber.config({ EXPONENTIAL_AT: 1e9 })
 
-export function makeBigNumber(arg: number | string | BigNumber): BigNumber {
-  // Zero sometimes returned as 0x from contracts
-  if (arg === '0x') {
-    arg = 0
-  }
-  // fix "new BigNumber() number type has more than 15 significant digits"
-  arg = arg.toString()
-  return new BigNumber(arg)
-}
+BigNumber.config({ EXPONENTIAL_AT: 1e9 })
 
 export function getSchema(network: Network, schemaName?: ElementSchemaName): Schema<any> {
   const schemaName_ = schemaName || ElementSchemaName.ERC1155
   // @ts-ignore
-  const scahmaList = schemas[network]
-  if (!scahmaList) {
-    throw new Error(
-      `Trading for this Network (${network}) is not yet supported. Please contact us or check back later!`
-    )
-  }
+  // const scahmaList = schemas[network]
+  // if (!scahmaList) {
+  //   throw new Error(
+  //     `Trading for this Network (${network}) is not yet supported. Please contact us or check back later!`
+  //   )
+  // }
+  const schemaInfo = getSchemaList(network, schemaName_) // scahmaList.find((val: Schema<any>) => val.name === schemaName_)
 
-  const schemaInfo = scahmaList.find((val: Schema<any>) => val.name === schemaName_)
-
-  if (!schemaInfo) {
+  if (schemaInfo.length == 0) {
     throw new Error(
       `Trading for this asset (${schemaName_}) is not yet supported. Please contact us or check back later!`
     )
   }
-  return schemaInfo
+  return schemaInfo[0]
 }
 
 export function getElementAsset(schema: Schema<ElementAsset>, asset: Asset, quantity = new BigNumber(1)): ElementAsset {
@@ -59,6 +56,18 @@ export function getElementAsset(schema: Schema<ElementAsset>, asset: Asset, quan
   })
 }
 
+export function getSchemaAndAsset(networkName: Network, asset: Asset, quantity: number) {
+  const schema = getSchema(networkName, asset.schemaName)
+  // const quantityBN = makeBigNumber(quantity) // WyvernProtocol.toBaseUnitAmount(makeBigNumber(quantity), asset.decimals || 0)
+  const quantityBN = makeBigNumber(quantity)
+  const elementAsset = getElementAsset(schema, asset, quantityBN)
+  return {
+    schema,
+    elementAsset,
+    quantityBN
+  }
+}
+
 export function generatePseudoRandomSalt() {
   // BigNumber.random returns a pseudo-random number between 0 & 1 with a passed in number of decimal places.
   // Source: https://mikemcl.github.io/bignumber.js/#random
@@ -66,12 +75,6 @@ export function generatePseudoRandomSalt() {
   const factor = new BigNumber(10).pow(MAX_DIGITS_IN_UNSIGNED_256_INT - 1)
   const salt = randomNumber.times(factor).integerValue()
   return salt
-}
-
-function toBaseUnitAmount(amount: BigNumber, decimals: number) {
-  const unit = new BigNumber(10).pow(decimals)
-  const baseUnitAmount = amount.times(unit).integerValue()
-  return baseUnitAmount
 }
 
 export function getPriceParameters(
@@ -207,10 +210,10 @@ export async function _makeBuyOrder({
   sellOrder?: Order
   referrerAddress?: string
 }): Promise<UnhashedOrder> {
-  const schema = getSchema(networkName, asset.schemaName)
-  const quantityBN = makeBigNumber(quantity) // WyvernProtocol.toBaseUnitAmount(makeBigNumber(quantity), asset.decimals || 0)
-
-  const wyAsset = getElementAsset(schema, asset, quantityBN)
+  let { schema, elementAsset, quantityBN } = getSchemaAndAsset(networkName, asset, quantity)
+  // const schema = getSchema(networkName, asset.schemaName)
+  // const quantityBN = makeBigNumber(quantity) // WyvernProtocol.toBaseUnitAmount(makeBigNumber(quantity), asset.decimals || 0)
+  // const wyAsset = getElementAsset(schema, asset, quantityBN)
 
   const taker = sellOrder ? sellOrder.maker : NULL_ADDRESS
 
@@ -220,7 +223,7 @@ export async function _makeBuyOrder({
 
   // console.log(wyAsset)
 
-  const { target, dataToCall, replacementPattern } = encodeBuy(schema, wyAsset, accountAddress)
+  const { target, dataToCall, replacementPattern } = encodeBuy(schema, elementAsset, accountAddress)
 
   const { basePrice, extra, paymentToken } = getPriceParameters(
     networkName,
@@ -259,7 +262,7 @@ export async function _makeBuyOrder({
     expirationTime: times.expirationTime,
     salt: generatePseudoRandomSalt(),
     metadata: {
-      asset: wyAsset,
+      asset: elementAsset,
       schema: schema.name as ElementSchemaName,
       referrerAddress
     }
@@ -297,12 +300,12 @@ export async function _makeSellOrder({
   extraBountyBasisPoints: number
   buyerAddress: string
 }): Promise<UnhashedOrder> {
-  const schema = getSchema(networkName, asset.schemaName)
+  let { schema, elementAsset, quantityBN } = getSchemaAndAsset(networkName, asset, quantity)
+  // const schema = getSchema(networkName, asset.schemaName)
+  // const quantityBN = makeBigNumber(quantity)
+  // const elementAsset = getElementAsset(schema, asset, quantityBN)
 
-  const quantityBN = makeBigNumber(quantity)
-  const wyAsset = getElementAsset(schema, asset, quantityBN)
-
-  const { target, dataToCall, replacementPattern } = encodeSell(schema, wyAsset, accountAddress)
+  const { target, dataToCall, replacementPattern } = encodeSell(schema, elementAsset, accountAddress)
 
   const orderSaleKind =
     endAmount !== undefined && endAmount !== startAmount ? SaleKind.DutchAuction : SaleKind.FixedPrice
@@ -351,7 +354,7 @@ export async function _makeSellOrder({
     expirationTime: times.expirationTime,
     salt: generatePseudoRandomSalt(),
     metadata: {
-      asset: wyAsset,
+      asset: elementAsset,
       schema: schema.name as ElementSchemaName
     }
   }
@@ -366,11 +369,53 @@ export function getTokenList(network: Network, symbol?: string): Array<any> {
   }
 }
 
-export function getSchemaList(network: Network, schemaName?: string): Array<any> {
+export function getSchemaList(network: Network, schemaName?: string): Array<Schema<any>> {
   // @ts-ignore
   let schemaList = schemas[network]
+  if (!schemaList) {
+    throw new Error(
+      `Trading for this Network (${network}) is not yet supported. Please contact us or check back later!`
+    )
+  }
   if (schemaName) {
-    schemaList = schemaList.filter((x: any) => x.name === schemaName)
+    schemaList = schemaList.filter((val: Schema<any>) => val.name === schemaName)
   }
   return schemaList
+}
+
+export function schemaEncodeSell(network: Network, schema: ElementSchemaName, owner: string, data: any) {
+  let schemaDefine: any = getSchemaList(network, schema)
+  // schemaDefine = schemaDefine[0]
+  let assetFiled: any = {}
+  let fields = schemaDefine.fields
+  for (let field of fields) {
+    let val = data[field.name]
+    if (!val) {
+      throw field.name + ' is require！'
+    }
+
+    if (field.type == 'address') {
+      val = val.toLowerCase()
+    }
+
+    if (field.type == 'address') {
+      val = val.toLowerCase()
+    }
+
+    assetFiled[field.name] = val
+  }
+
+  let asset = schemaDefine.assetFromFields(assetFiled)
+
+  let abi = schemaDefine.functions.transfer(asset)
+  let kind = abi.inputs.some((val: any) => val.kind == 'owner')
+  if (kind) {
+    if (!owner) {
+      throw 'must have owner field!'
+    }
+  }
+
+  let { target, dataToCall, replacementPattern } = encodeSell(schemaDefine, asset, owner) //target,
+
+  return { target, dataToCall, replacementPattern }
 }

@@ -1,7 +1,7 @@
 import { NULL_ADDRESS, MAX_UINT_256 } from './index'
 
 export async function checkSenderOfAuthenticatedProxy(
-  exchange: any,
+  exchangeContract: any,
   authenticatedProxyContract: any,
   proxyRegistryContract: any,
   account: string
@@ -16,7 +16,7 @@ export async function checkSenderOfAuthenticatedProxy(
   }
 
   let authproxyRegistryAddr = await authProxyContract.methods.registry().call()
-  let exchangeProxyRegistryAddr = await exchange.methods.registry().call()
+  let exchangeProxyRegistryAddr = await exchangeContract.methods.registry().call()
 
   if (authproxyRegistryAddr != exchangeProxyRegistryAddr) {
     return false
@@ -27,18 +27,20 @@ export async function checkSenderOfAuthenticatedProxy(
   }
 
   // 验证是否注册
-  return proxyRegistryContract.methods.contracts(exchange.options.address).call()
+  return proxyRegistryContract.methods.contracts(exchangeContract.options.address).call()
 }
 
 export async function getAccountBalance(web3: any, account: string, erc20?: any): Promise<boolean | Object> {
   const ethBal = await web3.eth.getBalance(account)
   if (Number(ethBal) == 0) {
+    console.log('ETH balance equal 0')
     return false
   }
   let erc20Bal = 0
   if (erc20) {
     erc20Bal = await erc20.methods.balanceOf(account).call()
     if (Number(erc20Bal) == 0) {
+      console.log('pay token balance equal 0')
       return false
     }
   }
@@ -53,7 +55,7 @@ export async function getAccountNFTsBalance(nftsContract: any, account: string, 
 export async function getTokenIDOwner(elementAssetContract: any, tokenId: any): Promise<string> {
   // token id 的 creator
   // let exists = await elementAssetContract.methods.exists(tokenId).call()
-  return await elementAssetContract.methods.creator(tokenId).call()
+  return elementAssetContract.methods.creator(tokenId).call()
 }
 
 //1. check register

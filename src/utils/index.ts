@@ -90,12 +90,45 @@ export async function getOrderHash(web3: any, exchangeHelper: any, order: Unhash
 export async function validateOrder(exchangeHelper: any, order: any): Promise<any> {
   const orderParamValueArray = orderParamsEncode(order)
   const orderSigArray = orderSigEncode(order)
-  return exchangeHelper.methods.validateOrder(orderParamValueArray, orderSigArray).call()
+  let isValidate = exchangeHelper.methods.validateOrder(orderParamValueArray, orderSigArray).call()
+  if (!isValidate) {
+    console.log('validateOrder false')
+  }
+  return isValidate
+}
+export function hashOrder(web3: any, order: UnhashedOrder): string {
+  return web3.utils
+    .soliditySha3(
+      { type: 'address', value: order.exchange },
+      { type: 'address', value: order.maker },
+      { type: 'address', value: order.taker },
+      { type: 'uint', value: order.makerRelayerFee },
+      { type: 'uint', value: order.takerRelayerFee },
+      { type: 'uint', value: order.takerProtocolFee },
+      { type: 'uint', value: order.takerProtocolFee },
+      { type: 'address', value: order.feeRecipient },
+      { type: 'uint8', value: order.feeMethod },
+      { type: 'uint8', value: order.side },
+      { type: 'uint8', value: order.saleKind },
+      { type: 'address', value: order.target },
+      { type: 'uint8', value: order.howToCall },
+      { type: 'bytes', value: order.dataToCall },
+      { type: 'bytes', value: order.replacementPattern },
+      { type: 'address', value: order.staticTarget },
+      { type: 'bytes', value: order.staticExtradata },
+      { type: 'address', value: order.paymentToken },
+      { type: 'uint', value: order.basePrice },
+      { type: 'uint', value: order.extra },
+      { type: 'uint', value: order.listingTime },
+      { type: 'uint', value: order.expirationTime },
+      { type: 'uint', value: order.salt }
+    )
+    .toString('hex')
 }
 
 export async function hashAndValidateOrder(web3: any, exchangeHelper: any, order: UnhashedOrder): Promise<any> {
-  // const orderHash = await getOrderHash(web3, exchangeHelper, order)
-  let orderHash = hashOrder(web3, order)
+  const orderHash = await getOrderHash(web3, exchangeHelper, order)
+  // let orderHash = hashOrder(web3, order)
   const hashedOrder = {
     ...order,
     hash: orderHash
@@ -104,6 +137,7 @@ export async function hashAndValidateOrder(web3: any, exchangeHelper: any, order
   if (web3.eth.defaultAccount.toLowerCase() == hashedOrder.maker.toLowerCase()) {
     signature = await signOrderHash(web3, hashedOrder)
   } else {
+    console.log('web3.eth.defaultAccount and maker not equal')
     return false
   }
 
@@ -116,6 +150,7 @@ export async function hashAndValidateOrder(web3: any, exchangeHelper: any, order
   if (isValid) {
     return orderToJSON(orderWithSignature)
   } else {
+    console.log('validateOrder false')
     return false
   }
 }
@@ -136,7 +171,7 @@ let canSettleOrder = (listingTime: any, expirationTime: any) => {
   return listingTime < now && (expirationTime == 0 || now < expirationTime)
 }
 
-export function ordersCanMatch(buy: Order, sell: Order) {
+export function _ordersCanMatch(buy: Order, sell: Order) {
   return (
     buy.side == 0 &&
     sell.side == 1 &&
@@ -161,40 +196,14 @@ export function ordersCanMatch(buy: Order, sell: Order) {
   )
 }
 
-export async function _ordersCanMatch(exchangeHelper: any, buy: Order, sell: Order): Promise<any> {
+export async function ordersCanMatch(exchangeHelper: any, buy: Order, sell: Order): Promise<any> {
   const buyOrderParamArray = orderParamsEncode(buy)
   const sellOrderParamArray = orderParamsEncode(sell)
-  return exchangeHelper.methods.ordersCanMatch(buyOrderParamArray, sellOrderParamArray).call()
-}
-
-export function hashOrder(web3: any, order: any): string {
-  return web3.utils
-    .soliditySha3(
-      { type: 'address', value: order.exchange },
-      { type: 'address', value: order.maker },
-      { type: 'address', value: order.taker },
-      { type: 'uint', value: new BigNumber(order.makerRelayerFee) },
-      { type: 'uint', value: new BigNumber(order.takerRelayerFee) },
-      { type: 'uint', value: new BigNumber(order.takerProtocolFee) },
-      { type: 'uint', value: new BigNumber(order.takerProtocolFee) },
-      { type: 'address', value: order.feeRecipient },
-      { type: 'uint8', value: order.feeMethod },
-      { type: 'uint8', value: order.side },
-      { type: 'uint8', value: order.saleKind },
-      { type: 'address', value: order.target },
-      { type: 'uint8', value: order.howToCall },
-      { type: 'bytes', value: order.dataToCall },
-      { type: 'bytes', value: order.replacementPattern },
-      { type: 'address', value: order.staticTarget },
-      { type: 'bytes', value: order.staticExtradata },
-      { type: 'address', value: order.paymentToken },
-      { type: 'uint', value: new BigNumber(order.basePrice) },
-      { type: 'uint', value: new BigNumber(order.extra) },
-      { type: 'uint', value: new BigNumber(order.listingTime) },
-      { type: 'uint', value: new BigNumber(order.expirationTime) },
-      { type: 'uint', value: order.salt }
-    )
-    .toString('hex')
+  let canMatch = exchangeHelper.methods.ordersCanMatch(buyOrderParamArray, sellOrderParamArray).call()
+  if (!canMatch) {
+    console.log('canMatch false')
+  }
+  return canMatch
 }
 
 export function validateAndFormatWalletAddress(web3: any, address: string): string {
@@ -385,4 +394,31 @@ export async function transferFromERC721(
 ): Promise<boolean> {
   let tx = await nftsContract.methods.safeTransferFrom(from, to, tokenId, amount, '0x').send({ from: from })
   return tx.status
+}
+
+export function toBaseUnitAmount(amount: BigNumber, decimals: number) {
+  const unit = new BigNumber(10).pow(decimals)
+  const baseUnitAmount = amount.times(unit).integerValue()
+  return baseUnitAmount
+}
+
+export function makeBigNumber(arg: number | string | BigNumber): BigNumber {
+  // Zero sometimes returned as 0x from contracts
+  if (arg === '0x') {
+    arg = 0
+  }
+  // fix "new BigNumber() number type has more than 15 significant digits"
+  arg = arg.toString()
+  return new BigNumber(arg)
+}
+
+export async function transferFromWETH(WETHContract: any, account: string, amount: number) {
+  let sellBal = await WETHContract.methods.balanceOf(account).call()
+  if (Number(sellBal) < 1e18) {
+    await WETHContract.methods.deposit().send({
+      from: account,
+      value: toBaseUnitAmount(makeBigNumber(amount), 18)
+    })
+    sellBal = await WETHContract.methods.balanceOf(account).call()
+  }
 }

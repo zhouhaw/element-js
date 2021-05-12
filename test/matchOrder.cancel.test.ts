@@ -54,6 +54,6 @@ import { Asset, ElementSchemaName, Network, Orders } from '../src'
     let sellOrder = orderFromJSON(sellOrderJson)
 
     let match = await order.cancelOrder({ order: sellOrder, accountAddress: base.web3.eth.defaultAccount })
-    console.log(match, sellOrderJson)
+    console.log('cancelOrder', match, sellOrderJson)
   }
 })()

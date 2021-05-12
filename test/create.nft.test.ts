@@ -20,7 +20,7 @@ const makeTokenIdForOwner = async (contract: any, account: string, index: number
 
   const makeTokenIDContract = order.makeTokenID
   // let tokenId = await makeTokenIdForOwner(makeTokenIDContract, sellAccount, 200, 1)
-  let tokenId = '25403046968847934954500617551918385923381343357399008756217544284256604258305'
+  let tokenId = '25403046968847934954500617551918385923381343357399008756217544287555139141633'
   // '0x4cDdBf865Ee2A1a3711648Bb192E285f290f7985/ 52110910509117159886520023034677676808462086871028572901793699248975699247105'
 
   // '0x4cddbf865ee2a1a3711648bb192e285f290f7985/ 25403046968847934954500617551918385923381343357399008756217544284256604258305
@@ -40,7 +40,7 @@ const makeTokenIdForOwner = async (contract: any, account: string, index: number
   let ower = await elementAssetContract.methods.owner().call()
 
   // 验证创建者是否拥有
-  let bal = await elementAssetContract.methods.balanceOf(creator, tokenId).call()
+  let bal = await elementAssetContract.methods.balanceOf(tokenIdOwner, tokenId).call()
 
-  console.log(exists, creator, bal)
+  console.log(exists, tokenIdOwner, bal)
 })()

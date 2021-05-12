@@ -1,6 +1,7 @@
 import { Asset, Order, OrderJSON } from './types'
 
 import {
+  toBaseUnitAmount,
   NULL_ADDRESS,
   orderParamsEncode,
   orderSigEncode,
@@ -28,7 +29,7 @@ export class Orders extends Contracts {
     accountAddress: string
     metadata?: string
   }) {
-    const equalPrice: boolean = buy.basePrice == sell.basePrice
+    const equalPrice: boolean = buy.basePrice.eq(sell.basePrice)
     if (!equalPrice) {
       console.log('matchOrder:buy.basePrice and sell.basePrice not equal!')
       return false
@@ -40,7 +41,8 @@ export class Orders extends Contracts {
       return false
     }
 
-    let canMatch = await ordersCanMatch(buy, sell)
+    // let canMatch = await ordersCanMatch(buy, sell)
+    let canMatch = await ordersCanMatch(this.exchangeHelper, buy, sell)
     if (!canMatch) {
       console.log('matchOrder: canMatch false')
       return false
@@ -170,6 +172,6 @@ export class Orders extends Contracts {
       .catch((error: any) => {
         console.error(error.receipt) //, error.message
       })
-    console.log('cancelOrder ', cancelTx.status)
+    return cancelTx.status
   }
 }

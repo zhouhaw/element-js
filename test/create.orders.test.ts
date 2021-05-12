@@ -48,7 +48,9 @@ import { Asset, ElementSchemaName, Network, Orders } from '../src'
   let assetBal = await getAccountNFTsBalance(buyNFTs, sellAccount, tokenId)
 
   if (assetBal == 0) {
-    await transferFromERC1155(buyNFTs, buyAccount, sellAccount, tokenId, 1)
+    // await transferFromERC1155(buyNFTs, buyAccount, sellAccount, tokenId, 1)
+    let tx = await transferFromERC1155(buyNFTs, buyAccount, sellAccount, tokenId, 1)
+    console.log('transferFromERC1155 to Sell', tx)
     return
   }
   console.log(assetBal)
@@ -57,7 +59,7 @@ import { Asset, ElementSchemaName, Network, Orders } from '../src'
     asset,
     accountAddress: sellAccount,
     startAmount: 0.12,
-    paymentTokenAddress: wETHAddr,
+    paymentTokenAddress: '',
     expirationTime: 0
   }
   base.web3.eth.defaultAccount = sellAccount
