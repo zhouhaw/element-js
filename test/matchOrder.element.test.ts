@@ -14,15 +14,16 @@ import { Asset, ElementSchemaName, Network, Orders } from '../src'
 ;(async () => {
   let base = new Base()
   await base.init()
-  let sellAccount = base.accounts[0].address
+  let sellAccount = base.accounts[3].address
   let buyAccount = base.accounts[1].address
   const order = base.orders
   const payToken = order.erc20.clone()
   let wETHAddr = order.WETHAddr
   payToken.options.address = wETHAddr
-  let bal = await getAccountBalance(order.web3, buyAccount, payToken)
+  let bal = await getAccountBalance(order.web3, sellAccount, payToken)
 
-  let tokenId = '52110910509117159886520023034677676808462086871028572901793699248975699247105'
+  let tokenId = '33716853113536161489978336371468443552125006904605057389181032262111709888513'
+
   // let tokenId = '52110910509117159886520023034677676808462086871028572901793699467778513174529'
   let assetAddr = order.elementSharedAssetAddr.toLowerCase()
 
@@ -49,7 +50,7 @@ import { Asset, ElementSchemaName, Network, Orders } from '../src'
     accountAddress: sellAccount,
     paymentTokenAddress: wETHAddr,
     asset,
-    startAmount: 0.12
+    startAmount: 0.00012
   }
   base.web3.eth.defaultAccount = sellAccount
   let sell = await order.createSellOrder(sellParm)
@@ -58,7 +59,7 @@ import { Asset, ElementSchemaName, Network, Orders } from '../src'
     accountAddress: buyAccount,
     paymentTokenAddress: wETHAddr,
     asset,
-    startAmount: 0.12
+    startAmount: 0.00012
   }
 
   base.web3.eth.defaultAccount = buyAccount
@@ -71,16 +72,16 @@ import { Asset, ElementSchemaName, Network, Orders } from '../src'
   }
 
   // sell accept
-  sell = orderFromJSON(sell)
-  buy = orderFromJSON(buy)
-  base.web3.eth.defaultAccount = sellAccount
-  let match = await order.matchOrder({ buy, sell, accountAddress: sellAccount })
+  // sell = orderFromJSON(sell)
+  // buy = orderFromJSON(buy)
+  // base.web3.eth.defaultAccount = sellAccount
+  // let match = await order.matchOrder({ buy, sell, accountAddress: sellAccount })
 
   // // buy 一口价
-  // buy = orderFromJSON(buy)
-  // sell = orderFromJSON(sell)
-  // base.web3.eth.defaultAccount = buyAccount
-  // let match = await order.matchOrder({ buy, sell, accountAddress: buyAccount })
+  buy = orderFromJSON(buy)
+  sell = orderFromJSON(sell)
+  base.web3.eth.defaultAccount = buyAccount
+  let match = await order.matchOrder({ buy, sell, accountAddress: buyAccount })
 
   let newAssetBal = await getAccountNFTsBalance(buyNFTs, sellAccount, tokenId)
 

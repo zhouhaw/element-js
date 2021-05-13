@@ -47,7 +47,7 @@ import { Asset, ElementSchemaName, Network, Orders } from '../src'
     accountAddress: sellAccount,
     paymentTokenAddress: wETHAddr,
     asset,
-    startAmount: 0.12
+    startAmount: 0.0001
   }
   base.web3.eth.defaultAccount = sellAccount
   let sell = await order.createSellOrder(sellParm)
@@ -56,7 +56,7 @@ import { Asset, ElementSchemaName, Network, Orders } from '../src'
     accountAddress: buyAccount,
     paymentTokenAddress: wETHAddr,
     asset,
-    startAmount: 0.12
+    startAmount: 0.0001
   }
 
   base.web3.eth.defaultAccount = buyAccount

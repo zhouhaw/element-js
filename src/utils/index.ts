@@ -19,6 +19,7 @@ import { schemas, tokens, encodeBuy, encodeSell } from '../schema'
 
 export { schemas, encodeBuy, encodeSell }
 export {
+  checkRegisterProxy,
   registerProxy,
   getTokenIDOwner,
   getAccountBalance,

@@ -14,10 +14,12 @@ import {
   orderParamsEncode,
   ordersCanMatch,
   orderSigEncode,
+  checkRegisterProxy,
   registerProxy,
   validateOrder,
   getSchemaList,
-  encodeSell
+  encodeSell,
+  makeBigNumber
 } from './utils'
 
 import { Contracts } from './contracts'
@@ -36,14 +38,18 @@ export class Orders extends Contracts {
     accountAddress: string
     metadata?: string
   }) {
-    let sellRegister = await registerProxy(this.exchangeProxyRegistry, sell.maker)
+    if (!buy.hash && !sell.hash) {
+      console.log('buy.hash %s sell.hash %s', buy.hash, sell.hash)
+      return false
+    }
+    let sellRegister = await checkRegisterProxy(this.exchangeProxyRegistry, sell.maker)
 
     if (!sellRegister) {
       console.log('sellRegister false')
       return false
     }
 
-    let buyRegister = await registerProxy(this.exchangeProxyRegistry, buy.maker)
+    let buyRegister = await checkRegisterProxy(this.exchangeProxyRegistry, buy.maker)
 
     if (!buyRegister) {
       console.log('buyRegister false')
@@ -77,8 +83,9 @@ export class Orders extends Contracts {
       let erc20Contract = this.erc20.clone()
       erc20Contract.options.address = buy.paymentToken
       let { erc20Bal } = await getAccountBalance(this.web3, buy.maker, erc20Contract)
-      if (erc20Bal == 0) {
-        console.log('matchOrder:erc20Bal balance equal 0')
+
+      if (!makeBigNumber(erc20Bal).gt(buy.basePrice)) {
+        console.log('matchOrder:erc20Bal balance', buy.basePrice.toNumber(), erc20Bal)
         return false
       }
       let isApproveTokenTransfer = await checkApproveTokenTransferProxy(this.exchange, erc20Contract, buy.maker)

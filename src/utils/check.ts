@@ -35,7 +35,7 @@ export async function getAccountBalance(web3: any, account: string, erc20?: any)
 
   let erc20Bal: number = 0
   if (erc20) {
-    erc20Bal = erc20Bal = await erc20.methods.balanceOf(account).call()
+    erc20Bal = await erc20.methods.balanceOf(account).call()
   }
   return { ethBal: Number(ethBal), erc20Bal: Number(erc20Bal) }
 }
@@ -52,9 +52,19 @@ export async function getTokenIDOwner(elementAssetContract: any, tokenId: any): 
 }
 
 //1. check register
-export async function registerProxy(proxyRegistryContract: any, account: string): Promise<boolean> {
-  let proxy = await proxyRegistryContract.methods.proxies(account).call()
+export async function checkRegisterProxy(proxyRegistryContract: any, account: string): Promise<boolean> {
+  let proxy = proxyRegistryContract.methods.proxies(account).call()
   if (proxy === NULL_ADDRESS) {
+    return false
+  } else {
+    return true
+  }
+}
+
+//1. check register
+export async function registerProxy(proxyRegistryContract: any, account: string): Promise<boolean> {
+  let isRegister = await checkRegisterProxy(proxyRegistryContract, account)
+  if (!isRegister) {
     let res = await proxyRegistryContract.methods.registerProxy().send({
       from: account
     })
@@ -70,8 +80,10 @@ export async function checkApproveTokenTransferProxy(
   account: string
 ): Promise<boolean> {
   let tokenTransferProxyAddr = await exchangeContract.methods.tokenTransferProxy().call()
-  const amount = await erc20Contract.methods.allowance(account, tokenTransferProxyAddr).call()
-  if (Number(amount) <= 1e18) {
+  const amount = await erc20Contract.methods.balanceOf(account).call()
+  const allowAmount = await erc20Contract.methods.allowance(account, tokenTransferProxyAddr).call()
+  if (Number(allowAmount) == 0 || Number(amount) == 0) {
+    console.log('checkApproveTokenTransferProxy allowAmount %s amount', allowAmount, amount)
     return false
   }
   return true
