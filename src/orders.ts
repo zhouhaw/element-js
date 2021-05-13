@@ -36,6 +36,20 @@ export class Orders extends Contracts {
     accountAddress: string
     metadata?: string
   }) {
+    let sellRegister = await registerProxy(this.exchangeProxyRegistry, sell.maker)
+
+    if (!sellRegister) {
+      console.log('sellRegister false')
+      return false
+    }
+
+    let buyRegister = await registerProxy(this.exchangeProxyRegistry, buy.maker)
+
+    if (!buyRegister) {
+      console.log('buyRegister false')
+      return false
+    }
+
     const equalPrice: boolean = buy.basePrice.eq(sell.basePrice)
     // const equalPrice: boolean = buy.basePrice == sell.basePrice
     if (!equalPrice) {
