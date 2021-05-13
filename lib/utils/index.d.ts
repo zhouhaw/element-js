@@ -2,7 +2,7 @@ import BigNumber from 'bignumber.js';
 import { ECSignature, Order, OrderJSON, UnhashedOrder, UnsignedOrder } from '../types';
 import { schemas, encodeBuy, encodeSell } from '../schema';
 export { schemas, encodeBuy, encodeSell };
-export { registerProxy, getTokenIDOwner, getAccountBalance, getAccountNFTsBalance, checkApproveTokenTransferProxy, approveTokenTransferProxy, checkApproveERC1155TransferProxy, approveERC1155TransferProxy, approveERC721TransferProxy, checkSenderOfAuthenticatedProxy } from './check';
+export { checkRegisterProxy, registerProxy, getTokenIDOwner, getAccountBalance, getAccountNFTsBalance, checkApproveTokenTransferProxy, approveTokenTransferProxy, checkApproveERC1155TransferProxy, approveERC1155TransferProxy, approveERC721TransferProxy, checkSenderOfAuthenticatedProxy } from './check';
 export { _makeBuyOrder, _makeSellOrder, getTokenList, getSchemaList } from './order';
 export declare const NULL_ADDRESS = "0x0000000000000000000000000000000000000000";
 export declare const MAX_DIGITS_IN_UNSIGNED_256_INT = 78;
