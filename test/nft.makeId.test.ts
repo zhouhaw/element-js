@@ -1,4 +1,5 @@
 import { Base } from './base'
+import { makeBigNumber, toBaseUnitAmount } from '../src/utils'
 
 const makeTokenIdForOwner = async (contract: any, account: string, index: number, supply: number): Promise<any> => {
   let res = await contract.methods.makeID(account, index, supply).send({
@@ -17,6 +18,11 @@ const makeTokenIdForOwner = async (contract: any, account: string, index: number
   const order = base.orders
   let elementAssetContract = order.elementSharedAsset
   let exchangeProxyRegistryContract = order.exchangeProxyRegistry
+
+  // await order.WETH.methods.deposit().send({
+  //   from: myAccount,
+  //   value: toBaseUnitAmount(makeBigNumber(1000), 18)
+  // })
 
   const makeTokenIDContract = order.makeTokenID
   let tokenId = await makeTokenIdForOwner(makeTokenIDContract, myAccount, 10, 1)

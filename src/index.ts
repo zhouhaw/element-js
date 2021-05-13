@@ -1,5 +1,7 @@
 export { Asset, ElementSchemaName, FeeMethod, HowToCall, Network, Order, OrderSide, SaleKind } from './types'
 export {
+  NULL_ADDRESS,
+  NULL_BLOCK_HASH,
   getTokenIDOwner,
   orderFromJSON,
   getTokenList,

@@ -156,6 +156,9 @@ export async function approveERC721TransferProxy(
 }
 
 export async function checkSellUser(contract: any, asset: Asset, paymentTokenAddr: string, accountAddress: string) {
+  if (paymentTokenAddr == '') {
+    paymentTokenAddr = NULL_ADDRESS
+  }
   const sellNFTs = contract.erc1155.clone()
   sellNFTs.options.address = asset.tokenAddress
   let bal = await getAccountNFTsBalance(sellNFTs, accountAddress, asset.tokenId)

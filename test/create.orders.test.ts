@@ -1,6 +1,7 @@
 import { Base } from './base'
 
 import {
+  NULL_ADDRESS,
   getAccountBalance,
   getAccountNFTsBalance,
   registerProxy,
@@ -16,10 +17,12 @@ import { Asset, ElementSchemaName, Network, Orders } from '../src'
   let sellAccount = base.accounts[0].address
   let buyAccount = base.accounts[1].address
   const order = base.orders
-  const payToken = order.erc20.clone()
-  let wETHAddr = order.WETHAddr
-  payToken.options.address = wETHAddr
-  let bal = await getAccountBalance(order.web3, buyAccount, payToken)
+  let wETHAddr = NULL_ADDRESS
+
+  // const payToken = order.erc20.clone()
+  // let wETHAddr = order.WETHAddr
+  // payToken.options.address = wETHAddr
+  // let bal = await getAccountBalance(order.web3, buyAccount, payToken)
   let tokenId = '52110910509117159886520023034677676808462086871028572901793699248975699247105'
   let assetAddr = order.elementSharedAssetAddr.toLowerCase() // ElementSharedAsset.networks[100].address
 

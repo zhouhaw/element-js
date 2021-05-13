@@ -128,6 +128,9 @@ export class Orders extends Contracts {
     buyerAddress?: string
     buyerEmail?: string
   }): Promise<OrderJSON | boolean> {
+    if (paymentTokenAddress == '') {
+      paymentTokenAddress = NULL_ADDRESS
+    }
     let next = await checkSellUser(this, asset, paymentTokenAddress, accountAddress)
     if (!next) {
       console.log('checkSellUser ', checkSellUser)
