@@ -37,7 +37,7 @@ const makeTokenIdForOwner = async (contract: any, account: string, index: number
   }
 
   // 资产合约拥有者，能直接执行 mint
-  let ower = await elementAssetContract.methods.owner().call()
+  // let ower = await elementAssetContract.methods.owner().call()
 
   // 验证创建者是否拥有
   let bal = await elementAssetContract.methods.balanceOf(tokenIdOwner, tokenId).call()

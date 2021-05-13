@@ -19,6 +19,9 @@ import { schemas, tokens, encodeBuy, encodeSell } from '../schema'
 
 export { schemas, encodeBuy, encodeSell }
 export {
+  checkSellUser,
+  checkBuyUser,
+  checkMatchOrder,
   checkRegisterProxy,
   registerProxy,
   getTokenIDOwner,
@@ -34,6 +37,7 @@ export {
 export { _makeBuyOrder, _makeSellOrder, getTokenList, getSchemaList } from './order'
 
 export const NULL_ADDRESS = '0x0000000000000000000000000000000000000000'
+export const NULL_BLOCK_HASH = '0x0000000000000000000000000000000000000000000000000000000000000000'
 export const MAX_DIGITS_IN_UNSIGNED_256_INT = 78 // 78 solt
 export const MAX_UINT_256 = new BigNumber(2).pow(256).minus(1) // approve
 
@@ -336,7 +340,7 @@ export const orderFromJSON = (order: any): Order => {
   }
 
   // Use client-side price calc, to account for buyer fee (not added by server) and latency
-  fromJSON.currentPrice = estimateCurrentPrice(fromJSON)
+  // fromJSON.currentPrice = estimateCurrentPrice(fromJSON)
 
   return fromJSON
 }

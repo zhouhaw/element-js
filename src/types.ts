@@ -56,7 +56,7 @@ interface FallbackAbi {
 
 export type FunctionAbi = MethodAbi | ConstructorAbi | FallbackAbi
 
-// Element Schemas (see https://github.com/ProjectOpenSea/wyvern-schemas)
+// Element Schemas (see https://github.com/definancer/element-js)
 export enum ElementSchemaName {
   ERC20 = 'ERC20',
   ERC721 = 'ERC721',
