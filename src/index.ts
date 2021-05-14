@@ -1,4 +1,5 @@
 export { Asset, ElementSchemaName, FeeMethod, HowToCall, Network, Order, OrderSide, SaleKind } from './types'
+export * as ethABI from 'ethereumjs-abi'
 export {
   NULL_ADDRESS,
   NULL_BLOCK_HASH,

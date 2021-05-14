@@ -61,7 +61,7 @@ import { Asset, ElementSchemaName, Network, Orders } from '../src'
     asset,
     accountAddress: sellAccount,
     startAmount: 0.12,
-    paymentTokenAddress: '',
+    paymentTokenAddress: wETHAddr,
     expirationTime: 0
   }
   base.web3.eth.defaultAccount = sellAccount
