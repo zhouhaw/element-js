@@ -20,6 +20,10 @@ export const ErrorCodes: ElementErrorCodes = [
     message: ''
   },
   {
+    code: 1000,
+    message: 'Custom information'
+  },
+  {
     code: 1001,
     message: 'Account no registration'
   },
@@ -69,16 +73,22 @@ export class ElementError extends Error {
   public code: number
   constructor(err: CustomError) {
     let _err: CustomError | undefined = ErrorCodes.find((val) => val.code == err.code)
-    if (_err) {
-      let _type = _err.code.toString().charAt(0)
+    // @ts-ignore
+    if (_err?.code > 1000) {
+      let _type = _err?.code.toString().charAt(0)
       if (_type == '2') {
         let message = err.message || ''
-        super(message + '-' + _err.message)
+        super(message + '-' + _err?.message)
       } else {
-        super(_err.message || 'sucess')
+        super(_err?.message || 'sucess')
       }
     } else {
-      super('undefined code!')
+      if (_err?.code == 1000) {
+        let message = err.message || ''
+        super(message + '-' + _err?.message)
+      } else {
+        super('undefined code!')
+      }
     }
     this.code = err.code
   }

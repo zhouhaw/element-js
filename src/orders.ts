@@ -24,11 +24,7 @@ export class Orders extends Contracts {
     accountAddress: string
     metadata?: string
   }): Promise<boolean> {
-    let next = await checkMatchOrder(this, buy, sell, accountAddress)
-    if (!next) {
-      console.log('checkMatchOrder ', next)
-      return false
-    }
+    await checkMatchOrder(this, buy, sell, accountAddress)
 
     const sellOrderParamArray = orderParamsEncode(sell)
     const sellOrderSigArray = orderSigEncode(sell)
@@ -71,11 +67,7 @@ export class Orders extends Contracts {
     sellOrder?: Order
     referrerAddress?: string
   }): Promise<OrderJSON | boolean> {
-    let next = await checkBuyUser(this, paymentTokenAddress, accountAddress)
-    if (!next) {
-      console.log('checkSellUser ', checkSellUser)
-      return false
-    }
+    await checkBuyUser(this, paymentTokenAddress, accountAddress)
 
     let networkName = this.networkName
     let exchangeAddr = this.exchange.options.address
@@ -128,11 +120,7 @@ export class Orders extends Contracts {
     if (paymentTokenAddress == '') {
       paymentTokenAddress = NULL_ADDRESS
     }
-    let next = await checkSellUser(this, asset, paymentTokenAddress, accountAddress)
-    if (!next) {
-      console.log('checkSellUser ', checkSellUser)
-      return false
-    }
+    await checkSellUser(this, asset, paymentTokenAddress, accountAddress)
 
     let networkName = this.networkName
     let exchangeAddr = this.exchange.options.address

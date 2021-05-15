@@ -1,6 +1,6 @@
-import BigNumber from 'bignumber.js';
 import { Asset, ECSignature, ElementAsset, ElementSchemaName, Network, Order, OrderJSON, OrderSide, UnhashedOrder, UnsignedOrder } from '../types';
 import { Schema } from '../schema/types';
+import { BigNumber } from './constants';
 export declare function toBaseUnitAmount(amount: BigNumber, decimals: number): BigNumber;
 export declare function makeBigNumber(arg: number | string | BigNumber): BigNumber;
 export declare function getSchema(network: Network, schemaName?: ElementSchemaName): Schema<any>;

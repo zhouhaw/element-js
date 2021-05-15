@@ -93,37 +93,3 @@ export async function transferFromWETH(WETHContract: any, account: string, amoun
     sellBal = await WETHContract.methods.balanceOf(account).call()
   }
 }
-
-export function estimateCurrentPrice(order: Order, secondsToBacktrack = 30, shouldRoundUp = true): BigNumber {
-  let { basePrice, listingTime, expirationTime, extra } = order
-  const { side, takerRelayerFee, saleKind } = order
-
-  const now = new BigNumber(Math.round(Date.now() / 1000)).minus(secondsToBacktrack)
-  basePrice = new BigNumber(basePrice)
-  listingTime = new BigNumber(listingTime)
-  expirationTime = new BigNumber(expirationTime)
-  extra = new BigNumber(extra)
-
-  let exactPrice = basePrice
-
-  if (saleKind === SaleKind.FixedPrice) {
-    // Do nothing, price is correct
-  } else if (saleKind === SaleKind.DutchAuction) {
-    const diff = extra.times(now.minus(listingTime)).dividedBy(expirationTime.minus(listingTime))
-
-    exactPrice =
-      side === OrderSide.Sell
-        ? /* Sell-side - start price: basePrice. End price: basePrice - extra. */
-          basePrice.minus(diff)
-        : /* Buy-side - start price: basePrice. End price: basePrice + extra. */
-          basePrice.plus(diff)
-  }
-
-  // Add taker fee only for buyers
-  if (side === OrderSide.Sell && !order.waitingForBestCounterOrder) {
-    // Buyer fee increases sale price
-    exactPrice = exactPrice.times(+takerRelayerFee / INVERSE_BASIS_POINT + 1)
-  }
-
-  return shouldRoundUp ? exactPrice.abs() : exactPrice
-}

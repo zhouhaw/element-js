@@ -1,5 +1,3 @@
-import BigNumber from 'bignumber.js'
-BigNumber.config({ EXPONENTIAL_AT: 1e9 })
 import {
   Asset,
   ECSignature,
@@ -20,13 +18,19 @@ import {
 import { schemas, encodeBuy, encodeSell } from '../schema'
 import { Schema } from '../schema/types'
 import { tokens } from '../schema/tokens'
-import { NULL_ADDRESS, MAX_DIGITS_IN_UNSIGNED_256_INT } from './constants'
+import { ElementError } from '../base/error'
+import {
+  BigNumber,
+  NULL_ADDRESS,
+  MAX_DIGITS_IN_UNSIGNED_256_INT,
+  MIN_EXPIRATION_SECONDS,
+  ORDER_MATCHING_LATENCY_SECONDS
+} from './constants'
 import { validateOrder } from './check'
 
-export function toBaseUnitAmount(amount: BigNumber, decimals: number) {
+export function toBaseUnitAmount(amount: BigNumber, decimals: number): BigNumber {
   const unit = new BigNumber(10).pow(decimals)
-  const baseUnitAmount = amount.times(unit).integerValue()
-  return baseUnitAmount
+  return amount.times(unit).integerValue()
 }
 
 export function makeBigNumber(arg: number | string | BigNumber): BigNumber {
@@ -41,19 +45,13 @@ export function makeBigNumber(arg: number | string | BigNumber): BigNumber {
 
 export function getSchema(network: Network, schemaName?: ElementSchemaName): Schema<any> {
   const schemaName_ = schemaName || ElementSchemaName.ERC1155
-  // @ts-ignore
-  // const scahmaList = schemas[network]
-  // if (!scahmaList) {
-  //   throw new Error(
-  //     `Trading for this Network (${network}) is not yet supported. Please contact us or check back later!`
-  //   )
-  // }
+
   const schemaInfo = getSchemaList(network, schemaName_) // scahmaList.find((val: Schema<any>) => val.name === schemaName_)
 
   if (schemaInfo.length == 0) {
-    throw new Error(
-      `Trading for this asset (${schemaName_}) is not yet supported. Please contact us or check back later!`
-    )
+    let msg = `Trading for this asset (${schemaName_}) is not yet supported. Please contact us or check back later!`
+
+    throw new ElementError({ code: 1000, message: msg })
   }
   return schemaInfo[0]
 }
@@ -82,13 +80,12 @@ export function getSchemaAndAsset(networkName: Network, asset: Asset, quantity: 
   }
 }
 
-export function generatePseudoRandomSalt() {
+export function generatePseudoRandomSalt(): BigNumber {
   // BigNumber.random returns a pseudo-random number between 0 & 1 with a passed in number of decimal places.
   // Source: https://mikemcl.github.io/bignumber.js/#random
   const randomNumber = BigNumber.random(MAX_DIGITS_IN_UNSIGNED_256_INT)
   const factor = new BigNumber(10).pow(MAX_DIGITS_IN_UNSIGNED_256_INT - 1)
-  const salt = randomNumber.times(factor).integerValue()
-  return salt
+  return randomNumber.times(factor).integerValue()
 }
 
 export function getPriceParameters(
@@ -112,28 +109,28 @@ export function getPriceParameters(
 
   // Validation
   if (isNaN(startAmount) || startAmount == undefined || startAmount < 0) {
-    throw new Error(`Starting price must be a number >= 0`)
+    throw new ElementError({ code: 1000, message: `Starting price must be a number >= 0` })
   }
   if (!isEther && !token) {
-    throw new Error(`No ERC-20 token found for '${paymentToken}'`)
+    throw new ElementError({ code: 1000, message: `No ERC-20 token found for '${paymentToken}'` })
   }
   if (isEther && waitingForBestCounterOrder) {
-    throw new Error(`English auctions must use wrapped ETH or an ERC-20 token.`)
+    throw new ElementError({ code: 1000, message: `English auctions must use wrapped ETH or an ERC-20 token.` })
   }
   // if (isEther && orderSide === OrderSide.Buy) {
   //   throw new Error(`Offers must use wrapped ETH or an ERC-20 token.`)
   // }
   if (priceDiff < 0) {
-    throw new Error('End price must be less than or equal to the start price.')
+    throw new ElementError({ code: 1000, message: 'End price must be less than or equal to the start price.' })
   }
   if (priceDiff > 0 && expirationTime == 0) {
-    throw new Error('Expiration time must be set if order will change in price.')
+    throw new ElementError({ code: 1000, message: 'Expiration time must be set if order will change in price.' })
   }
   if (englishAuctionReservePrice && !waitingForBestCounterOrder) {
-    throw new Error('Reserve prices may only be set on English auctions.')
+    throw new ElementError({ code: 1000, message: 'Reserve prices may only be set on English auctions.' })
   }
   if (englishAuctionReservePrice && englishAuctionReservePrice < startAmount) {
-    throw new Error('Reserve price must be greater than or equal to the start amount.')
+    throw new ElementError({ code: 1000, message: 'Reserve price must be greater than or equal to the start amount.' })
   }
 
   // Note: WyvernProtocol.toBaseUnitAmount(makeBigNumber(startAmount), token.decimals)
@@ -151,9 +148,6 @@ export function getPriceParameters(
   return { basePrice, extra, paymentToken, reservePrice }
 }
 
-const MIN_EXPIRATION_SECONDS = 10
-const ORDER_MATCHING_LATENCY_SECONDS = 60 * 60 * 24 * 7
-
 export function getTimeParameters(
   expirationTimestamp: number,
   listingTimestamp?: number,
@@ -163,24 +157,25 @@ export function getTimeParameters(
   const minExpirationTimestamp = Math.round(Date.now() / 1000 + MIN_EXPIRATION_SECONDS)
   const minListingTimestamp = Math.round(Date.now() / 1000)
   if (expirationTimestamp != 0 && expirationTimestamp < minExpirationTimestamp) {
-    throw new Error(
-      `Expiration time must be at least ${MIN_EXPIRATION_SECONDS} seconds from now, or zero (non-expiring).`
-    )
+    throw new ElementError({
+      code: 1000,
+      message: `Expiration time must be at least ${MIN_EXPIRATION_SECONDS} seconds from now, or zero (non-expiring).`
+    })
   }
   if (listingTimestamp && listingTimestamp < minListingTimestamp) {
-    throw new Error('Listing time cannot be in the past.')
+    throw new ElementError({ code: 1000, message: 'Listing time cannot be in the past.' })
   }
   if (listingTimestamp && expirationTimestamp !== 0 && listingTimestamp >= expirationTimestamp) {
-    throw new Error('Listing time must be before the expiration time.')
+    throw new ElementError({ code: 1000, message: 'Listing time must be before the expiration time.' })
   }
   if (waitingForBestCounterOrder && expirationTimestamp == 0) {
-    throw new Error('English auctions must have an expiration time.')
+    throw new ElementError({ code: 1000, message: 'English auctions must have an expiration time.' })
   }
   if (waitingForBestCounterOrder && listingTimestamp) {
-    throw new Error(`Cannot schedule an English auction for the future.`)
+    throw new ElementError({ code: 1000, message: `Cannot schedule an English auction for the future.` })
   }
   if (Number.parseInt(expirationTimestamp.toString()) != expirationTimestamp) {
-    throw new Error(`Expiration timestamp must be a whole number of seconds`)
+    throw new ElementError({ code: 1000, message: `Expiration timestamp must be a whole number of seconds` })
   }
 
   if (waitingForBestCounterOrder) {
@@ -315,9 +310,6 @@ export async function _makeSellOrder({
   buyerAddress: string
 }): Promise<UnhashedOrder> {
   let { schema, elementAsset, quantityBN } = getSchemaAndAsset(networkName, asset, quantity)
-  // const schema = getSchema(networkName, asset.schemaName)
-  // const quantityBN = makeBigNumber(quantity)
-  // const elementAsset = getElementAsset(schema, asset, quantityBN)
 
   const { target, dataToCall, replacementPattern } = encodeSell(schema, elementAsset, accountAddress)
 
@@ -445,9 +437,7 @@ export function orderSigEncode(order: any) {
 
 export async function getOrderHash(web3: any, exchangeHelper: any, order: UnhashedOrder): Promise<string> {
   const orderParamValueArray = orderParamsEncode(order)
-  const hash = await exchangeHelper.methods.hashOrder(orderParamValueArray).call()
-  // let messageHash = web3.eth.accounts.hashMessage(hash)
-  return hash
+  return exchangeHelper.methods.hashOrder(orderParamValueArray).call()
 }
 
 export async function hashAndValidateOrder(web3: any, exchangeHelper: any, order: UnhashedOrder): Promise<any> {
@@ -461,22 +451,15 @@ export async function hashAndValidateOrder(web3: any, exchangeHelper: any, order
   if (web3.eth.defaultAccount.toLowerCase() == hashedOrder.maker.toLowerCase()) {
     signature = await signOrderHash(web3, hashedOrder)
   } else {
-    console.log('web3.eth.defaultAccount and maker not equal')
-    return false
+    throw new ElementError({ code: 1000, message: 'web3.eth.defaultAccount and maker not equal' })
   }
 
   let orderWithSignature = {
     ...hashedOrder,
     ...signature
   }
-
-  const isValid: boolean = await validateOrder(exchangeHelper, orderWithSignature)
-  if (isValid) {
-    return orderToJSON(orderWithSignature)
-  } else {
-    console.log('validateOrder false')
-    return false
-  }
+  await validateOrder(exchangeHelper, orderWithSignature)
+  return orderToJSON(orderWithSignature)
 }
 
 export async function signOrderHash(web3: any, hashedOrder: UnsignedOrder): Promise<ECSignature> {
@@ -496,8 +479,7 @@ export async function signOrderHash(web3: any, hashedOrder: UnsignedOrder): Prom
       s: `0x${signatureHex.slice(64, 128)}`
     }
   } catch (error) {
-    console.error(error)
-    throw new Error('You declined to authorize your auction')
+    throw new ElementError({ code: 1000, message: 'You declined to authorize your auction' })
   }
   return signature
 }
