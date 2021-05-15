@@ -1,17 +1,14 @@
 import { Asset, Order, OrderJSON } from './types'
+import { NULL_ADDRESS, NULL_BLOCK_HASH } from './utils/constants'
+import { checkSellUser, checkBuyUser, checkMatchOrder } from './utils/check'
 
 import {
   _makeBuyOrder,
   _makeSellOrder,
-  hashAndValidateOrder,
-  NULL_ADDRESS,
-  NULL_BLOCK_HASH,
   orderParamsEncode,
   orderSigEncode,
-  checkSellUser,
-  checkBuyUser,
-  checkMatchOrder
-} from './utils'
+  hashAndValidateOrder
+} from './utils/markOrder'
 
 import { Contracts } from './contracts'
 
@@ -26,7 +23,7 @@ export class Orders extends Contracts {
     sell: Order
     accountAddress: string
     metadata?: string
-  }) {
+  }): Promise<boolean> {
     let next = await checkMatchOrder(this, buy, sell, accountAddress)
     if (!next) {
       console.log('checkMatchOrder ', next)
@@ -158,7 +155,7 @@ export class Orders extends Contracts {
     return hashAndValidateOrder(this.web3, this.exchangeHelper, sellOrder)
   }
 
-  public async cancelOrder({ order, accountAddress }: { order: Order; accountAddress: string }) {
+  public async cancelOrder({ order, accountAddress }: { order: Order; accountAddress: string }): Promise<boolean> {
     if (order.maker.toLowerCase() != accountAddress.toLowerCase()) {
       console.log('order.maker must be accountAddress')
       return false

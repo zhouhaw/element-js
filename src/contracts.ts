@@ -1,5 +1,4 @@
-import { Network } from './schema/types'
-import { ElementAPIConfig } from './types'
+import { ElementAPIConfig, Network } from './types'
 
 const abiPath = '../abi/'
 
@@ -26,7 +25,7 @@ export class Contracts {
   public WETHAddr: string
   public elementSharedAssetAddr: string
 
-  //abi
+  // abi
   public erc20: any
   public erc721: any
   public erc1155: any

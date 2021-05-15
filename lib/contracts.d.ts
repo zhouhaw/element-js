@@ -1,5 +1,4 @@
-import { Network } from './schema/types';
-import { ElementAPIConfig } from './types';
+import { ElementAPIConfig, Network } from './types';
 export declare class Contracts {
     web3: any;
     networkName: Network;

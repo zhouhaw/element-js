@@ -6,7 +6,7 @@ export declare class Orders extends Contracts {
         sell: Order;
         accountAddress: string;
         metadata?: string;
-    }): Promise<any>;
+    }): Promise<boolean>;
     createBuyOrder({ asset, accountAddress, startAmount, quantity, expirationTime, paymentTokenAddress, sellOrder, referrerAddress }: {
         asset: Asset;
         accountAddress: string;
@@ -35,5 +35,5 @@ export declare class Orders extends Contracts {
     cancelOrder({ order, accountAddress }: {
         order: Order;
         accountAddress: string;
-    }): Promise<any>;
+    }): Promise<boolean>;
 }

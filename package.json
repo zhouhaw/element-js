@@ -5,6 +5,7 @@
   "main": "lib/index.js",
   "author": "Project Element Developers",
   "scripts": {
+    "dev": "tsc -w -p tsconfig.json",
     "build": "tsc"
   },
   "dependencies": {

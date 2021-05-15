@@ -4,16 +4,28 @@ import {
   approveERC1155TransferProxy,
   approveTokenTransferProxy,
   checkSenderOfAuthenticatedProxy,
-  getTokenList,
   registerProxy
-} from '../src/utils'
+} from '../src/utils/check'
 import { Network } from '../src'
 ;(async () => {
   let base = new Base()
   await base.init()
   let account = base.accounts[1].address
 
-  let tokenList = getTokenList(Network.Private, 'WETH')
+  try {
+    // 检测执行 exchangeProxyRegistry 是否 授权 exchange 执行
+    let isExchangeRegister = await checkSenderOfAuthenticatedProxy(
+      base.contracts.exchange,
+      base.contracts.authenticatedProxy,
+      base.contracts.exchangeProxyRegistry,
+      account
+    )
+    console.log('isExchangeRegister', isExchangeRegister)
+  } catch (e) {
+    console.log(e.code, e.message)
+  }
+
+  // let tokenList = getTokenList(Network.Private, 'WETH')
 
   // console.log(tokenList)
 
@@ -33,13 +45,4 @@ import { Network } from '../src'
 
   let isRegister = await registerProxy(base.contracts.exchangeProxyRegistry, account)
   console.log('isRegister', isRegister)
-
-  // 检测执行 exchangeProxyRegistry 是否 授权 exchange 执行
-  let isExchangeRegister = await checkSenderOfAuthenticatedProxy(
-    base.contracts.exchange,
-    base.contracts.authenticatedProxy,
-    base.contracts.exchangeProxyRegistry,
-    account
-  )
-  console.log('isExchangeRegister', isExchangeRegister)
 })()

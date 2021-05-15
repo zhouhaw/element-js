@@ -1,29 +1,43 @@
+import BigNumber from 'bignumber.js'
+BigNumber.config({ EXPONENTIAL_AT: 1e9 })
 import {
   Asset,
+  ECSignature,
   ElementAsset,
   ElementSchemaName,
   FeeMethod,
   HowToCall,
   Network,
   Order,
+  OrderJSON,
   OrderSide,
   SaleKind,
-  UnhashedOrder
+  UnhashedOrder,
+  UnsignedOrder
 } from '../types'
-import {
-  toBaseUnitAmount,
-  makeBigNumber,
-  encodeBuy,
-  encodeSell,
-  MAX_DIGITS_IN_UNSIGNED_256_INT,
-  NULL_ADDRESS
-} from './index'
-import { Schema } from '../schema/types'
-import { schemas } from '../schema/schemas'
-import BigNumber from 'bignumber.js'
-import { tokens } from '../schema/tokens'
 
-BigNumber.config({ EXPONENTIAL_AT: 1e9 })
+// import { schemas, encodeBuy, encodeSell, encodeCall } from '../schema'
+import { schemas, encodeBuy, encodeSell } from '../schema'
+import { Schema } from '../schema/types'
+import { tokens } from '../schema/tokens'
+import { NULL_ADDRESS, MAX_DIGITS_IN_UNSIGNED_256_INT } from './constants'
+import { validateOrder } from './check'
+
+export function toBaseUnitAmount(amount: BigNumber, decimals: number) {
+  const unit = new BigNumber(10).pow(decimals)
+  const baseUnitAmount = amount.times(unit).integerValue()
+  return baseUnitAmount
+}
+
+export function makeBigNumber(arg: number | string | BigNumber): BigNumber {
+  // Zero sometimes returned as 0x from contracts
+  if (arg === '0x') {
+    arg = 0
+  }
+  // fix "new BigNumber() number type has more than 15 significant digits"
+  arg = arg.toString()
+  return new BigNumber(arg)
+}
 
 export function getSchema(network: Network, schemaName?: ElementSchemaName): Schema<any> {
   const schemaName_ = schemaName || ElementSchemaName.ERC1155
@@ -383,6 +397,150 @@ export function getSchemaList(network: Network, schemaName?: string): Array<Sche
   return schemaList
 }
 
+export function orderParamsEncode(order: any) {
+  const orderParamKeys = [
+    'exchange',
+    'maker',
+    'taker',
+    'makerRelayerFee',
+    'takerRelayerFee',
+    'makerProtocolFee',
+    'takerProtocolFee',
+    'feeRecipient',
+    'feeMethod',
+    'side',
+    'saleKind',
+    'target',
+    'howToCall',
+    'dataToCall',
+    'replacementPattern',
+    'staticTarget',
+    'staticExtradata',
+    'paymentToken',
+    'basePrice',
+    'extra',
+    'listingTime',
+    'expirationTime',
+    'salt'
+  ]
+  const orerParamValueArray = []
+  for (const key of orderParamKeys) {
+    let val = order[key]
+    if (BigNumber.isBigNumber(val)) {
+      val = val.toString()
+    }
+    orerParamValueArray.push(val)
+  }
+  return orerParamValueArray
+}
+
+export function orderSigEncode(order: any) {
+  const orderSigKeys = ['v', 'r', 's']
+  const orderSigValueArray = []
+  for (const key of orderSigKeys) {
+    orderSigValueArray.push(order[key])
+  }
+  return orderSigValueArray
+}
+
+export async function getOrderHash(web3: any, exchangeHelper: any, order: UnhashedOrder): Promise<string> {
+  const orderParamValueArray = orderParamsEncode(order)
+  const hash = await exchangeHelper.methods.hashOrder(orderParamValueArray).call()
+  // let messageHash = web3.eth.accounts.hashMessage(hash)
+  return hash
+}
+
+export async function hashAndValidateOrder(web3: any, exchangeHelper: any, order: UnhashedOrder): Promise<any> {
+  const orderHash = await getOrderHash(web3, exchangeHelper, order)
+  // let orderHash = hashOrder(web3, order)
+  const hashedOrder = {
+    ...order,
+    hash: orderHash
+  }
+  let signature: ECSignature
+  if (web3.eth.defaultAccount.toLowerCase() == hashedOrder.maker.toLowerCase()) {
+    signature = await signOrderHash(web3, hashedOrder)
+  } else {
+    console.log('web3.eth.defaultAccount and maker not equal')
+    return false
+  }
+
+  let orderWithSignature = {
+    ...hashedOrder,
+    ...signature
+  }
+
+  const isValid: boolean = await validateOrder(exchangeHelper, orderWithSignature)
+  if (isValid) {
+    return orderToJSON(orderWithSignature)
+  } else {
+    console.log('validateOrder false')
+    return false
+  }
+}
+
+export async function signOrderHash(web3: any, hashedOrder: UnsignedOrder): Promise<ECSignature> {
+  let signature: ECSignature
+  try {
+    let signatureRes
+    if (typeof window !== 'undefined') {
+      signatureRes = await web3.eth.personal.sign(hashedOrder.hash, hashedOrder.maker)
+    } else {
+      signatureRes = await web3.eth.sign(hashedOrder.hash, hashedOrder.maker)
+    }
+
+    const signatureHex = signatureRes.slice(2)
+    signature = {
+      v: Number.parseInt(signatureHex.slice(128, 130), 16), // The signature is now comprised of r, s, and v.
+      r: `0x${signatureHex.slice(0, 64)}`,
+      s: `0x${signatureHex.slice(64, 128)}`
+    }
+  } catch (error) {
+    console.error(error)
+    throw new Error('You declined to authorize your auction')
+  }
+  return signature
+}
+
+export const orderToJSON = (order: Order): OrderJSON => {
+  const asJSON: OrderJSON = {
+    exchange: order.exchange.toLowerCase(),
+    maker: order.maker.toLowerCase(),
+    taker: order.taker.toLowerCase(),
+    makerRelayerFee: order.makerRelayerFee.toString(),
+    takerRelayerFee: order.takerRelayerFee.toString(),
+    makerProtocolFee: order.makerProtocolFee.toString(),
+    takerProtocolFee: order.takerProtocolFee.toString(),
+    makerReferrerFee: order.makerReferrerFee.toString(),
+    feeMethod: order.feeMethod,
+    feeRecipient: order.feeRecipient.toLowerCase(),
+    side: order.side,
+    saleKind: order.saleKind,
+    target: order.target.toLowerCase(),
+    howToCall: order.howToCall,
+    dataToCall: order.dataToCall,
+    replacementPattern: order.replacementPattern,
+    staticTarget: order.staticTarget.toLowerCase(),
+    staticExtradata: order.staticExtradata,
+    paymentToken: order.paymentToken.toLowerCase(),
+    quantity: order.quantity.toString(),
+    basePrice: order.basePrice.toString(),
+    extra: order.extra.toString(),
+    listingTime: order.listingTime.toString(),
+    expirationTime: order.expirationTime.toString(),
+    salt: order.salt.toString(),
+
+    metadata: order.metadata,
+
+    v: order.v,
+    r: order.r,
+    s: order.s,
+
+    hash: order.hash
+  }
+  return asJSON
+}
+
 export function schemaEncodeSell(network: Network, schema: ElementSchemaName, owner: string, data: any) {
   let schemaDefine: any = getSchemaList(network, schema)
   // schemaDefine = schemaDefine[0]
@@ -418,4 +576,34 @@ export function schemaEncodeSell(network: Network, schema: ElementSchemaName, ow
   let { target, dataToCall, replacementPattern } = encodeSell(schemaDefine, asset, owner) //target,
 
   return { target, dataToCall, replacementPattern }
+}
+
+export function hashOrder(web3: any, order: UnhashedOrder): string {
+  return web3.utils
+    .soliditySha3(
+      { type: 'address', value: order.exchange },
+      { type: 'address', value: order.maker },
+      { type: 'address', value: order.taker },
+      { type: 'uint', value: order.makerRelayerFee },
+      { type: 'uint', value: order.takerRelayerFee },
+      { type: 'uint', value: order.takerProtocolFee },
+      { type: 'uint', value: order.takerProtocolFee },
+      { type: 'address', value: order.feeRecipient },
+      { type: 'uint8', value: order.feeMethod },
+      { type: 'uint8', value: order.side },
+      { type: 'uint8', value: order.saleKind },
+      { type: 'address', value: order.target },
+      { type: 'uint8', value: order.howToCall },
+      { type: 'bytes', value: order.dataToCall },
+      { type: 'bytes', value: order.replacementPattern },
+      { type: 'address', value: order.staticTarget },
+      { type: 'bytes', value: order.staticExtradata },
+      { type: 'address', value: order.paymentToken },
+      { type: 'uint', value: order.basePrice },
+      { type: 'uint', value: order.extra },
+      { type: 'uint', value: order.listingTime },
+      { type: 'uint', value: order.expirationTime },
+      { type: 'uint', value: order.salt }
+    )
+    .toString('hex')
 }

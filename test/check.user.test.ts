@@ -1,19 +1,16 @@
 import { Base } from './base'
 
 import {
-  transferFromERC1155,
   getAccountBalance,
   getAccountNFTsBalance,
   registerProxy,
   approveTokenTransferProxy,
   approveERC1155TransferProxy,
-  orderFromJSON,
   getTokenIDOwner,
   checkRegisterProxy,
   checkApproveTokenTransferProxy,
   checkApproveERC1155TransferProxy
-} from '../src/utils'
-import { Asset, ElementSchemaName, Network, Orders } from '../src'
+} from '../src/utils/check'
 ;(async () => {
   let base = new Base()
 

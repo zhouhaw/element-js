@@ -9,7 +9,12 @@ export declare function checkApproveTokenTransferProxy(exchangeContract: any, er
 export declare function approveTokenTransferProxy(exchangeContract: any, erc20Contract: any, account: string): Promise<boolean>;
 export declare function checkApproveERC1155TransferProxy(proxyRegistryContract: any, nftsContract: any, account: string): Promise<boolean>;
 export declare function approveERC1155TransferProxy(proxyRegistryContract: any, nftsContract: any, account: string): Promise<boolean>;
+export declare function checkApproveERC721TransferProxy(proxyRegistryContract: any, nftsContract: any, account: string, tokenID: string): Promise<boolean>;
 export declare function approveERC721TransferProxy(proxyRegistryContract: any, nftsContract: any, account: string, tokenID: string): Promise<boolean>;
 export declare function checkSellUser(contract: any, asset: Asset, paymentTokenAddr: string, accountAddress: string): Promise<boolean>;
 export declare function checkBuyUser(contract: any, paymentTokenAddr: any, accountAddress: string): Promise<boolean>;
 export declare function checkMatchOrder(contract: any, buy: Order, sell: Order, accountAddress: string): Promise<boolean>;
+export declare function validateOrder(exchangeHelper: any, order: any): Promise<any>;
+export declare function validateAndFormatWalletAddress(web3: any, address: string): string;
+export declare function _ordersCanMatch(buy: Order, sell: Order): boolean;
+export declare function ordersCanMatch(exchangeHelper: any, buy: Order, sell: Order): Promise<any>;
