@@ -1,10 +1,11 @@
-export type { Asset, ElementSchemaName, FeeMethod, HowToCall, Network, Order, OrderSide, SaleKind } from './types'
+export { Asset, ElementSchemaName, FeeMethod, HowToCall, Network, Order, OrderSide, SaleKind } from './types'
 export { schemas, encodeBuy, encodeSell, encodeCall } from './schema'
 export {
   ordersCanMatch,
   validateOrder,
   checkSellUser,
   checkBuyUser,
+  checkOrder,
   checkMatchOrder,
   checkRegisterProxy,
   registerProxy,

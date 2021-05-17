@@ -64,6 +64,10 @@ export const ErrorCodes: ElementErrorCodes = [
     message: 'Order validateOrder false '
   },
   {
+    code: 1204,
+    message: 'Buy order payment Token cannot be ETH '
+  },
+  {
     code: 2001,
     message: 'rpc requset error '
   }
@@ -93,7 +97,7 @@ export class ElementError extends Error {
     this.code = err.code
   }
 }
-
+//
 // try {
 //   throw new ElementError({ code: 1 })
 // } catch (e) {

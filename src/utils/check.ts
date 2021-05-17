@@ -1,7 +1,7 @@
-import { makeBigNumber, getSchemaList, orderParamsEncode, orderSigEncode } from './markOrder'
+import { getSchemaList, makeBigNumber, orderParamsEncode, orderSigEncode } from './markOrder'
 import { encodeSell } from '../schema'
-import { BigNumber, NULL_ADDRESS, MAX_UINT_256 } from './constants'
-import { Asset, ElementSchemaName, Network, Order } from '../types'
+import { BigNumber, MAX_UINT_256, NULL_ADDRESS } from './constants'
+import { Asset, ElementSchemaName, Network, Order, OrderSide } from '../types'
 import { ElementError } from '../base/error'
 
 export async function checkSenderOfAuthenticatedProxy(
@@ -76,8 +76,8 @@ export async function checkRegisterProxy(proxyRegistryContract: any, account: st
 
 //1.  register
 export async function registerProxy(proxyRegistryContract: any, account: string): Promise<boolean> {
-  let isRegister = await checkRegisterProxy(proxyRegistryContract, account)
-  if (!isRegister) {
+  let proxy = proxyRegistryContract.methods.proxies(account).call()
+  if (proxy === NULL_ADDRESS) {
     let res = await proxyRegistryContract.methods.registerProxy().send({
       from: account
     })
@@ -110,9 +110,9 @@ export async function approveTokenTransferProxy(
   erc20Contract: any,
   account: string
 ): Promise<boolean> {
-  let isApprove = await checkApproveTokenTransferProxy(exchangeContract, erc20Contract, account)
-  if (!isApprove) {
-    let tokenTransferProxyAddr = await exchangeContract.methods.tokenTransferProxy().call()
+  let tokenTransferProxyAddr = await exchangeContract.methods.tokenTransferProxy().call()
+  const allowAmount = await erc20Contract.methods.allowance(account, tokenTransferProxyAddr).call()
+  if (Number(allowAmount) == 0) {
     let res = await erc20Contract.methods.approve(tokenTransferProxyAddr, MAX_UINT_256).send({
       from: account
     })
@@ -142,7 +142,8 @@ export async function approveERC1155TransferProxy(
   nftsContract: any,
   account: string
 ): Promise<boolean> {
-  let isApprove = await checkApproveERC1155TransferProxy(proxyRegistryContract, nftsContract, account)
+  let operator = await proxyRegistryContract.methods.proxies(account).call()
+  let isApprove = await nftsContract.methods.isApprovedForAll(account, operator).call()
   if (!isApprove) {
     let operator = await proxyRegistryContract.methods.proxies(account).call()
     let res = await nftsContract.methods.setApprovalForAll(operator, true).send({ from: account })
@@ -230,7 +231,7 @@ export async function checkBuyUser(contract: any, paymentTokenAddr: any, account
   return true
 }
 
-export async function checkMatchOrder(contract: any, buy: Order, sell: Order, accountAddress: string) {
+export async function _checkMatchOrder(contract: any, buy: Order, sell: Order, accountAddress: string) {
   await checkRegisterProxy(contract.exchangeProxyRegistry, sell.maker)
   await checkRegisterProxy(contract.exchangeProxyRegistry, buy.maker)
 
@@ -296,6 +297,92 @@ export async function checkMatchOrder(contract: any, buy: Order, sell: Order, ac
   await validateOrder(contract.exchangeHelper, sell)
 
   return true
+}
+
+export async function checkMatchOrder(contract: any, buy: Order, sell: Order, accountAddress: string) {
+  const equalPrice: boolean = buy.basePrice.gte(sell.basePrice)
+  // const equalPrice: boolean = buy.basePrice == sell.basePrice
+  if (!equalPrice) {
+    throw new ElementError({ code: 1201 })
+  }
+  await checkOrder(contract, buy)
+  await checkOrder(contract, sell)
+
+  return true
+}
+
+export async function checkOrder(contract: any, order: Order) {
+  await checkRegisterProxy(contract.exchangeProxyRegistry, order.maker)
+
+  const equalPrice: boolean = order.basePrice.gt(0)
+  if (!equalPrice) {
+    throw new ElementError({ code: 1201 })
+  }
+
+  await validateOrder(contract.exchangeHelper, order)
+
+  let { ethBal } = await getAccountBalance(contract.web3, order.maker)
+  if (ethBal == 0) {
+    throw new ElementError({ code: 1105 })
+  }
+
+  // 检查 Sell 买单 Buy = 0, Sell = 1
+  if (order.side == OrderSide.Sell) {
+    let sell = order
+    const sellNFTs = contract.erc1155.clone()
+    sellNFTs.options.address = sell.metadata.asset.address
+    let bal = await getAccountNFTsBalance(sellNFTs, sell.maker, sell.metadata.asset.id)
+    if (bal == 0) {
+      throw new ElementError({ code: 1103 })
+    }
+
+    if (sell.paymentToken != NULL_ADDRESS) {
+      let erc20Contract = contract.erc20.clone()
+      erc20Contract.options.address = sell.paymentToken
+      await checkApproveTokenTransferProxy(contract.exchange, erc20Contract, sell.maker)
+    }
+
+    if (sell.metadata.schema == ElementSchemaName.ERC1155) {
+      await checkApproveERC1155TransferProxy(contract.exchangeProxyRegistry, sellNFTs, sell.maker)
+    }
+    checkDataToCall(contract.networkName, sell)
+  }
+
+  // 检查 Buy 卖单
+  if (order.side == OrderSide.Buy) {
+    let buy = order
+    if (buy.paymentToken !== NULL_ADDRESS) {
+      let erc20Contract = contract.erc20.clone()
+      erc20Contract.options.address = buy.paymentToken
+      let { erc20Bal } = await getAccountBalance(contract.web3, buy.maker, erc20Contract)
+
+      if (!makeBigNumber(erc20Bal).gte(buy.basePrice)) {
+        throw new ElementError({ code: 1105 })
+      }
+      await checkApproveTokenTransferProxy(contract.exchange, erc20Contract, buy.maker)
+    } else {
+      throw new ElementError({ code: 1204 })
+    }
+  }
+  return true
+}
+
+export function checkDataToCall(netWorkName: Network, sell: Order) {
+  // encodeSell
+  let schemas = getSchemaList(netWorkName, sell.metadata.schema)
+  let { target, dataToCall, replacementPattern } = encodeSell(schemas[0], sell.metadata.asset, sell.maker)
+
+  if (dataToCall != sell.dataToCall) {
+    console.log('sell.dataToCall error')
+  }
+
+  if (target != sell.target) {
+    console.log('sell.target error')
+  }
+
+  if (replacementPattern != sell.replacementPattern) {
+    console.log('sell.replacementPattern error')
+  }
 }
 
 export async function validateOrder(exchangeHelper: any, order: any): Promise<any> {
