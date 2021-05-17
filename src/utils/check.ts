@@ -242,19 +242,18 @@ export async function checkBuyUser(contract: any, paymentTokenAddr: any, account
   }
 
   let isRegister = await checkRegisterProxy(contract.exchangeProxyRegistry, accountAddress)
-  log('isRegister', isRegister)
-  debugger
+
   if (!isRegister) {
     await registerProxy(contract.exchangeProxyRegistry, accountAddress)
   }
 
   debugger
-
   let isApproveWETH = await checkApproveTokenTransferProxy(contract.exchange, contract.WETH, accountAddress)
   if (!isApproveWETH) {
     await approveTokenTransferProxy(contract.exchange, contract.WETH, accountAddress)
   }
 
+  debugger
   // 直接购买 paytoken 可以为空
   if (paymentTokenAddr != NULL_ADDRESS) {
     let erc20Contract = contract.erc20.clone()
@@ -268,6 +267,7 @@ export async function checkBuyUser(contract: any, paymentTokenAddr: any, account
       await approveTokenTransferProxy(contract.exchange, erc20Contract, accountAddress)
     }
   }
+  debugger
   return true
 }
 
@@ -400,7 +400,12 @@ export async function checkOrder(contract: any, order: Order) {
       }
       await checkApproveTokenTransferProxy(contract.exchange, erc20Contract, buy.maker)
     } else {
-      throw new ElementError({ code: 1204 })
+      if (
+        contract.web3.eth.defaultAccount &&
+        contract.web3.eth.defaultAccount.toLowerCase() != buy.maker.toLowerCase()
+      ) {
+        throw new ElementError({ code: 1204 })
+      }
     }
   }
   return true
