@@ -10,6 +10,8 @@
     "module": "commonjs",
     /* Specify module code generation: 'none', 'commonjs', 'amd', 'system', 'umd', 'es2015', 'es2020', or 'ESNext'. */
     "resolveJsonModule": true,
+    /* 增加 type  类型的检查 */
+    "isolatedModules": true,
     // 支持导入json模块
     "strict": true,
     /* Enable all strict type-checking options. */
