@@ -2,6 +2,10 @@
   "include": [
     "./src/**/*"
   ],
+  "exclude": [
+    "node_modules",
+    "./test/**/*"
+  ],
   "compilerOptions": {
     "outDir": "./lib",
     "declaration": true,

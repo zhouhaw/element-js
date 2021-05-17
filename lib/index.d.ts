@@ -1,4 +1,5 @@
-export type { Asset, ElementSchemaName, FeeMethod, HowToCall, Network, Order, OrderSide, SaleKind } from './types';
+export { ElementSchemaName, FeeMethod, HowToCall, Network, OrderSide, SaleKind } from './types';
+export type { Asset, Order } from './types';
 export { schemas, encodeBuy, encodeSell, encodeCall } from './schema';
 export { ordersCanMatch, validateOrder, checkSellUser, checkBuyUser, checkOrder, checkMatchOrder, checkRegisterProxy, registerProxy, getTokenIDOwner, getAccountBalance, getAccountNFTsBalance, checkApproveTokenTransferProxy, approveTokenTransferProxy, checkApproveERC1155TransferProxy, approveERC1155TransferProxy, approveERC721TransferProxy, checkSenderOfAuthenticatedProxy } from './utils/check';
 export { getTokenList, getSchemaList, orderToJSON } from './utils/markOrder';

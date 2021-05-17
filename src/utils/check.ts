@@ -198,15 +198,18 @@ export async function checkSellUser(contract: any, asset: Asset, paymentTokenAdd
     throw new ElementError({ code: 1103 })
   }
 
+  await checkRegisterProxy(contract.exchangeProxyRegistry, accountAddress)
   await registerProxy(contract.exchangeProxyRegistry, accountAddress)
 
   if (asset.schemaName == ElementSchemaName.ERC1155) {
+    await checkApproveERC1155TransferProxy(contract.exchangeProxyRegistry, sellNFTs, accountAddress)
     await approveERC1155TransferProxy(contract.exchangeProxyRegistry, sellNFTs, accountAddress)
   }
 
   if (paymentTokenAddr != NULL_ADDRESS) {
     let erc20Contract = contract.erc20.clone()
     erc20Contract.options.address = paymentTokenAddr
+    await checkApproveTokenTransferProxy(contract.exchange, erc20Contract, accountAddress)
     await approveTokenTransferProxy(contract.exchange, erc20Contract, accountAddress)
   }
 
@@ -214,9 +217,10 @@ export async function checkSellUser(contract: any, asset: Asset, paymentTokenAdd
 }
 
 export async function checkBuyUser(contract: any, paymentTokenAddr: any, accountAddress: string) {
-  // exchangeProxyRegistry
+  await checkRegisterProxy(contract.exchangeProxyRegistry, accountAddress)
   await registerProxy(contract.exchangeProxyRegistry, accountAddress)
 
+  await checkApproveTokenTransferProxy(contract.exchange, contract.WETH, accountAddress)
   await approveTokenTransferProxy(contract.exchange, contract.WETH, accountAddress)
 
   if (paymentTokenAddr != NULL_ADDRESS) {
@@ -226,6 +230,7 @@ export async function checkBuyUser(contract: any, paymentTokenAddr: any, account
     if (erc20Bal == 0) {
       throw new ElementError({ code: 1104 })
     }
+    await checkApproveTokenTransferProxy(contract.exchange, erc20Contract, accountAddress)
     await approveTokenTransferProxy(contract.exchange, erc20Contract, accountAddress)
   }
   return true
