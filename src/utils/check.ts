@@ -96,13 +96,13 @@ export async function checkApproveTokenTransferProxy(
   account: string
 ): Promise<boolean> {
   let tokenTransferProxyAddr = await exchangeContract.methods.tokenTransferProxy().call()
-  const amount = await erc20Contract.methods.balanceOf(account).call()
-  if (Number(amount) == 0) {
-    throw new ElementError({ code: 1104 })
-  }
+  // const amount = await erc20Contract.methods.balanceOf(account).call()
+  // if (Number(amount) == 0) {
+  //   throw new ElementError({ code: 1104 })
+  // }
   const allowAmount = await erc20Contract.methods.allowance(account, tokenTransferProxyAddr).call()
   if (Number(allowAmount) == 0) {
-    console.log('checkApproveTokenTransferProxy allowAmount %s amount', allowAmount, amount)
+    // console.log('checkApproveTokenTransferProxy allowAmount %s amount', allowAmount, amount)
     throw new ElementError({ code: 1101 })
   }
   return true
