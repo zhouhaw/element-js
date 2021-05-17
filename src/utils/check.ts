@@ -69,7 +69,6 @@ export async function getTokenIDOwner(elementAssetContract: any, tokenId: any): 
 //1. check register
 export async function checkRegisterProxy(proxyRegistryContract: any, account: string): Promise<boolean> {
   let proxy = await proxyRegistryContract.methods.proxies(account).call()
-
   if (proxy === NULL_ADDRESS) {
     throw new ElementError({ code: 1001 })
   }
@@ -98,6 +97,9 @@ export async function checkApproveTokenTransferProxy(
 ): Promise<boolean> {
   let tokenTransferProxyAddr = await exchangeContract.methods.tokenTransferProxy().call()
   const amount = await erc20Contract.methods.balanceOf(account).call()
+  if (Number(amount) == 0) {
+    throw new ElementError({ code: 1104 })
+  }
   const allowAmount = await erc20Contract.methods.allowance(account, tokenTransferProxyAddr).call()
   if (Number(allowAmount) == 0) {
     console.log('checkApproveTokenTransferProxy allowAmount %s amount', allowAmount, amount)
