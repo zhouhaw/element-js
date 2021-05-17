@@ -6,3 +6,4 @@ temp/
 /package-lock.json
 package-lock.json
 /.idea
+.DS_Store
