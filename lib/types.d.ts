@@ -1,12 +1,6 @@
-import { BigNumber } from 'bignumber.js';
+import { BigNumber } from './utils/constants';
 import { Network } from './schema/types';
-export { Network, BigNumber };
-export interface ExchangeProtocolConfig {
-    network: Network;
-    gasPrice?: BigNumber;
-    exchangeContractAddress?: string;
-    proxyRegistryContractAddress?: string;
-}
+export { Network };
 export interface ElementAPIConfig {
     networkName: Network;
     networkID: number;
@@ -19,32 +13,6 @@ export declare enum AbiType {
     Event = "event",
     Fallback = "fallback"
 }
-interface FunctionParameter {
-    name: string;
-    type: string;
-}
-declare type ConstructorStateMutability = 'nonpayable' | 'payable';
-declare type StateMutability = 'pure' | 'view' | ConstructorStateMutability;
-interface MethodAbi {
-    type: AbiType.Function;
-    name: string;
-    inputs: FunctionParameter[];
-    outputs: FunctionParameter[];
-    constant: boolean;
-    stateMutability: StateMutability;
-    payable: boolean;
-}
-interface ConstructorAbi {
-    type: AbiType.Constructor;
-    inputs: FunctionParameter[];
-    payable: boolean;
-    stateMutability: ConstructorStateMutability;
-}
-interface FallbackAbi {
-    type: AbiType.Fallback;
-    payable: boolean;
-}
-export declare type FunctionAbi = MethodAbi | ConstructorAbi | FallbackAbi;
 export declare enum ElementSchemaName {
     ERC20 = "ERC20",
     ERC721 = "ERC721",

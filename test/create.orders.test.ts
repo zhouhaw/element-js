@@ -4,7 +4,7 @@ import { NULL_ADDRESS } from '../src/utils/constants'
 import { getAccountNFTsBalance } from '../src/utils/check'
 
 import { transferFromERC1155 } from '../src/utils'
-import { Asset, ElementSchemaName, Network, Orders } from '../src'
+import { Asset, ElementSchemaName, Network, Orders, OrderCheckStatus } from '../src'
 ;(async () => {
   let base = new Base()
   await base.init()
@@ -34,8 +34,12 @@ import { Asset, ElementSchemaName, Network, Orders } from '../src'
     startAmount: 0.12
   }
 
+  function next<OrderCheckStatus>(arg: OrderCheckStatus) {
+    console.log(arg)
+  }
+
   base.web3.eth.defaultAccount = buyAccount
-  const buyOrder = await order.createBuyOrder(buyParm)
+  const buyOrder = await order.createBuyOrder(buyParm, { next })
   console.log('buyOrder', buyOrder)
 
   //------createSellOrder
@@ -45,7 +49,6 @@ import { Asset, ElementSchemaName, Network, Orders } from '../src'
   let assetBal = await getAccountNFTsBalance(buyNFTs, sellAccount, tokenId)
 
   if (assetBal == 0) {
-    // await transferFromERC1155(buyNFTs, buyAccount, sellAccount, tokenId, 1)
     let tx = await transferFromERC1155(buyNFTs, buyAccount, sellAccount, tokenId, 1)
     console.log('transferFromERC1155 to Sell', tx)
     return
