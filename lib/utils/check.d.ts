@@ -13,7 +13,7 @@ export declare function checkApproveERC721TransferProxy(proxyRegistryContract: a
 export declare function approveERC721TransferProxy(proxyRegistryContract: any, nftsContract: any, account: string, tokenID: string): Promise<boolean>;
 export declare function checkSellUser(contract: any, asset: Asset, paymentTokenAddr: string, accountAddress: string): Promise<boolean>;
 export declare function checkBuyUser(contract: any, paymentTokenAddr: any, accountAddress: string): Promise<boolean>;
-export declare function checkMatchOrder(contract: any, buy: Order, sell: Order, accountAddress: string): Promise<boolean>;
+export declare function checkMatchOrder(contract: any, buy: Order, sell: Order, accountAddress?: string): Promise<boolean>;
 export declare function checkOrder(contract: any, order: Order, accountAddress?: string): Promise<boolean>;
 export declare function checkDataToCall(netWorkName: Network, sell: Order): void;
 export declare function validateOrder(exchangeHelper: any, order: any): Promise<any>;

@@ -40,7 +40,7 @@ import { Asset, ElementSchemaName, Network, Orders, OrderCheckStatus } from '../
 
   base.web3.eth.defaultAccount = buyAccount
   const buyOrder = await order.createBuyOrder(buyParm, { next })
-  console.log('buyOrder', buyOrder)
+  // console.log('buyOrder', buyOrder)
 
   //------createSellOrder
 
@@ -64,5 +64,5 @@ import { Asset, ElementSchemaName, Network, Orders, OrderCheckStatus } from '../
   base.web3.eth.defaultAccount = sellAccount
   let sellOrderJson = await order.createSellOrder(sellParm)
 
-  console.log('createSellOrder', sellOrderJson)
+  console.log('sellOrder', { buy: buyOrder, sell: sellOrderJson })
 })()

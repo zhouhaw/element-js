@@ -265,7 +265,7 @@ export async function checkBuyUser(contract: any, paymentTokenAddr: any, account
   return true
 }
 
-export async function checkMatchOrder(contract: any, buy: Order, sell: Order, accountAddress: string) {
+export async function checkMatchOrder(contract: any, buy: Order, sell: Order, accountAddress?: string) {
   const equalPrice: boolean = buy.basePrice.gte(sell.basePrice)
   if (!equalPrice) {
     throw new ElementError({ code: '1201' })
@@ -286,7 +286,7 @@ export async function checkOrder(contract: any, order: Order, accountAddress?: s
   await validateOrder(contract.exchangeHelper, order)
 
   let { ethBal } = await getAccountBalance(contract.web3, order.maker)
-  if (ethBal == 0) {
+  if (makeBigNumber(ethBal).eq(0)) {
     throw new ElementError({ code: '1105' })
   }
 
@@ -326,7 +326,7 @@ export async function checkOrder(contract: any, order: Order, accountAddress?: s
       await checkApproveTokenTransferProxy(contract.exchange, erc20Contract, buy.maker)
     } else {
       if (
-        !contract.web3.eth.defaultAccount ||
+        contract.web3.eth.defaultAccount &&
         contract.web3.eth.defaultAccount.toLowerCase() != buy.maker.toLowerCase()
       ) {
         throw new ElementError({ code: '1204' })
