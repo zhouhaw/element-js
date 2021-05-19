@@ -295,6 +295,11 @@ export async function checkOrder(contract: any, order: Order, accountAddress?: s
     let sell = order
     const sellNFTs = contract.erc1155.clone()
     sellNFTs.options.address = sell.metadata.asset.address
+
+    if (!sell.metadata.asset.id) {
+      throw new ElementError({ code: '1000', message: 'sell.metadata.asset.id undefined' })
+    }
+
     let bal = await getAccountNFTsBalance(sellNFTs, sell.maker, sell.metadata.asset.id)
     if (bal == 0) {
       throw new ElementError({ code: '1103' })
