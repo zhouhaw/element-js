@@ -68,6 +68,10 @@ export const ErrorCodes: ElementErrorCodes = [
     message: 'Buy order payment Token cannot be ETH '
   },
   {
+    code: 1205,
+    message: 'Order parameter false '
+  },
+  {
     code: 2001,
     message: 'rpc requset error '
   }

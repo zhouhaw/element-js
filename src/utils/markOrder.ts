@@ -418,9 +418,14 @@ export function orderParamsEncode(order: any) {
   const orerParamValueArray = []
   for (const key of orderParamKeys) {
     let val = order[key]
+    if (val === undefined) {
+      console.log('orderParamsEncode key undefined', key)
+      continue
+    }
     if (BigNumber.isBigNumber(val)) {
       val = val.toString()
     }
+
     orerParamValueArray.push(val)
   }
   return orerParamValueArray
@@ -430,6 +435,10 @@ export function orderSigEncode(order: any) {
   const orderSigKeys = ['v', 'r', 's']
   const orderSigValueArray = []
   for (const key of orderSigKeys) {
+    if (order[key] === undefined) {
+      console.log('orderSigEncode key undefined', key)
+      continue
+    }
     orderSigValueArray.push(order[key])
   }
   return orderSigValueArray

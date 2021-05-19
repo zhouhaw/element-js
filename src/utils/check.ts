@@ -357,12 +357,18 @@ export function checkDataToCall(netWorkName: Network, sell: Order) {
 export async function validateOrder(exchangeHelper: any, order: any): Promise<any> {
   const orderParamValueArray = orderParamsEncode(order)
   const orderSigArray = orderSigEncode(order)
-  let isValidate = exchangeHelper.methods.validateOrder(orderParamValueArray, orderSigArray).call()
-
-  if (!isValidate) {
-    throw new ElementError({ code: 1203 })
+  try {
+    let isValidate = await exchangeHelper.methods.validateOrder(orderParamValueArray, orderSigArray).call()
+    if (!isValidate) {
+      throw new ElementError({ code: 1203 })
+    }
+    return isValidate
+  } catch (e) {
+    if (!e.code) {
+      throw new ElementError({ code: 1205 })
+    }
+    throw e
   }
-  return isValidate
 }
 
 export function validateAndFormatWalletAddress(web3: any, address: string): string {
