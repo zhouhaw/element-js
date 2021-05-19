@@ -4,7 +4,7 @@
 export interface CustomError {
   name?: string
   data?: any
-  code: number
+  code: string
   message?: string
 }
 
@@ -16,73 +16,77 @@ export type ElementErrorCodes = Array<Readonly<CustomError>>
 // 20 开头 合约执行错误 rpc 网络请求错
 export const ErrorCodes: ElementErrorCodes = [
   {
-    code: 0,
+    code: 'INVALID_ARGUMENT',
+    message: 'Smart contract error'
+  },
+  {
+    code: '0',
     message: ''
   },
   {
-    code: 1000,
+    code: '1000',
     message: 'Custom information'
   },
   {
-    code: 1001,
+    code: '1001',
     message: 'Account no registration'
   },
   {
-    code: 1002,
+    code: '1002',
     message: 'Account authProxy without authorization exchangeProxyRegistryAddr '
   },
   {
-    code: 1101,
+    code: '1101',
     message: 'TokenTransferProxy allowAmount equel 0 '
   },
   {
-    code: 1102,
+    code: '1102',
     message: 'ERC1155TransferProxy NFTs isApprovedForAll is false '
   },
   {
-    code: 1103,
+    code: '1103',
     message: 'ElementSharedAsset balanceOf equal 0 !'
   },
   {
-    code: 1104,
+    code: '1104',
     message: 'ERC20 balance balance equal 0 !'
   },
   {
-    code: 1105,
+    code: '1105',
     message: 'ETH balance equel 0 '
   },
   {
-    code: 1201,
+    code: '1201',
     message: 'Order: buy.basePrice to be greater than sell.basePrice!'
   },
   {
-    code: 1202,
+    code: '1202',
     message: 'Order can match false'
   },
   {
-    code: 1203,
+    code: '1203',
     message: 'Order validateOrder false '
   },
   {
-    code: 1204,
+    code: '1204',
     message: 'Buy order payment Token cannot be ETH '
   },
   {
-    code: 1205,
+    code: '1205',
     message: 'Order parameter false '
   },
   {
-    code: 2001,
+    code: '2001',
     message: 'rpc requset error '
   }
 ]
 
 export class ElementError extends Error {
-  public code: number
+  public code: string
   constructor(err: CustomError) {
     let _err: CustomError | undefined = ErrorCodes.find((val) => val.code == err.code)
-    // @ts-ignore
-    if (_err?.code > 1000) {
+
+    if (Number(_err?.code) > 1000) {
       let _type = _err?.code.toString().charAt(0)
       if (_type == '2') {
         let message = err.message || ''
@@ -91,7 +95,7 @@ export class ElementError extends Error {
         super(_err?.message || 'sucess')
       }
     } else {
-      if (_err?.code == 1000) {
+      if (_err?.code == '1000') {
         let message = err.message || ''
         super(message + '-' + _err?.message)
       } else {
