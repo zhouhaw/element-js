@@ -65,7 +65,7 @@ export class Orders extends Contracts {
         gas: (80e4).toString()
       })
       .catch((error: any) => {
-        throw new ElementError({ code: 1000, message: 'OrderMatch failure' })
+        throw new ElementError({ code: '1000', message: 'OrderMatch failure' })
         // console.error('orderMatch', error.receipt) //, error.message
       })
     callBack?.next(OrderCheckStatus.EndOrderMatch)
@@ -193,7 +193,7 @@ export class Orders extends Contracts {
 
   public async cancelOrder({ order, accountAddress }: { order: Order; accountAddress: string }): Promise<boolean> {
     if (order.maker.toLowerCase() != accountAddress.toLowerCase()) {
-      throw new ElementError({ code: 1000, message: 'CancelOrder order.maker not equle accountAddress' })
+      throw new ElementError({ code: '1000', message: 'CancelOrder order.maker not equle accountAddress' })
     }
     const orderParamArray = orderParamsEncode(order)
     const orderSigArray = orderSigEncode(order)
@@ -204,7 +204,7 @@ export class Orders extends Contracts {
         gas: (80e4).toString()
       })
       .catch((error: any) => {
-        throw new ElementError({ code: 1000, message: 'CancelOrder failure' })
+        throw new ElementError({ code: '1000', message: 'CancelOrder failure' })
         // console.error(error.receipt) //, error.message
       })
     return cancelTx.status

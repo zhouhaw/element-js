@@ -13,14 +13,14 @@ export async function checkSenderOfAuthenticatedProxy(
 ): Promise<boolean> {
   let proxy = await proxyRegistryContract.methods.proxies(account).call()
   if (proxy == NULL_ADDRESS) {
-    throw new ElementError({ code: 1001 })
+    throw new ElementError({ code: '1001' })
   }
   let authProxyContract = authenticatedProxyContract.clone()
   authProxyContract.options.address = proxy
 
   let user = await authProxyContract.methods.user().call()
   if (user != account) {
-    throw new ElementError({ code: 1001 })
+    throw new ElementError({ code: '1001' })
   }
   // 查询用户授权的 proxy 执行合约地址
   let authproxyRegistryAddr = await authProxyContract.methods.registry().call()
@@ -29,19 +29,19 @@ export async function checkSenderOfAuthenticatedProxy(
 
   // 用户代理合约授权合约 和 和交易代理授权合约是否一致
   if (authproxyRegistryAddr != exchangeProxyRegistryAddr) {
-    throw new ElementError({ code: 1002 })
+    throw new ElementError({ code: '1002' })
   }
 
   // 用户交易的代理注册合约 和 代理注册合约是否一致
   if (authproxyRegistryAddr != proxyRegistryContract.options.address) {
-    throw new ElementError({ code: 1002 })
+    throw new ElementError({ code: '1002' })
   }
 
   // 验证交易合约是否为代理执行的合约地址
   let isPass = await proxyRegistryContract.methods.contracts(exchangeContract.options.address).call()
 
   if (!isPass) {
-    throw new ElementError({ code: 1002 })
+    throw new ElementError({ code: '1002' })
   }
   return true
 }
@@ -70,7 +70,7 @@ export async function getTokenIDOwner(elementAssetContract: any, tokenId: any): 
 export async function checkRegisterProxy(proxyRegistryContract: any, account: string): Promise<boolean> {
   let proxy = await proxyRegistryContract.methods.proxies(account).call()
   if (proxy === NULL_ADDRESS) {
-    throw new ElementError({ code: 1001 })
+    throw new ElementError({ code: '1001' })
   }
   return true
 }
@@ -83,7 +83,7 @@ export async function registerProxy(proxyRegistryContract: any, account: string)
       from: account
     })
     if (!res.status) {
-      throw new ElementError({ code: 2001, message: 'registerProxy()' })
+      throw new ElementError({ code: '2001', message: 'registerProxy()' })
     }
   }
   return true
@@ -100,7 +100,7 @@ export async function checkApproveTokenTransferProxy(
   const allowAmount = await erc20Contract.methods.allowance(account, tokenTransferProxyAddr).call()
   if (new BigNumber(allowAmount).eq(0)) {
     // console.log('checkApproveTokenTransferProxy allowAmount %s amount', allowAmount, amount)
-    throw new ElementError({ code: 1101 })
+    throw new ElementError({ code: '1101' })
   }
   return true
 }
@@ -118,7 +118,7 @@ export async function approveTokenTransferProxy(
       from: account
     })
     if (!res.status) {
-      throw new ElementError({ code: 2001, message: 'tokenTransferProxyAddr approve()' })
+      throw new ElementError({ code: '2001', message: 'tokenTransferProxyAddr approve()' })
     }
   }
   return true
@@ -132,7 +132,7 @@ export async function checkApproveERC1155TransferProxy(
   let operator = await proxyRegistryContract.methods.proxies(account).call()
   let isApprove = await nftsContract.methods.isApprovedForAll(account, operator).call()
   if (!isApprove) {
-    throw new ElementError({ code: 1102 })
+    throw new ElementError({ code: '1102' })
   }
   return isApprove
 }
@@ -150,7 +150,7 @@ export async function approveERC1155TransferProxy(
     let res = await nftsContract.methods.setApprovalForAll(operator, true).send({ from: account })
 
     if (!res.status) {
-      throw new ElementError({ code: 2001, message: 'ERC1155 NFTs setApprovalForAll()' })
+      throw new ElementError({ code: '2001', message: 'ERC1155 NFTs setApprovalForAll()' })
     }
   }
   return true
@@ -164,7 +164,7 @@ export async function checkApproveERC721TransferProxy(
 ): Promise<boolean> {
   let isApprove = await nftsContract.methods.getApproved(tokenID).call()
   if (!isApprove) {
-    throw new ElementError({ code: 1102 })
+    throw new ElementError({ code: '1102' })
   }
   return true
 }
@@ -181,7 +181,7 @@ export async function approveERC721TransferProxy(
   if (!isApprove) {
     let res = await nftsContract.methods.approve(operator, tokenID).send({ from: account })
     if (!res.status) {
-      throw new ElementError({ code: 2001, message: 'ERC721 NFTs approve()' })
+      throw new ElementError({ code: '2001', message: 'ERC721 NFTs approve()' })
     }
   }
   return true
@@ -193,14 +193,14 @@ export async function checkSellUser(contract: any, asset: Asset, paymentTokenAdd
   }
   let { ethBal } = await getAccountBalance(contract.web3, accountAddress)
   if (ethBal == 0) {
-    throw new ElementError({ code: 1105 })
+    throw new ElementError({ code: '1105' })
   }
 
   const sellNFTs = contract.erc1155.clone()
   sellNFTs.options.address = asset.tokenAddress
   let bal = await getAccountNFTsBalance(sellNFTs, accountAddress, asset.tokenId)
   if (bal == 0) {
-    throw new ElementError({ code: 1103 })
+    throw new ElementError({ code: '1103' })
   }
 
   let isRegister = await checkRegisterProxy(contract.exchangeProxyRegistry, accountAddress)
@@ -235,7 +235,7 @@ export async function checkSellUser(contract: any, asset: Asset, paymentTokenAdd
 export async function checkBuyUser(contract: any, paymentTokenAddr: any, accountAddress: string) {
   let { ethBal } = await getAccountBalance(contract.web3, accountAddress)
   if (ethBal == 0) {
-    throw new ElementError({ code: 1105 })
+    throw new ElementError({ code: '1105' })
   }
 
   let isRegister = await checkRegisterProxy(contract.exchangeProxyRegistry, accountAddress)
@@ -255,7 +255,7 @@ export async function checkBuyUser(contract: any, paymentTokenAddr: any, account
     erc20Contract.options.address = paymentTokenAddr
     let { erc20Bal } = await getAccountBalance(contract.web3, accountAddress, erc20Contract)
     if (erc20Bal == 0) {
-      throw new ElementError({ code: 1104 })
+      throw new ElementError({ code: '1104' })
     }
     let isApproveToken = await checkApproveTokenTransferProxy(contract.exchange, erc20Contract, accountAddress)
     if (!isApproveToken) {
@@ -268,7 +268,7 @@ export async function checkBuyUser(contract: any, paymentTokenAddr: any, account
 export async function checkMatchOrder(contract: any, buy: Order, sell: Order, accountAddress: string) {
   const equalPrice: boolean = buy.basePrice.gte(sell.basePrice)
   if (!equalPrice) {
-    throw new ElementError({ code: 1201 })
+    throw new ElementError({ code: '1201' })
   }
   await checkOrder(contract, buy)
   await checkOrder(contract, sell)
@@ -280,14 +280,14 @@ export async function checkOrder(contract: any, order: Order, accountAddress?: s
   await checkRegisterProxy(contract.exchangeProxyRegistry, order.maker)
   const equalPrice: boolean = order.basePrice.gt(0)
   if (!equalPrice) {
-    throw new ElementError({ code: 1201 })
+    throw new ElementError({ code: '1201' })
   }
 
   await validateOrder(contract.exchangeHelper, order)
 
   let { ethBal } = await getAccountBalance(contract.web3, order.maker)
   if (ethBal == 0) {
-    throw new ElementError({ code: 1105 })
+    throw new ElementError({ code: '1105' })
   }
 
   // 检查 Sell 买单 Buy = 0, Sell = 1
@@ -297,7 +297,7 @@ export async function checkOrder(contract: any, order: Order, accountAddress?: s
     sellNFTs.options.address = sell.metadata.asset.address
     let bal = await getAccountNFTsBalance(sellNFTs, sell.maker, sell.metadata.asset.id)
     if (bal == 0) {
-      throw new ElementError({ code: 1103 })
+      throw new ElementError({ code: '1103' })
     }
 
     if (sell.paymentToken != NULL_ADDRESS) {
@@ -321,7 +321,7 @@ export async function checkOrder(contract: any, order: Order, accountAddress?: s
       let { erc20Bal } = await getAccountBalance(contract.web3, buy.maker, erc20Contract)
 
       if (!makeBigNumber(erc20Bal).gte(buy.basePrice)) {
-        throw new ElementError({ code: 1105 })
+        throw new ElementError({ code: '1105' })
       }
       await checkApproveTokenTransferProxy(contract.exchange, erc20Contract, buy.maker)
     } else {
@@ -329,7 +329,7 @@ export async function checkOrder(contract: any, order: Order, accountAddress?: s
         !contract.web3.eth.defaultAccount ||
         contract.web3.eth.defaultAccount.toLowerCase() != buy.maker.toLowerCase()
       ) {
-        throw new ElementError({ code: 1204 })
+        throw new ElementError({ code: '1204' })
       }
     }
   }
@@ -360,12 +360,12 @@ export async function validateOrder(exchangeHelper: any, order: any): Promise<an
   try {
     let isValidate = await exchangeHelper.methods.validateOrder(orderParamValueArray, orderSigArray).call()
     if (!isValidate) {
-      throw new ElementError({ code: 1203 })
+      throw new ElementError({ code: '1203' })
     }
     return isValidate
   } catch (e) {
     if (!e.code) {
-      throw new ElementError({ code: 1205 })
+      throw new ElementError({ code: '1205' })
     }
     throw e
   }
@@ -430,7 +430,7 @@ export async function ordersCanMatch(exchangeHelper: any, buy: Order, sell: Orde
   const sellOrderParamArray = orderParamsEncode(sell)
   let canMatch = exchangeHelper.methods.ordersCanMatch(buyOrderParamArray, sellOrderParamArray).call()
   if (!canMatch) {
-    throw new ElementError({ code: 1202 })
+    throw new ElementError({ code: '1202' })
   }
   return true
 }

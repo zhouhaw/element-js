@@ -4,12 +4,12 @@
 export interface CustomError {
     name?: string;
     data?: any;
-    code: number;
+    code: string;
     message?: string;
 }
 export declare type ElementErrorCodes = Array<Readonly<CustomError>>;
 export declare const ErrorCodes: ElementErrorCodes;
 export declare class ElementError extends Error {
-    code: number;
+    code: string;
     constructor(err: CustomError);
 }

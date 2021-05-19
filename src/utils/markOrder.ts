@@ -51,7 +51,7 @@ export function getSchema(network: Network, schemaName?: ElementSchemaName): Sch
   if (schemaInfo.length == 0) {
     let msg = `Trading for this asset (${schemaName_}) is not yet supported. Please contact us or check back later!`
 
-    throw new ElementError({ code: 1000, message: msg })
+    throw new ElementError({ code: '1000', message: msg })
   }
   return schemaInfo[0]
 }
@@ -109,28 +109,31 @@ export function getPriceParameters(
 
   // Validation
   if (isNaN(startAmount) || startAmount == undefined || startAmount < 0) {
-    throw new ElementError({ code: 1000, message: `Starting price must be a number >= 0` })
+    throw new ElementError({ code: '1000', message: `Starting price must be a number >= 0` })
   }
   if (!isEther && !token) {
-    throw new ElementError({ code: 1000, message: `No ERC-20 token found for '${paymentToken}'` })
+    throw new ElementError({ code: '1000', message: `No ERC-20 token found for '${paymentToken}'` })
   }
   if (isEther && waitingForBestCounterOrder) {
-    throw new ElementError({ code: 1000, message: `English auctions must use wrapped ETH or an ERC-20 token.` })
+    throw new ElementError({ code: '1000', message: `English auctions must use wrapped ETH or an ERC-20 token.` })
   }
   // if (isEther && orderSide === OrderSide.Buy) {
   //   throw new Error(`Offers must use wrapped ETH or an ERC-20 token.`)
   // }
   if (priceDiff < 0) {
-    throw new ElementError({ code: 1000, message: 'End price must be less than or equal to the start price.' })
+    throw new ElementError({ code: '1000', message: 'End price must be less than or equal to the start price.' })
   }
   if (priceDiff > 0 && expirationTime == 0) {
-    throw new ElementError({ code: 1000, message: 'Expiration time must be set if order will change in price.' })
+    throw new ElementError({ code: '1000', message: 'Expiration time must be set if order will change in price.' })
   }
   if (englishAuctionReservePrice && !waitingForBestCounterOrder) {
-    throw new ElementError({ code: 1000, message: 'Reserve prices may only be set on English auctions.' })
+    throw new ElementError({ code: '1000', message: 'Reserve prices may only be set on English auctions.' })
   }
   if (englishAuctionReservePrice && englishAuctionReservePrice < startAmount) {
-    throw new ElementError({ code: 1000, message: 'Reserve price must be greater than or equal to the start amount.' })
+    throw new ElementError({
+      code: '1000',
+      message: 'Reserve price must be greater than or equal to the start amount.'
+    })
   }
 
   // Note: WyvernProtocol.toBaseUnitAmount(makeBigNumber(startAmount), token.decimals)
@@ -158,24 +161,24 @@ export function getTimeParameters(
   const minListingTimestamp = Math.round(Date.now() / 1000)
   if (expirationTimestamp != 0 && expirationTimestamp < minExpirationTimestamp) {
     throw new ElementError({
-      code: 1000,
+      code: '1000',
       message: `Expiration time must be at least ${MIN_EXPIRATION_SECONDS} seconds from now, or zero (non-expiring).`
     })
   }
   if (listingTimestamp && listingTimestamp < minListingTimestamp) {
-    throw new ElementError({ code: 1000, message: 'Listing time cannot be in the past.' })
+    throw new ElementError({ code: '1000', message: 'Listing time cannot be in the past.' })
   }
   if (listingTimestamp && expirationTimestamp !== 0 && listingTimestamp >= expirationTimestamp) {
-    throw new ElementError({ code: 1000, message: 'Listing time must be before the expiration time.' })
+    throw new ElementError({ code: '1000', message: 'Listing time must be before the expiration time.' })
   }
   if (waitingForBestCounterOrder && expirationTimestamp == 0) {
-    throw new ElementError({ code: 1000, message: 'English auctions must have an expiration time.' })
+    throw new ElementError({ code: '1000', message: 'English auctions must have an expiration time.' })
   }
   if (waitingForBestCounterOrder && listingTimestamp) {
-    throw new ElementError({ code: 1000, message: `Cannot schedule an English auction for the future.` })
+    throw new ElementError({ code: '1000', message: `Cannot schedule an English auction for the future.` })
   }
   if (Number.parseInt(expirationTimestamp.toString()) != expirationTimestamp) {
-    throw new ElementError({ code: 1000, message: `Expiration timestamp must be a whole number of seconds` })
+    throw new ElementError({ code: '1000', message: `Expiration timestamp must be a whole number of seconds` })
   }
 
   if (waitingForBestCounterOrder) {
@@ -460,7 +463,7 @@ export async function hashAndValidateOrder(web3: any, exchangeHelper: any, order
   if (web3.eth.defaultAccount.toLowerCase() == hashedOrder.maker.toLowerCase()) {
     signature = await signOrderHash(web3, hashedOrder)
   } else {
-    throw new ElementError({ code: 1000, message: 'web3.eth.defaultAccount and maker not equal' })
+    throw new ElementError({ code: '1000', message: 'web3.eth.defaultAccount and maker not equal' })
   }
 
   let orderWithSignature = {
@@ -488,7 +491,7 @@ export async function signOrderHash(web3: any, hashedOrder: UnsignedOrder): Prom
       s: `0x${signatureHex.slice(64, 128)}`
     }
   } catch (error) {
-    throw new ElementError({ code: 1000, message: 'You declined to authorize your auction' })
+    throw new ElementError({ code: '1000', message: 'You declined to authorize your auction' })
   }
   return signature
 }
