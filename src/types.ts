@@ -176,8 +176,7 @@ export enum OrderSide {
 
 export enum SaleKind {
   FixedPrice = 0,
-  EnglishAuction = 1,
-  DutchAuction = 2
+  DutchAuction = 1
 }
 
 export enum HowToCall {

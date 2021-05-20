@@ -3,7 +3,7 @@ import { Base } from './base'
 import { NULL_ADDRESS } from '../src/utils/constants'
 import { getAccountNFTsBalance } from '../src/utils/check'
 
-import { transferFromERC1155 } from '../src/utils'
+import { orderFromJSON, transferFromERC1155 } from '../src/utils'
 import { Asset, ElementSchemaName, Network, Orders, OrderCheckStatus } from '../src'
 ;(async () => {
   let base = new Base()
@@ -26,12 +26,27 @@ import { Asset, ElementSchemaName, Network, Orders, OrderCheckStatus } from '../
     schemaName: ElementSchemaName.ERC1155
   } as Asset
 
+  const sellParm = {
+    asset,
+    accountAddress: sellAccount,
+    startAmount: 0.12,
+    endAmount: 0.1,
+    paymentTokenAddress: wETHAddr,
+    expirationTime: 1621509587
+  }
+  //     endAmount: 0.1,
+  // expirationTime: 0 // 1621509587
+  base.web3.eth.defaultAccount = sellAccount
+  let sellOrderJson = await order.createSellOrder(sellParm)
+
   //------createBuyOrder
   const buyParm = {
     accountAddress: buyAccount,
     paymentTokenAddress: wETHAddr,
     asset,
-    startAmount: 0.12
+    startAmount: 0.12,
+    endAmount: 0.1,
+    sellOrder: orderFromJSON(sellOrderJson)
   }
 
   function next<OrderCheckStatus>(arg: OrderCheckStatus) {
@@ -53,16 +68,6 @@ import { Asset, ElementSchemaName, Network, Orders, OrderCheckStatus } from '../
     console.log('transferFromERC1155 to Sell', tx)
     return
   }
-
-  const sellParm = {
-    asset,
-    accountAddress: sellAccount,
-    startAmount: 0.12,
-    paymentTokenAddress: wETHAddr,
-    expirationTime: 0
-  }
-  base.web3.eth.defaultAccount = sellAccount
-  let sellOrderJson = await order.createSellOrder(sellParm)
 
   console.log('sellOrder', { buy: buyOrder, sell: sellOrderJson })
 })()

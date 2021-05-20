@@ -446,7 +446,12 @@ export function orderSigEncode(order: any) {
 
 export async function getOrderHash(web3: any, exchangeHelper: any, order: UnhashedOrder): Promise<string> {
   const orderParamValueArray = orderParamsEncode(order)
-  return exchangeHelper.methods.hashOrder(orderParamValueArray).call()
+  try {
+    let orderHash = await exchangeHelper.methods.hashOrder(orderParamValueArray).call()
+    return orderHash
+  } catch (e) {
+    throw new ElementError({ code: '1000', message: 'exchangeHelper.methods.hashOrder ' + e.message })
+  }
 }
 
 export async function hashAndValidateOrder(web3: any, exchangeHelper: any, order: UnhashedOrder): Promise<any> {
