@@ -21,7 +21,7 @@ export {
   checkSenderOfAuthenticatedProxy
 } from './utils/check'
 
-export { getTokenList, getSchemaList, orderToJSON } from './utils/markOrder'
+export { getTokenList, getSchemaList, orderToJSON, getPriceParameters } from './utils/markOrder'
 export { BigNumber, NULL_ADDRESS, NULL_BLOCK_HASH } from './utils/constants'
 export { orderFromJSON, transferFromERC1155, transferFromERC721, transferFromWETH } from './utils'
 

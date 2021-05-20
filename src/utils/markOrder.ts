@@ -223,9 +223,6 @@ export async function _makeBuyOrder({
   referrerAddress?: string
 }): Promise<UnhashedOrder> {
   let { schema, elementAsset, quantityBN } = getSchemaAndAsset(networkName, asset, quantity)
-  // const schema = getSchema(networkName, asset.schemaName)
-  // const quantityBN = makeBigNumber(quantity) // WyvernProtocol.toBaseUnitAmount(makeBigNumber(quantity), asset.decimals || 0)
-  // const wyAsset = getElementAsset(schema, asset, quantityBN)
 
   const taker = sellOrder ? sellOrder.maker : NULL_ADDRESS
 
