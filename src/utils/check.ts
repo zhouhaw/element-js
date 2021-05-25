@@ -266,7 +266,7 @@ export async function checkBuyUser(contract: any, paymentTokenAddr: any, account
 }
 
 export async function checkMatchOrder(contract: any, buy: Order, sell: Order, accountAddress?: string) {
-  const equalPrice: boolean = buy.basePrice.gte(sell.basePrice)
+  const equalPrice: boolean = sell.basePrice.gte(buy.basePrice)
   if (!equalPrice) {
     throw new ElementError({ code: '1201' })
   }

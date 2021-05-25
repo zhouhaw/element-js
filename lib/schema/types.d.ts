@@ -32,6 +32,11 @@ export declare enum Network {
     Rinkeby = "rinkeby",
     Private = "private"
 }
+export declare enum NetworkID {
+    Main = "4",
+    Rinkeby = "7",
+    Private = "100"
+}
 export declare enum AbiType {
     Function = "function",
     Constructor = "constructor",

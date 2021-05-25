@@ -138,8 +138,7 @@ export declare enum OrderSide {
 }
 export declare enum SaleKind {
     FixedPrice = 0,
-    EnglishAuction = 1,
-    DutchAuction = 2
+    DutchAuction = 1
 }
 export declare enum HowToCall {
     Call = 0,

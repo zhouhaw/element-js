@@ -37,6 +37,12 @@ export enum Network {
   Private = 'private'
 }
 
+export enum NetworkID {
+  Main = '4',
+  Rinkeby = '7',
+  Private = '100'
+}
+
 export enum AbiType {
   Function = 'function',
   Constructor = 'constructor',

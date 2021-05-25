@@ -3,20 +3,31 @@ import { Base } from './base'
 import { NULL_ADDRESS } from '../src/utils/constants'
 import { getAccountNFTsBalance } from '../src/utils/check'
 
-import { orderFromJSON, transferFromERC1155 } from '../src/utils'
-import { Asset, ElementSchemaName, Network, Orders, OrderCheckStatus } from '../src'
+import { orderFromJSON, transferFromERC1155, getCurrentPrice } from '../src'
+import {
+  Asset,
+  ElementSchemaName,
+  Network,
+  Orders,
+  OrderCheckStatus,
+  getAccountBalance,
+  chainValueConvert
+} from '../src'
 ;(async () => {
   let base = new Base()
   await base.init()
-  let sellAccount = base.accounts[1].address
-  let buyAccount = base.accounts[0].address
+  let sellAccount = base.accounts[0].address
+  let buyAccount = base.accounts[1].address
   const order = base.orders
   let wETHAddr = NULL_ADDRESS
+
+  console.log('sell', sellAccount, 'buy', buyAccount)
 
   // const payToken = order.erc20.clone()
   // let wETHAddr = order.WETHAddr
   // payToken.options.address = wETHAddr
   // let bal = await getAccountBalance(order.web3, buyAccount, payToken)
+
   let tokenId = '52110910509117159886520023034677676808462086871028572901793699248975699247105'
   let assetAddr = order.elementSharedAssetAddr.toLowerCase() // ElementSharedAsset.networks[100].address
 
@@ -29,27 +40,26 @@ import { Asset, ElementSchemaName, Network, Orders, OrderCheckStatus } from '../
   const sellParm = {
     asset,
     accountAddress: sellAccount,
-    startAmount: 200,
-    endAmount: 2,
+    startAmount: 1000,
+    endAmount: 600,
     paymentTokenAddress: wETHAddr,
-    expirationTime: Date.now() / 1000 + 2 * 60 * 60
+    listingTime: Number.parseInt(`${Date.now() / 1000 - 2 * 60}`, 10),
+    expirationTime: Number.parseInt(`${Date.now() / 1000 + 2 * 60}`, 10)
   }
-  //     endAmount: 0.1,
-  // expirationTime: 0 // 1621509587
+
   base.web3.eth.defaultAccount = sellAccount
   let sellOrderJson = await order.createSellOrder(sellParm)
+  let sell = orderFromJSON(sellOrderJson)
+  const basePrice = await getCurrentPrice(base.contracts.exchangeHelper, sell)
 
-  console.log(sellOrderJson.extra.toString())
-
-  debugger
+  console.log('getCurrentPrice', chainValueConvert(basePrice, 18))
 
   //------createBuyOrder
   const buyParm = {
     accountAddress: buyAccount,
     paymentTokenAddress: wETHAddr,
     asset,
-    startAmount: 0.12,
-    endAmount: 0.1,
+    startAmount: chainValueConvert(basePrice, 18),
     sellOrder: orderFromJSON(sellOrderJson)
   }
 
@@ -73,10 +83,32 @@ import { Asset, ElementSchemaName, Network, Orders, OrderCheckStatus } from '../
     return
   }
 
-  // let buy = orderFromJSON(buyOrder)
-  // let sell = orderFromJSON(sellOrderJson)
-  // base.web3.eth.defaultAccount = buyAccount
-  // let match = await order.matchOrder({ buy, sell, accountAddress: buyAccount })
+  let buy = orderFromJSON(buyOrder)
 
-  console.log('matchOrder', { buy: buyOrder, sell: sellOrderJson })
+  let buyBal = await getAccountBalance(order.web3, buyAccount)
+  let sellBal = await getAccountBalance(order.web3, sellAccount)
+  console.log(
+    `Match before Buyer ${chainValueConvert(buyBal.ethBal, 18).toString()} Seller ${chainValueConvert(
+      sellBal.ethBal,
+      18
+    )}, sell price ${sell.basePrice}`
+  )
+
+  base.web3.eth.defaultAccount = buyAccount
+  let match = await order.matchOrder({ buy, sell, accountAddress: buyAccount })
+
+  if (match) {
+    buyBal = await getAccountBalance(order.web3, buyAccount)
+    sellBal = await getAccountBalance(order.web3, sellAccount)
+    console.log(
+      `Match after Buyer ${chainValueConvert(buyBal.ethBal, 18).toString()} Seller ${chainValueConvert(
+        sellBal.ethBal,
+        18
+      )},buy price ${buy.basePrice}`
+    )
+  } else {
+    console.log('matchOrder fail')
+  }
+
+  // console.log('matchOrder', { buy: buyOrder, sell: sellOrderJson })
 })()

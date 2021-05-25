@@ -161,10 +161,12 @@ export class Orders extends Contracts {
     if (paymentTokenAddress == '') {
       paymentTokenAddress = NULL_ADDRESS
     }
+    expirationTime = expirationTime ? parseInt(String(expirationTime)) : expirationTime
     await checkSellUser(this, asset, paymentTokenAddress, accountAddress)
 
     let networkName = this.networkName
     let exchangeAddr = this.exchange.options.address
+
     const sellOrder = await _makeSellOrder({
       networkName,
       exchangeAddr,

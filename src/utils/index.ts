@@ -93,3 +93,43 @@ export async function transferFromWETH(WETHContract: any, account: string, amoun
     sellBal = await WETHContract.methods.balanceOf(account).call()
   }
 }
+
+/**
+ * @desc 链上返回大数处理，并小数点默认保留5位小数
+ * @Params (bigNumberValue大数, decimalPow位, decimalDigits保留几个小数点)
+ * @method chainValueConvert(bigNumberValue, decimalPow, decimalDigits)
+ */
+export function chainValueConvert(bigNumberValue: BigNumber.Value, decimalPow: number, decimalDigits?: number): string
+export function chainValueConvert(bigNumberValue: () => BigNumber.Value, decimalPow: number, decimalDigits?: number): string
+export function chainValueConvert(
+    bigNumberValue: BigNumber.Value | (() => BigNumber.Value),
+    decimalPow: number,
+    decimalDigits = 5
+): string {
+  BigNumber.config({ DECIMAL_PLACES: decimalDigits, ROUNDING_MODE: BigNumber.ROUND_DOWN, EXPONENTIAL_AT: 1e9 })
+
+  const val = typeof bigNumberValue === 'function' ? bigNumberValue() : bigNumberValue
+
+  const decimalBase = new BigNumber(10)
+  const decimal = decimalBase.pow(decimalPow)
+  const valueReturn = new BigNumber(val)
+  return valueReturn.div(decimal).toString(10)
+}
+
+/**
+ * @desc 返回真实链上所需要的数值
+ * @Params (decimalDigitsValue大数, decimalPow位)
+ * @method chainValueRestore(decimalDigitsValue, decimalPow)
+ */
+export function chainValueRestore(decimalDigitsValue: BigNumber.Value, decimalPow: number): string
+export function chainValueRestore(decimalDigitsValue: () => BigNumber.Value, decimalPow: number): string
+export function chainValueRestore(decimalDigitsValue: BigNumber.Value | (() => BigNumber.Value), decimalPow: number): string {
+  BigNumber.config({ DECIMAL_PLACES: 0, EXPONENTIAL_AT: 1e9 })
+
+  const val = typeof decimalDigitsValue === 'function' ? decimalDigitsValue() : decimalDigitsValue
+
+  const decimalBase = new BigNumber(10)
+  const decimal = decimalBase.pow(decimalPow)
+  const valueReturn = new BigNumber(val)
+  return valueReturn.times(decimal).dp(0).toString()
+}

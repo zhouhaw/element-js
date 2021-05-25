@@ -64,3 +64,4 @@ export declare function schemaEncodeSell(network: Network, schema: ElementSchema
     replacementPattern: string;
 };
 export declare function hashOrder(web3: any, order: UnhashedOrder): string;
+export declare function getCurrentPrice(exchangeHelper: any, order: Order): Promise<any>;
