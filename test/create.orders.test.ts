@@ -26,7 +26,7 @@ import { Asset, ElementSchemaName, Network, Orders, OrderCheckStatus } from '../
     schemaName: ElementSchemaName.ERC1155
   } as Asset
 
-  const sellParm = {
+  const sellParm1 = {
     asset,
     accountAddress: sellAccount,
     startAmount: 200,
@@ -34,6 +34,22 @@ import { Asset, ElementSchemaName, Network, Orders, OrderCheckStatus } from '../
     paymentTokenAddress: wETHAddr,
     expirationTime: Date.now() / 1000 + 2 * 60 * 60
   }
+
+  const sellParm = {
+    asset: {
+      tokenId: '111412907064897424396546521797626316190000184639223517525059479039576268341258',
+      tokenAddress: '0x4cddbf865ee2a1a3711648bb192e285f290f7985',
+      name: 'ERC1155'
+    },
+    accountAddress: '0x4A8b1005816A31b07B25254a883761BaCf297abc',
+    startAmount: '1',
+    endAmount: '0',
+    quantity: 1,
+    paymentTokenAddress: '',
+    listingTime: 1622023860,
+    expirationTime: 1622628660
+  }
+
   //     endAmount: 0.1,
   // expirationTime: 0 // 1621509587
   base.web3.eth.defaultAccount = sellAccount

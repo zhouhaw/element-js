@@ -76,6 +76,14 @@ export const ErrorCodes: ElementErrorCodes = [
     message: 'Order parameter false '
   },
   {
+    code: '1206',
+    message: 'Sell Order cancelledOrFinalized false '
+  },
+  {
+    code: '1207',
+    message: 'Buy Order cancelledOrFinalized false '
+  },
+  {
     code: '2001',
     message: 'rpc requset error '
   }

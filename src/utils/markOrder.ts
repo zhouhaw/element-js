@@ -604,8 +604,8 @@ export function hashOrder(web3: any, order: UnhashedOrder): string {
     .toString('hex')
 }
 
-export async function getCurrentPrice(exchangeHelper: any, order: Order) {
-  let currentPrice = await exchangeHelper.methods
+export async function getCurrentPrice(exchangeHelper: any, order: Order): Promise<string> {
+  let currentPrice: string = await exchangeHelper.methods
     .calculateFinalPrice(
       order.side,
       order.saleKind,

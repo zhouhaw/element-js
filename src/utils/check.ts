@@ -267,13 +267,19 @@ export async function checkBuyUser(contract: any, paymentTokenAddr: any, account
 
 export async function checkMatchOrder(contract: any, buy: Order, sell: Order, accountAddress?: string) {
   const equalPrice: boolean = sell.basePrice.gte(buy.basePrice)
+
   if (!equalPrice) {
     throw new ElementError({ code: '1201' })
   }
+
   await checkOrder(contract, buy)
   await checkOrder(contract, sell)
 
   return true
+}
+
+export async function cancelledOrFinalized(exchangeHelper: any, orderHash: string): Promise<boolean> {
+  return exchangeHelper.methods.cancelledOrFinalized(orderHash).call()
 }
 
 export async function checkOrder(contract: any, order: Order, accountAddress?: string) {
@@ -290,9 +296,14 @@ export async function checkOrder(contract: any, order: Order, accountAddress?: s
     throw new ElementError({ code: '1105' })
   }
 
+  const isCancelledOrFinalized = await cancelledOrFinalized(contract.exchange, order.hash)
   // 检查 Sell 买单 Buy = 0, Sell = 1
   if (order.side == OrderSide.Sell) {
+    if (!isCancelledOrFinalized) {
+      throw new ElementError({ code: '1206' })
+    }
     let sell = order
+
     const sellNFTs = contract.erc1155.clone()
     sellNFTs.options.address = sell.metadata.asset.address
 
@@ -319,6 +330,9 @@ export async function checkOrder(contract: any, order: Order, accountAddress?: s
 
   // 检查 Buy 卖单
   if (order.side == OrderSide.Buy) {
+    if (!isCancelledOrFinalized) {
+      throw new ElementError({ code: '1207' })
+    }
     let buy = order
     if (buy.paymentToken !== NULL_ADDRESS) {
       let erc20Contract = contract.erc20.clone()
