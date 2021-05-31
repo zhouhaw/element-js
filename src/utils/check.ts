@@ -299,7 +299,7 @@ export async function checkOrder(contract: any, order: Order, accountAddress?: s
   const isCancelledOrFinalized = await cancelledOrFinalized(contract.exchange, order.hash)
   // 检查 Sell 买单 Buy = 0, Sell = 1
   if (order.side == OrderSide.Sell) {
-    if (!isCancelledOrFinalized) {
+    if (isCancelledOrFinalized) {
       throw new ElementError({ code: '1206' })
     }
     let sell = order
@@ -330,7 +330,7 @@ export async function checkOrder(contract: any, order: Order, accountAddress?: s
 
   // 检查 Buy 卖单
   if (order.side == OrderSide.Buy) {
-    if (!isCancelledOrFinalized) {
+    if (isCancelledOrFinalized) {
       throw new ElementError({ code: '1207' })
     }
     let buy = order
