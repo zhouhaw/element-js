@@ -8,8 +8,8 @@ import { Asset, ElementSchemaName, Network, Orders } from '../src'
   try {
     let base = new Base()
     await base.init()
-    let sellAccount = base.accounts[0].address
-    let buyAccount = base.accounts[1].address
+    let sellAccount = base.accounts[1].address
+    let buyAccount = base.accounts[0].address
     const order = base.orders
     const payToken = order.erc20.clone()
     let wETHAddr = order.WETHAddr

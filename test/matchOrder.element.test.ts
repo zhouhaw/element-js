@@ -1,20 +1,20 @@
 import { Base } from './base'
 
+import { transferFromERC1155, orderFromJSON } from '../src/utils'
+
 import {
-  transferFromERC1155,
+  Asset,
+  ElementSchemaName,
   getAccountBalance,
+  Network,
   getAccountNFTsBalance,
-  registerProxy,
-  approveTokenTransferProxy,
-  approveERC1155TransferProxy,
-  orderFromJSON,
-  getTokenIDOwner
-} from '../src/utils'
-import { Asset, ElementSchemaName, Network, Orders } from '../src'
+  getTokenIDOwner,
+  Orders
+} from '../src'
 ;(async () => {
   let base = new Base()
   await base.init()
-  let sellAccount = base.accounts[3].address
+  let sellAccount = base.accounts[0].address
   let buyAccount = base.accounts[1].address
   const order = base.orders
   const payToken = order.erc20.clone()
@@ -22,9 +22,9 @@ import { Asset, ElementSchemaName, Network, Orders } from '../src'
   payToken.options.address = wETHAddr
   let bal = await getAccountBalance(order.web3, sellAccount, payToken)
 
-  let tokenId = '33716853113536161489978336371468443552125006904605057389181032262111709888513'
+  // let tokenId = '33716853113536161489978336371468443552125006904605057389181032262111709888513'
 
-  // let tokenId = '52110910509117159886520023034677676808462086871028572901793699467778513174529'
+  let tokenId = '52110910509117159886520023034677676808462086871028572901793699467778513174529'
   let assetAddr = order.elementSharedAssetAddr.toLowerCase()
 
   //---------- match order buy--------
@@ -68,7 +68,7 @@ import { Asset, ElementSchemaName, Network, Orders } from '../src'
   let owner = await getTokenIDOwner(base.contracts.elementSharedAsset, sell.metadata.asset.id)
   let sellIsOwner = sell.maker.toLowerCase() == owner.toLowerCase()
   if (!sellIsOwner) {
-    return false
+    // return false
   }
 
   // sell accept
@@ -77,9 +77,11 @@ import { Asset, ElementSchemaName, Network, Orders } from '../src'
   // base.web3.eth.defaultAccount = sellAccount
   // let match = await order.matchOrder({ buy, sell, accountAddress: sellAccount })
 
+  console.log('buy', buy, 'sell', sell)
   // // buy 一口价
   buy = orderFromJSON(buy)
   sell = orderFromJSON(sell)
+
   base.web3.eth.defaultAccount = buyAccount
   let match = await order.matchOrder({ buy, sell, accountAddress: buyAccount })
 

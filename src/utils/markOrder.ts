@@ -24,7 +24,8 @@ import {
   NULL_ADDRESS,
   MAX_DIGITS_IN_UNSIGNED_256_INT,
   MIN_EXPIRATION_SECONDS,
-  ORDER_MATCHING_LATENCY_SECONDS
+  ORDER_MATCHING_LATENCY_SECONDS,
+  ELEMENT_FEE_RECIPIENT
 } from './constants'
 import { validateOrder } from './check'
 
@@ -328,7 +329,7 @@ export async function _makeSellOrder({
   )
   const times = getTimeParameters(expirationTime, listingTime, waitForHighestBid)
 
-  const feeRecipient = accountAddress
+  const feeRecipient = ELEMENT_FEE_RECIPIENT //accountAddress
   const feeMethod = FeeMethod.SplitFee
 
   return {
