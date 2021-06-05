@@ -31,12 +31,14 @@ export enum ElementSchemaName {
 interface ElementNFTAsset {
   id: string
   address: string
+  collection?: ElementCollection
 }
 
 interface ElementFTAsset {
   id?: string
   address: string
   quantity: string
+  collection?: ElementCollection
 }
 
 export type ElementAsset = ElementNFTAsset | ElementFTAsset
@@ -89,6 +91,7 @@ export interface Asset {
   data?: string
   // Optional for fungible items
   decimals?: number
+  collection?: ElementCollection
 }
 
 //----------- OrderJSON--------------
@@ -121,7 +124,7 @@ export interface OrderJSON extends Partial<ECSignature> {
 
   quantity: string
   basePrice: string
-  // englishAuctionReservePrice: string | undefined
+  englishAuctionReservePrice: string | undefined
   extra: string
 
   // createdTime is undefined when order hasn't been posted yet
@@ -193,7 +196,7 @@ export interface UnhashedOrder extends ElementOrder {
   howToCall: HowToCall
   quantity: BigNumber
 
-  // OpenSea-specific
+  // Element-specific
   makerReferrerFee: BigNumber
   waitingForBestCounterOrder?: boolean
   englishAuctionReservePrice?: BigNumber
@@ -224,7 +227,6 @@ export interface Order extends UnsignedOrder, Partial<ECSignature> {
   assetBundle?: any
 }
 
-// Asset
 export interface Token {
   name: string
   symbol: string
@@ -257,4 +259,67 @@ export interface ElementAccount {
 
   // More information explicitly set by this account's owner on Element
   user: ElementUser | null
+}
+
+/******************** Fees ***********************/
+/**
+ * The basis point values of each type of fee
+ */
+export interface ElementFees {
+  // Fee for Element levied on sellers
+  elementSellerFeeBasisPoints: number
+  // Fee for Element levied on buyers
+  elementBuyerFeeBasisPoints: number
+  // Fee for the collection owner levied on sellers
+  devSellerFeeBasisPoints: number
+  // Fee for the collection owner levied on buyers
+  devBuyerFeeBasisPoints: number
+}
+
+/**
+ * Fully computed fees including bounties and transfer fees
+ */
+export interface ComputedFees extends ElementFees {
+  // Total fees. dev + element
+  totalBuyerFeeBasisPoints: number
+  totalSellerFeeBasisPoints: number
+
+  // Fees that the item's creator takes on every transfer
+  transferFee: BigNumber
+  transferFeeTokenAddress: string | null
+
+  // Fees that go to whoever refers the order to the taker.
+  // Comes out of OpenSea fees
+  sellerBountyBasisPoints: number
+}
+
+export interface Token {
+  name: string;
+  symbol: string;
+  decimals: number;
+  address: string;
+}
+/**
+ * Full annotated Fungible Token spec with OpenSea metadata
+ */
+export interface ElemetnFungibleToken extends Token {
+  imageUrl?: string
+  ethPrice?: string
+  usdPrice?: string
+}
+
+/**
+ * Annotated collection with OpenSea metadata
+ */
+export interface ElementCollection extends ElementFees {
+  // Name of the collection
+  name: string
+  // Description of the collection
+  description: string
+  // Image for the collection
+  imageUrl: string
+  // The per-transfer fee, in base units, for this asset in its transfer method
+  transferFee: BigNumber | string | null,
+  // The transfer fee token for this asset in its transfer method
+  transferFeePaymentToken: ElemetnFungibleToken | null
 }

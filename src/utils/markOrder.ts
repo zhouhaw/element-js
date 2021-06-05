@@ -3,7 +3,6 @@ import {
   ECSignature,
   ElementAsset,
   ElementSchemaName,
-  FeeMethod,
   HowToCall,
   Network,
   Order,
@@ -13,36 +12,27 @@ import {
   UnhashedOrder,
   UnsignedOrder
 } from '../types'
-
 // import { schemas, encodeBuy, encodeSell, encodeCall } from '../schema'
-import { schemas, encodeBuy, encodeSell } from '../schema'
+import { encodeBuy, encodeSell, schemas } from '../schema'
 import { Schema } from '../schema/types'
 import { tokens } from '../schema/tokens'
 import { ElementError } from '../base/error'
+import { _getBuyFeeParameters, _getSellFeeParameters, computeFees } from './fees'
 import {
   BigNumber,
-  NULL_ADDRESS,
+  ELEMENT_FEE_RECIPIENT,
   MAX_DIGITS_IN_UNSIGNED_256_INT,
   MIN_EXPIRATION_SECONDS,
+  NULL_ADDRESS,
   ORDER_MATCHING_LATENCY_SECONDS,
-  ELEMENT_FEE_RECIPIENT
+  STATIC_CALL_TX_ORIGIN_ADDRESS,
+  STATIC_CALL_TX_ORIGIN_RINKEBY_ADDRESS,
+  STATIC_EXTRADATA
 } from './constants'
 import { validateOrder } from './check'
+import { makeBigNumber, toBaseUnitAmount } from './helper'
 
-export function toBaseUnitAmount(amount: BigNumber, decimals: number): BigNumber {
-  const unit = new BigNumber(10).pow(decimals)
-  return amount.times(unit).integerValue()
-}
-
-export function makeBigNumber(arg: number | string | BigNumber): BigNumber {
-  // Zero sometimes returned as 0x from contracts
-  if (arg === '0x') {
-    arg = 0
-  }
-  // fix "new BigNumber() number type has more than 15 significant digits"
-  arg = arg.toString()
-  return new BigNumber(arg)
-}
+export { makeBigNumber }
 
 export function getSchema(network: Network, schemaName?: ElementSchemaName): Schema<any> {
   const schemaName_ = schemaName || ElementSchemaName.ERC1155
@@ -101,6 +91,7 @@ export function getPriceParameters(
 ) {
   const priceDiff = endAmount != undefined ? startAmount - endAmount : 0
   const paymentToken = tokenAddress.toLowerCase()
+
   const isEther = tokenAddress == NULL_ADDRESS
   let token
   if (!isEther) {
@@ -148,6 +139,10 @@ export function getPriceParameters(
     : toBaseUnitAmount(makeBigNumber(priceDiff), token.decimals)
 
   const reservePrice = englishAuctionReservePrice
+    ? isEther
+      ? toBaseUnitAmount(makeBigNumber(englishAuctionReservePrice), 18)
+      : toBaseUnitAmount(makeBigNumber(englishAuctionReservePrice), token.decimals)
+    : undefined
 
   return { basePrice, extra, paymentToken, reservePrice }
 }
@@ -227,12 +222,6 @@ export async function _makeBuyOrder({
 
   const taker = sellOrder ? sellOrder.maker : NULL_ADDRESS
 
-  // OrderSide.Buy
-  const feeRecipient = NULL_ADDRESS
-  const feeMethod = FeeMethod.SplitFee
-
-  // console.log(wyAsset)
-
   const { target, dataToCall, replacementPattern } = encodeBuy(schema, elementAsset, accountAddress)
 
   const { basePrice, extra, paymentToken } = getPriceParameters(
@@ -244,16 +233,44 @@ export async function _makeBuyOrder({
   )
   const times = getTimeParameters(expirationTime)
 
+  // -------- Fee -----------
+  const { totalBuyerFeeBasisPoints, totalSellerFeeBasisPoints } = await computeFees({
+    asset: asset,
+    extraBountyBasisPoints,
+    side: OrderSide.Buy
+  })
+
+  // OrderSide.Buy
+  // const feeRecipient = NULL_ADDRESS
+  // const feeMethod = FeeMethod.SplitFee
+
+  const {
+    makerRelayerFee,
+    takerRelayerFee,
+    makerProtocolFee,
+    takerProtocolFee,
+    makerReferrerFee,
+    feeRecipient,
+    feeMethod
+  } = _getBuyFeeParameters(totalBuyerFeeBasisPoints, totalSellerFeeBasisPoints, sellOrder)
+
+  const isMainnet = networkName == Network.Main
+  const { staticTarget, staticExtradata } = await _getStaticCallTargetAndExtraData({
+    isMainnet,
+    asset,
+    useTxnOriginStaticCall: false
+  })
+
   return {
     exchange: exchangeAddr,
     maker: accountAddress,
     taker,
     quantity: quantityBN,
-    makerRelayerFee: makeBigNumber(250),
-    takerRelayerFee: makeBigNumber(0),
-    makerProtocolFee: makeBigNumber(0),
-    takerProtocolFee: makeBigNumber(0),
-    makerReferrerFee: makeBigNumber(0),
+    makerRelayerFee,
+    takerRelayerFee,
+    makerProtocolFee,
+    takerProtocolFee,
+    makerReferrerFee,
     waitingForBestCounterOrder: false,
     feeMethod,
     feeRecipient,
@@ -263,8 +280,8 @@ export async function _makeBuyOrder({
     howToCall: HowToCall.Call,
     dataToCall,
     replacementPattern,
-    staticTarget: NULL_ADDRESS,
-    staticExtradata: '0x',
+    staticTarget,
+    staticExtradata,
     paymentToken,
     basePrice,
     extra,
@@ -273,8 +290,7 @@ export async function _makeBuyOrder({
     salt: generatePseudoRandomSalt(),
     metadata: {
       asset: elementAsset,
-      schema: schema.name as ElementSchemaName,
-      referrerAddress
+      schema: schema.name as ElementSchemaName
     }
   }
 }
@@ -329,19 +345,50 @@ export async function _makeSellOrder({
   )
   const times = getTimeParameters(expirationTime, listingTime, waitForHighestBid)
 
-  const feeRecipient = ELEMENT_FEE_RECIPIENT //accountAddress
-  const feeMethod = FeeMethod.SplitFee
+  // -------- Fee -----------
+  const isPrivate = buyerAddress != NULL_ADDRESS
+  const { totalSellerFeeBasisPoints, totalBuyerFeeBasisPoints, sellerBountyBasisPoints } = await computeFees({
+    asset,
+    side: OrderSide.Sell,
+    isPrivate,
+    extraBountyBasisPoints
+  })
+
+  // const feeRecipient = ELEMENT_FEE_RECIPIENT
+  // const feeMethod = FeeMethod.SplitFee
+
+  const {
+    makerRelayerFee,
+    takerRelayerFee,
+    makerProtocolFee,
+    takerProtocolFee,
+    makerReferrerFee,
+    feeRecipient,
+    feeMethod
+  } = _getSellFeeParameters(
+    totalBuyerFeeBasisPoints,
+    totalSellerFeeBasisPoints,
+    waitForHighestBid,
+    sellerBountyBasisPoints
+  )
+
+  const isMainnet = networkName == Network.Main
+  const { staticTarget, staticExtradata } = await _getStaticCallTargetAndExtraData({
+    isMainnet,
+    asset,
+    useTxnOriginStaticCall: waitForHighestBid
+  })
 
   return {
     exchange: exchangeAddr,
     maker: accountAddress,
     taker: buyerAddress,
     quantity: quantityBN,
-    makerRelayerFee: makeBigNumber(250),
-    takerRelayerFee: makeBigNumber(0),
-    makerProtocolFee: makeBigNumber(0),
-    takerProtocolFee: makeBigNumber(0),
-    makerReferrerFee: makeBigNumber(0),
+    makerRelayerFee,
+    takerRelayerFee,
+    makerProtocolFee,
+    takerProtocolFee,
+    makerReferrerFee,
     waitingForBestCounterOrder: waitForHighestBid,
     englishAuctionReservePrice: reservePrice ? makeBigNumber(reservePrice) : undefined,
     feeMethod,
@@ -352,8 +399,8 @@ export async function _makeSellOrder({
     howToCall: HowToCall.Call,
     dataToCall,
     replacementPattern,
-    staticTarget: NULL_ADDRESS,
-    staticExtradata: '0x',
+    staticTarget,
+    staticExtradata,
     paymentToken,
     basePrice,
     extra,
@@ -522,6 +569,7 @@ export const orderToJSON = (order: Order): OrderJSON => {
     paymentToken: order.paymentToken.toLowerCase(),
     quantity: order.quantity.toString(),
     basePrice: order.basePrice.toString(),
+    englishAuctionReservePrice: order?.englishAuctionReservePrice?.toString(),
     extra: order.extra.toString(),
     listingTime: order.listingTime.toString(),
     expirationTime: order.expirationTime.toString(),
@@ -608,14 +656,140 @@ export function hashOrder(web3: any, order: UnhashedOrder): string {
 export async function getCurrentPrice(exchangeHelper: any, order: Order): Promise<string> {
   let currentPrice: string = await exchangeHelper.methods
     .calculateFinalPrice(
-      order.side,
-      order.saleKind,
-      order.basePrice,
-      order.extra,
-      order.listingTime,
-      order.expirationTime
+      order.side?.toString(),
+      order.saleKind?.toString(),
+      order.basePrice?.toString(),
+      order.extra?.toString(),
+      order.listingTime?.toString(),
+      order.expirationTime?.toString()
     )
     .call()
 
   return currentPrice
+}
+
+export async function _getStaticCallTargetAndExtraData({
+  isMainnet,
+  asset,
+  useTxnOriginStaticCall
+}: {
+  isMainnet: boolean
+  asset: Asset
+  useTxnOriginStaticCall: boolean
+}): Promise<{
+  staticTarget: string
+  staticExtradata: string
+}> {
+  if (useTxnOriginStaticCall) {
+    return {
+      staticTarget: isMainnet ? STATIC_CALL_TX_ORIGIN_ADDRESS : STATIC_CALL_TX_ORIGIN_RINKEBY_ADDRESS,
+      staticExtradata: STATIC_EXTRADATA
+    }
+  } else {
+    return {
+      staticTarget: NULL_ADDRESS,
+      staticExtradata: '0x'
+    }
+  }
+}
+
+export function _makeMatchingOrder({
+  networkName,
+  signedOrder,
+  accountAddress
+}: {
+  networkName: Network
+  signedOrder: UnsignedOrder
+  accountAddress: string
+}): UnhashedOrder {
+  const order = signedOrder
+  const recipientAddress = ELEMENT_FEE_RECIPIENT
+
+  const computeOrderParams = () => {
+    if ('asset' in order.metadata) {
+      const schema = getSchema(networkName, order.metadata.schema)
+      return order.side == OrderSide.Buy
+        ? encodeSell(schema, order.metadata.asset, recipientAddress)
+        : encodeBuy(schema, order.metadata.asset, recipientAddress)
+    } else {
+      throw new Error('Invalid order metadata')
+    }
+  }
+
+  const { target, dataToCall, replacementPattern } = computeOrderParams()
+  const times = getTimeParameters(0)
+  // Compat for matching buy orders that have fee recipient still on them
+  const feeRecipient = order.feeRecipient == NULL_ADDRESS ? ELEMENT_FEE_RECIPIENT : NULL_ADDRESS
+
+  const makerRelayerFee = order.makerRelayerFee
+  const takerRelayerFee = order.takerRelayerFee
+  // 完成买单时
+  // if(order.side ==OrderSide.S){
+  //   makerRelayerFee= order.takerRelayerFee
+  //   takerRelayerFee =  order.makerRelayerFee
+  // }
+
+  const matchingOrder: UnhashedOrder = {
+    exchange: order.exchange,
+    maker: accountAddress,
+    taker: order.maker,
+    quantity: order.quantity,
+    makerRelayerFee,
+    takerRelayerFee,
+    makerProtocolFee: order.makerProtocolFee,
+    takerProtocolFee: order.takerProtocolFee,
+    makerReferrerFee: order.makerReferrerFee,
+    waitingForBestCounterOrder: false,
+    feeMethod: order.feeMethod,
+    feeRecipient,
+    side: (order.side + 1) % 2,
+    saleKind: SaleKind.FixedPrice,
+    target,
+    howToCall: order.howToCall,
+    dataToCall,
+    replacementPattern,
+    staticTarget: NULL_ADDRESS,
+    staticExtradata: '0x',
+    paymentToken: order.paymentToken,
+    basePrice: order.basePrice,
+    extra: makeBigNumber(0),
+    listingTime: times.listingTime,
+    expirationTime: times.expirationTime,
+    salt: generatePseudoRandomSalt(),
+    metadata: order.metadata
+  }
+  return matchingOrder
+}
+
+/**
+ * Assign an order and a new matching order to their buy/sell sides
+ * @param order Original order
+ * @param matchingOrder The result of _makeMatchingOrder
+ */
+export function assignOrdersToSides(order: Order, matchingOrder: UnsignedOrder): { buy: Order; sell: Order } {
+  debugger
+  const isSellOrder = order.side == OrderSide.Sell
+
+  let buy: Order
+  let sell: Order
+  if (!isSellOrder) {
+    buy = order
+
+    sell = {
+      ...matchingOrder,
+      v: buy.v,
+      r: buy.r,
+      s: buy.s
+    }
+  } else {
+    sell = order
+    buy = {
+      ...matchingOrder,
+      v: sell.v,
+      r: sell.r,
+      s: sell.s
+    }
+  }
+  debugger
+  return { buy, sell }
 }

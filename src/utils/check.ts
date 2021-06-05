@@ -273,14 +273,16 @@ export async function checkMatchOrder(contract: any, buy: Order, sell: Order, ac
   }
 
   await checkOrder(contract, buy)
-  await checkOrder(contract, sell)
+  // await checkOrder(contract, sell)
 
   return true
 }
 
-export async function cancelledOrFinalized(exchangeHelper: any, orderHash: string): Promise<boolean> {
+
+export async function cancelledOrFinalized(exchangeHelper: any, orderHash:string): Promise<boolean> {
   return exchangeHelper.methods.cancelledOrFinalized(orderHash).call()
 }
+
 
 export async function checkOrder(contract: any, order: Order, accountAddress?: string) {
   await checkRegisterProxy(contract.exchangeProxyRegistry, order.maker)
@@ -296,10 +298,10 @@ export async function checkOrder(contract: any, order: Order, accountAddress?: s
     throw new ElementError({ code: '1105' })
   }
 
-  const isCancelledOrFinalized = await cancelledOrFinalized(contract.exchange, order.hash)
+  const isCancelledOrFinalized =await cancelledOrFinalized(contract.exchange,order.hash)
   // 检查 Sell 买单 Buy = 0, Sell = 1
   if (order.side == OrderSide.Sell) {
-    if (isCancelledOrFinalized) {
+    if (isCancelledOrFinalized ) {
       throw new ElementError({ code: '1206' })
     }
     let sell = order
@@ -330,7 +332,7 @@ export async function checkOrder(contract: any, order: Order, accountAddress?: s
 
   // 检查 Buy 卖单
   if (order.side == OrderSide.Buy) {
-    if (isCancelledOrFinalized) {
+    if (isCancelledOrFinalized ) {
       throw new ElementError({ code: '1207' })
     }
     let buy = order
@@ -379,6 +381,7 @@ export async function validateOrder(exchangeHelper: any, order: any): Promise<an
   try {
     let isValidate = await exchangeHelper.methods.validateOrder(orderParamValueArray, orderSigArray).call()
     if (!isValidate) {
+      console.log("validateOrder",orderParamValueArray)
       throw new ElementError({ code: '1203' })
     }
     return isValidate
@@ -453,3 +456,5 @@ export async function ordersCanMatch(exchangeHelper: any, buy: Order, sell: Orde
   }
   return true
 }
+
+

@@ -9,13 +9,14 @@ import {
   Network,
   getAccountNFTsBalance,
   getTokenIDOwner,
-  Orders
+  Orders,
+  NULL_ADDRESS
 } from '../src'
 ;(async () => {
   let base = new Base()
   await base.init()
-  let sellAccount = base.accounts[0].address
-  let buyAccount = base.accounts[1].address
+  let sellAccount = base.accounts[1].address
+  let buyAccount = base.accounts[0].address
   const order = base.orders
   const payToken = order.erc20.clone()
   let wETHAddr = order.WETHAddr
@@ -59,7 +60,8 @@ import {
     accountAddress: buyAccount,
     paymentTokenAddress: wETHAddr,
     asset,
-    startAmount: 0.00012
+    startAmount: 0.00012,
+    feeRecipient: NULL_ADDRESS
   }
 
   base.web3.eth.defaultAccount = buyAccount
