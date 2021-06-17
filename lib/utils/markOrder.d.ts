@@ -1,8 +1,8 @@
 import { Asset, ECSignature, ElementAsset, ElementSchemaName, Network, Order, OrderJSON, OrderSide, UnhashedOrder, UnsignedOrder } from '../types';
 import { Schema } from '../schema/types';
 import { BigNumber } from './constants';
-export declare function toBaseUnitAmount(amount: BigNumber, decimals: number): BigNumber;
-export declare function makeBigNumber(arg: number | string | BigNumber): BigNumber;
+import { makeBigNumber } from './helper';
+export { makeBigNumber };
 export declare function getSchema(network: Network, schemaName?: ElementSchemaName): Schema<any>;
 export declare function getElementAsset(schema: Schema<ElementAsset>, asset: Asset, quantity?: BigNumber): ElementAsset;
 export declare function getSchemaAndAsset(networkName: Network, asset: Asset, quantity: number): {
@@ -15,7 +15,7 @@ export declare function getPriceParameters(network: Network, orderSide: OrderSid
     basePrice: BigNumber;
     extra: BigNumber;
     paymentToken: string;
-    reservePrice: number | undefined;
+    reservePrice: BigNumber | undefined;
 };
 export declare function getTimeParameters(expirationTimestamp: number, listingTimestamp?: number, waitingForBestCounterOrder?: boolean): {
     listingTime: BigNumber;
@@ -64,4 +64,27 @@ export declare function schemaEncodeSell(network: Network, schema: ElementSchema
     replacementPattern: string;
 };
 export declare function hashOrder(web3: any, order: UnhashedOrder): string;
-export declare function getCurrentPrice(exchangeHelper: any, order: Order): Promise<any>;
+export declare function getCurrentPrice(exchangeHelper: any, order: Order): Promise<string>;
+export declare function _getStaticCallTargetAndExtraData({ networkName, asset, useTxnOriginStaticCall }: {
+    networkName: Network;
+    asset: Asset;
+    useTxnOriginStaticCall: boolean;
+}): Promise<{
+    staticTarget: string;
+    staticExtradata: string;
+}>;
+export declare function _makeMatchingOrder({ networkName, signedOrder, accountAddress, recipientAddress }: {
+    networkName: Network;
+    signedOrder: UnsignedOrder;
+    accountAddress: string;
+    recipientAddress: string;
+}): UnhashedOrder;
+/**
+ * Assign an order and a new matching order to their buy/sell sides
+ * @param order Original order
+ * @param matchingOrder The result of _makeMatchingOrder
+ */
+export declare function assignOrdersToSides(order: Order, matchingOrder: UnsignedOrder): {
+    buy: Order;
+    sell: Order;
+};

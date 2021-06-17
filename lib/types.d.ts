@@ -3,7 +3,7 @@ import { Network } from './schema/types';
 export { Network };
 export interface ElementAPIConfig {
     networkName: Network;
-    networkID: number;
+    networkID?: number;
     account?: string;
     gasPrice?: number;
 }
@@ -25,11 +25,13 @@ export declare enum ElementSchemaName {
 interface ElementNFTAsset {
     id: string;
     address: string;
+    collection?: ElementCollection;
 }
 interface ElementFTAsset {
     id?: string;
     address: string;
     quantity: string;
+    collection?: ElementCollection;
 }
 export declare type ElementAsset = ElementNFTAsset | ElementFTAsset;
 export interface ElementBundle {
@@ -42,6 +44,7 @@ export interface ElementBundle {
 export interface ExchangeMetadataForAsset {
     asset: ElementAsset;
     schema: ElementSchemaName;
+    version?: number;
     referrerAddress?: string;
 }
 export interface ExchangeMetadataForBundle {
@@ -61,13 +64,14 @@ export declare enum TokenStandardVersion {
  * Simple, unannotated asset spec
  */
 export interface Asset {
-    tokenId: string | null;
+    tokenId: string | undefined;
     tokenAddress: string;
     schemaName?: ElementSchemaName;
     version?: TokenStandardVersion;
     name?: string;
     data?: string;
     decimals?: number;
+    collection?: ElementCollection;
 }
 export interface ECSignature {
     v: number;
@@ -96,6 +100,7 @@ export interface OrderJSON extends Partial<ECSignature> {
     paymentToken: string;
     quantity: string;
     basePrice: string;
+    englishAuctionReservePrice: string | undefined;
     extra: string;
     listingTime: number | string;
     expirationTime: number | string;
@@ -196,4 +201,48 @@ export interface ElementAccount {
     config: string;
     profileImgUrl: string;
     user: ElementUser | null;
+}
+/******************** Fees ***********************/
+/**
+ * The basis point values of each type of fee
+ */
+export interface ElementFees {
+    elementSellerFeeBasisPoints: number;
+    elementBuyerFeeBasisPoints: number;
+    devSellerFeeBasisPoints: number;
+    devBuyerFeeBasisPoints: number;
+}
+/**
+ * Fully computed fees including bounties and transfer fees
+ */
+export interface ComputedFees extends ElementFees {
+    totalBuyerFeeBasisPoints: number;
+    totalSellerFeeBasisPoints: number;
+    transferFee: BigNumber;
+    transferFeeTokenAddress: string | null;
+    sellerBountyBasisPoints: number;
+}
+export interface Token {
+    name: string;
+    symbol: string;
+    decimals: number;
+    address: string;
+}
+/**
+ * Full annotated Fungible Token spec with OpenSea metadata
+ */
+export interface ElemetnFungibleToken extends Token {
+    imageUrl?: string;
+    ethPrice?: string;
+    usdPrice?: string;
+}
+/**
+ * Annotated collection with OpenSea metadata
+ */
+export interface ElementCollection extends ElementFees {
+    name: string;
+    description: string;
+    imageUrl: string;
+    transferFee: BigNumber | string | null;
+    transferFeePaymentToken: ElemetnFungibleToken | null;
 }

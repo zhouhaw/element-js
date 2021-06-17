@@ -5,6 +5,7 @@ export declare class Contracts {
     tokenTransferProxyAddr: string;
     WETHAddr: string;
     elementSharedAssetAddr: string;
+    elementixExchangeKeeperAddr: string;
     erc20: any;
     erc721: any;
     erc1155: any;
@@ -14,6 +15,5 @@ export declare class Contracts {
     exchangeHelper: any;
     elementSharedAsset: any;
     WETH: any;
-    makeTokenID: any;
     constructor(web3: any, apiConfig?: ElementAPIConfig);
 }

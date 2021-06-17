@@ -4,19 +4,25 @@ export declare enum OrderCheckStatus {
     StartOrderHashSign = "startOrderHashSign",
     EndOrderHashSign = "endOrderHashSign",
     StartOrderMatch = "startOrderMatch",
-    EndOrderMatch = "endOrderMatch"
+    EndOrderMatch = "endOrderMatch",
+    End = "End"
 }
 export interface CallBack {
-    next<T>(arg: T): OrderCheckStatus;
+    next<T>(arg: OrderCheckStatus): OrderCheckStatus;
 }
 export declare class Orders extends Contracts {
-    matchOrder({ buy, sell, accountAddress, metadata }: {
+    fulfillOrder({ signedOrder, accountAddress, recipientAddress }: {
+        signedOrder: Order;
+        accountAddress: string;
+        recipientAddress?: string;
+    }): Promise<boolean>;
+    orderMatch({ buy, sell, accountAddress, metadata }: {
         buy: Order;
         sell: Order;
         accountAddress: string;
         metadata?: string;
     }, callBack?: CallBack): Promise<boolean>;
-    createBuyOrder({ asset, accountAddress, startAmount, quantity, expirationTime, paymentTokenAddress, sellOrder, referrerAddress }: {
+    createBuyOrder({ asset, accountAddress, startAmount, quantity, expirationTime, paymentTokenAddress, sellOrder, referrerAddress, feeRecipient }: {
         asset: Asset;
         accountAddress: string;
         startAmount: number;
@@ -25,8 +31,9 @@ export declare class Orders extends Contracts {
         paymentTokenAddress?: string;
         sellOrder?: Order;
         referrerAddress?: string;
+        feeRecipient?: string;
     }, callBack?: CallBack): Promise<OrderJSON | boolean>;
-    createSellOrder({ asset, accountAddress, startAmount, endAmount, quantity, listingTime, expirationTime, waitForHighestBid, englishAuctionReservePrice, paymentTokenAddress, extraBountyBasisPoints, buyerAddress, buyerEmail }: {
+    createSellOrder({ asset, accountAddress, startAmount, endAmount, quantity, listingTime, expirationTime, waitForHighestBid, englishAuctionReservePrice, paymentTokenAddress, extraBountyBasisPoints, feeRecipient, buyerAddress, buyerEmail }: {
         asset: Asset;
         accountAddress: string;
         startAmount: number;
@@ -38,6 +45,7 @@ export declare class Orders extends Contracts {
         englishAuctionReservePrice?: number;
         paymentTokenAddress?: string;
         extraBountyBasisPoints?: number;
+        feeRecipient?: string;
         buyerAddress?: string;
         buyerEmail?: string;
     }, callBack?: CallBack): Promise<OrderJSON | boolean>;
