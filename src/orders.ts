@@ -1,19 +1,19 @@
-import { Asset, ECSignature, Order, OrderJSON } from './types'
+import { Asset, ECSignature, Order, OrderJSON, OrderSide } from './types'
 import { NULL_ADDRESS, NULL_BLOCK_HASH } from './utils/constants'
-import { checkSellUser, checkBuyUser, checkMatchOrder } from './utils/check'
+import { _ordersCanMatch, checkBuyUser, checkMatchOrder, checkSellUser } from './utils/check'
 import { ElementError } from './base/error'
 
 import {
   _makeBuyOrder,
-  _makeSellOrder,
   _makeMatchingOrder,
+  _makeSellOrder,
   assignOrdersToSides,
+  hashAndValidateOrder,
+  makeBigNumber,
   orderParamsEncode,
   orderSigEncode,
-  hashAndValidateOrder,
   getOrderHash,
-  signOrderHash,
-  makeBigNumber
+  signOrderHash
 } from './utils/markOrder'
 
 import { Contracts } from './contracts'
@@ -30,93 +30,45 @@ export enum OrderCheckStatus {
   StartOrderHashSign = 'startOrderHashSign',
   EndOrderHashSign = 'endOrderHashSign',
   StartOrderMatch = 'startOrderMatch',
-  EndOrderMatch = 'endOrderMatch'
+  EndOrderMatch = 'endOrderMatch',
+  End = 'End'
 }
 
 // export type CallBackFunc = (arg: OrderCheckPoints) => OrderCheckStatus
 
 export interface CallBack {
-  next<T>(arg: T): OrderCheckStatus
+  next<T>(arg: OrderCheckStatus): OrderCheckStatus
 }
 
 export class Orders extends Contracts {
-  // 完成买单
   public async fulfillOrder({
     signedOrder,
-    accountAddress
+    accountAddress,
+    recipientAddress
   }: {
     signedOrder: Order
     accountAddress: string
+    recipientAddress?: string
   }): Promise<boolean> {
     let networkName = this.networkName
+    let recipient = recipientAddress
+    if (!recipient || signedOrder.side == OrderSide.Buy) {
+      recipient = accountAddress
+    }
+
     const matchingOrder = _makeMatchingOrder({
       networkName,
       signedOrder,
-      accountAddress
+      accountAddress,
+      recipientAddress: recipient
     })
-
-    // let hash = await getOrderHash(this.web3, this.exchangeHelper, matchingOrder)
 
     // 伪造买单 Buy
     let unsignData = { ...matchingOrder, hash: signedOrder.hash }
+
     const { buy, sell } = assignOrdersToSides(signedOrder, unsignData)
 
-    console.log('fulfillOrder', 'buy', buy, 'sell', sell)
-    return this.orderMatch({ buy, sell, accountAddress })
-  }
-
-  public async fulfillBuyOrder({
-    signedBuyOrder,
-    accountAddress
-  }: {
-    signedBuyOrder: Order
-    accountAddress: string
-  }): Promise<boolean> {
-    let networkName = this.networkName
-    const matchingOrder = _makeMatchingOrder({
-      networkName,
-      signedOrder: signedBuyOrder,
-      accountAddress
-    })
-
-    // const hash = await getOrderHash(this.web3, this.exchangeHelper, matchingOrder)
-    //
-    // // 伪造卖单  Sell
-    // let hashedOrder = { ...matchingOrder, hash:signedBuyOrder.hash }
-
-    // let signature: ECSignature
-    // if (this.web3.eth.defaultAccount.toLowerCase() == accountAddress) {
-    //   signature = await signOrderHash(this.web3, hashedOrder)
-    // } else {
-    //   throw new ElementError({ code: '1000', message: 'web3.eth.defaultAccount and maker not equal' })
-    // }
-    // const sell = orderFromJSON({ ...matchingOrder, hash, ...signature })
-    // const buy = signedBuyOrder
-
-    // const { buy, sell } = assignOrdersToSides(signedBuyOrder, unsignData)
-
-    // 伪造卖单  Sell
-    let unsignData = { ...matchingOrder, hash: signedBuyOrder.hash }
-    const { buy, sell } = assignOrdersToSides(signedBuyOrder, unsignData)
-    console.log('fulfillBuyOrder', 'buy', buy, 'sell', sell)
-    return this.matchOrder({ buy, sell, accountAddress })
-  }
-
-  public async matchOrder(
-    {
-      buy,
-      sell,
-      accountAddress,
-      metadata = NULL_BLOCK_HASH
-    }: {
-      buy: Order
-      sell: Order
-      accountAddress: string
-      metadata?: string
-    },
-    callBack?: CallBack
-  ): Promise<boolean> {
-    await checkMatchOrder(this, buy, sell, accountAddress)
+    console.log('fulfillOrder Sell', 'buy', buy, 'sell', sell)
     return this.orderMatch({ buy, sell, accountAddress })
   }
 
@@ -134,7 +86,10 @@ export class Orders extends Contracts {
     },
     callBack?: CallBack
   ): Promise<boolean> {
-    // await checkMatchOrder(this, buy, sell, accountAddress)
+    if (!_ordersCanMatch(buy, sell)) {
+      throw new ElementError({ code: '1202' })
+    }
+    await checkMatchOrder(this, buy, sell, accountAddress)
 
     const sellOrderParamArray = orderParamsEncode(sell)
     const sellOrderSigArray = orderSigEncode(sell)
@@ -151,9 +106,11 @@ export class Orders extends Contracts {
         gas: (80e4).toString()
       })
       .catch((error: any) => {
-        console.log(error)
-        throw new ElementError({ code: '1000', message: 'OrderMatch failure' })
-        // console.error('orderMatch', error.receipt) //, error.message
+        if (error.code == '4001') {
+          throw new ElementError(error)
+        } else {
+          throw new ElementError({ code: '1000', message: 'OrderMatch failure' })
+        }
       })
     callBack?.next(OrderCheckStatus.EndOrderMatch)
 
@@ -307,8 +264,11 @@ export class Orders extends Contracts {
         gas: (80e4).toString()
       })
       .catch((error: any) => {
-        throw new ElementError({ code: '1000', message: 'CancelOrder failure' })
-        // console.error(error.receipt) //, error.message
+        if (error.code == '4001') {
+          throw new ElementError(error)
+        } else {
+          throw new ElementError({ code: '1000', message: 'CancelOrder failure' })
+        }
       })
     return cancelTx.status
   }

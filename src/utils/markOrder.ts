@@ -25,8 +25,7 @@ import {
   MIN_EXPIRATION_SECONDS,
   NULL_ADDRESS,
   ORDER_MATCHING_LATENCY_SECONDS,
-  STATIC_CALL_TX_ORIGIN_ADDRESS,
-  STATIC_CALL_TX_ORIGIN_RINKEBY_ADDRESS,
+  CONTRACTS_ADDRESSES,
   STATIC_EXTRADATA
 } from './constants'
 import { validateOrder } from './check'
@@ -154,13 +153,14 @@ export function getTimeParameters(
 ) {
   // Validation
   const minExpirationTimestamp = Math.round(Date.now() / 1000 + MIN_EXPIRATION_SECONDS)
-  const minListingTimestamp = Math.round(Date.now() / 1000)
+  const minListingTimestamp = Math.round(Date.now() / 1000 - 1)
   if (expirationTimestamp != 0 && expirationTimestamp < minExpirationTimestamp) {
     throw new ElementError({
       code: '1000',
       message: `Expiration time must be at least ${MIN_EXPIRATION_SECONDS} seconds from now, or zero (non-expiring).`
     })
   }
+  console.log('listingTimestamp', listingTimestamp)
   if (listingTimestamp && listingTimestamp < minListingTimestamp) {
     throw new ElementError({ code: '1000', message: 'Listing time cannot be in the past.' })
   }
@@ -254,9 +254,9 @@ export async function _makeBuyOrder({
     feeMethod
   } = _getBuyFeeParameters(totalBuyerFeeBasisPoints, totalSellerFeeBasisPoints, sellOrder)
 
-  const isMainnet = networkName == Network.Main
+  // const isMainnet = networkName == Network.Main
   const { staticTarget, staticExtradata } = await _getStaticCallTargetAndExtraData({
-    isMainnet,
+    networkName,
     asset,
     useTxnOriginStaticCall: false
   })
@@ -290,7 +290,8 @@ export async function _makeBuyOrder({
     salt: generatePseudoRandomSalt(),
     metadata: {
       asset: elementAsset,
-      schema: schema.name as ElementSchemaName
+      schema: schema.name as ElementSchemaName,
+      version: schema.version
     }
   }
 }
@@ -354,9 +355,6 @@ export async function _makeSellOrder({
     extraBountyBasisPoints
   })
 
-  // const feeRecipient = ELEMENT_FEE_RECIPIENT
-  // const feeMethod = FeeMethod.SplitFee
-
   const {
     makerRelayerFee,
     takerRelayerFee,
@@ -372,9 +370,9 @@ export async function _makeSellOrder({
     sellerBountyBasisPoints
   )
 
-  const isMainnet = networkName == Network.Main
+  // const isMainnet = networkName == Network.Main
   const { staticTarget, staticExtradata } = await _getStaticCallTargetAndExtraData({
-    isMainnet,
+    networkName,
     asset,
     useTxnOriginStaticCall: waitForHighestBid
   })
@@ -409,7 +407,8 @@ export async function _makeSellOrder({
     salt: generatePseudoRandomSalt(),
     metadata: {
       asset: elementAsset,
-      schema: schema.name as ElementSchemaName
+      schema: schema.name as ElementSchemaName,
+      version: schema.version
     }
   }
 }
@@ -511,7 +510,9 @@ export async function hashAndValidateOrder(web3: any, exchangeHelper: any, order
   }
   let signature: ECSignature
   if (web3.eth.defaultAccount.toLowerCase() == hashedOrder.maker.toLowerCase()) {
-    signature = await signOrderHash(web3, hashedOrder)
+    signature = await signOrderHash(web3, hashedOrder).catch((err) => {
+      throw new ElementError(err)
+    })
   } else {
     throw new ElementError({ code: '1000', message: 'web3.eth.defaultAccount and maker not equal' })
   }
@@ -541,7 +542,8 @@ export async function signOrderHash(web3: any, hashedOrder: UnsignedOrder): Prom
       s: `0x${signatureHex.slice(64, 128)}`
     }
   } catch (error) {
-    throw new ElementError({ code: '1000', message: 'You declined to authorize your auction' })
+    throw new ElementError(error)
+    // throw new ElementError({ code: '1000', message: 'You declined to authorize your auction' })
   }
   return signature
 }
@@ -653,6 +655,7 @@ export function hashOrder(web3: any, order: UnhashedOrder): string {
     .toString('hex')
 }
 
+//计算当前 订单的总价格
 export async function getCurrentPrice(exchangeHelper: any, order: Order): Promise<string> {
   let currentPrice: string = await exchangeHelper.methods
     .calculateFinalPrice(
@@ -669,11 +672,11 @@ export async function getCurrentPrice(exchangeHelper: any, order: Order): Promis
 }
 
 export async function _getStaticCallTargetAndExtraData({
-  isMainnet,
+  networkName,
   asset,
   useTxnOriginStaticCall
 }: {
-  isMainnet: boolean
+  networkName: Network
   asset: Asset
   useTxnOriginStaticCall: boolean
 }): Promise<{
@@ -682,7 +685,7 @@ export async function _getStaticCallTargetAndExtraData({
 }> {
   if (useTxnOriginStaticCall) {
     return {
-      staticTarget: isMainnet ? STATIC_CALL_TX_ORIGIN_ADDRESS : STATIC_CALL_TX_ORIGIN_RINKEBY_ADDRESS,
+      staticTarget: CONTRACTS_ADDRESSES[networkName].ElementixExchangeKeeper,
       staticExtradata: STATIC_EXTRADATA
     }
   } else {
@@ -696,21 +699,28 @@ export async function _getStaticCallTargetAndExtraData({
 export function _makeMatchingOrder({
   networkName,
   signedOrder,
-  accountAddress
+  accountAddress,
+  recipientAddress
 }: {
   networkName: Network
   signedOrder: UnsignedOrder
   accountAddress: string
+  recipientAddress: string
 }): UnhashedOrder {
   const order = signedOrder
-  const recipientAddress = ELEMENT_FEE_RECIPIENT
-
   const computeOrderParams = () => {
     if ('asset' in order.metadata) {
+      debugger
       const schema = getSchema(networkName, order.metadata.schema)
+      // TODO order.metadata.asset.data = ''
+      let asset: any = order.metadata.asset
+      if (!asset.data) {
+        asset = { ...asset, data: '' }
+      }
+
       return order.side == OrderSide.Buy
-        ? encodeSell(schema, order.metadata.asset, recipientAddress)
-        : encodeBuy(schema, order.metadata.asset, recipientAddress)
+        ? encodeSell(schema, asset, recipientAddress)
+        : encodeBuy(schema, asset, recipientAddress)
     } else {
       throw new Error('Invalid order metadata')
     }
@@ -723,11 +733,6 @@ export function _makeMatchingOrder({
 
   const makerRelayerFee = order.makerRelayerFee
   const takerRelayerFee = order.takerRelayerFee
-  // 完成买单时
-  // if(order.side ==OrderSide.S){
-  //   makerRelayerFee= order.takerRelayerFee
-  //   takerRelayerFee =  order.makerRelayerFee
-  // }
 
   const matchingOrder: UnhashedOrder = {
     exchange: order.exchange,
@@ -767,14 +772,12 @@ export function _makeMatchingOrder({
  * @param matchingOrder The result of _makeMatchingOrder
  */
 export function assignOrdersToSides(order: Order, matchingOrder: UnsignedOrder): { buy: Order; sell: Order } {
-  debugger
   const isSellOrder = order.side == OrderSide.Sell
 
   let buy: Order
   let sell: Order
   if (!isSellOrder) {
     buy = order
-
     sell = {
       ...matchingOrder,
       v: buy.v,
@@ -790,6 +793,5 @@ export function assignOrdersToSides(order: Order, matchingOrder: UnsignedOrder):
       s: sell.s
     }
   }
-  debugger
   return { buy, sell }
 }

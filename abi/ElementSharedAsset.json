@@ -814,20 +814,5 @@
       "type": "function",
       "constant": true
     }
-  ],
-  "networks": {
-    "8555": {
-      "links": {},
-      "address": "0xBBbf6fd42F0ae6D6ddf018eCa63c87fdE490208A",
-      "transactionHash": "0x7463ff847ee5e881559c682247b58c85658a103adcabfc3d7b23c96d8ff7acfe"
-    },
-    "100": {
-      "links": {},
-      "address": "0x4cDdBf865Ee2A1a3711648Bb192E285f290f7985",
-      "transactionHash": "0x7463ff847ee5e881559c682247b58c85658a103adcabfc3d7b23c96d8ff7acfe"
-    }
-  },
-  "schemaVersion": "3.4.0",
-  "updatedAt": "2021-05-01T09:06:14.973Z",
-  "networkType": "ethereum"
+  ]
 }

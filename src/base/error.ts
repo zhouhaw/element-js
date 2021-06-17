@@ -14,6 +14,7 @@ export type ElementErrorCodes = Array<Readonly<CustomError>>
 // 11 开头 资产，各类资产余额，授权，ID错误
 // 12 开头 订单约束条件
 // 20 开头 合约执行错误 rpc 网络请求错
+// 40 开头 是MetaMask的拒绝 异常
 export const ErrorCodes: ElementErrorCodes = [
   {
     code: 'INVALID_ARGUMENT',
@@ -86,6 +87,10 @@ export const ErrorCodes: ElementErrorCodes = [
   {
     code: '2001',
     message: 'rpc requset error '
+  },
+  {
+    code: '4001',
+    message: 'MetaMask Error '
   }
 ]
 
@@ -96,11 +101,17 @@ export class ElementError extends Error {
 
     if (Number(_err?.code) > 1000) {
       let _type = _err?.code.toString().charAt(0)
-      if (_type == '2') {
-        let message = err.message || ''
-        super(message + '-' + _err?.message)
-      } else {
-        super(_err?.message || 'sucess')
+      let message = err.message || ''
+      switch (_type) {
+        case "2":
+          super(message + '-' + _err?.message)
+          break
+        case "4":
+          super(message)
+          break
+        default:
+          super(_err?.message || 'sucess')
+          break
       }
     } else {
       if (_err?.code == '1000') {
@@ -110,7 +121,7 @@ export class ElementError extends Error {
         super('undefined code!')
       }
     }
-    this.code = err.code
+    this.code = err.code.toString()
   }
 }
 //

@@ -21,8 +21,15 @@ export {
   checkSenderOfAuthenticatedProxy
 } from './utils/check'
 
-export { getTokenList, getSchemaList, orderToJSON, getPriceParameters,getCurrentPrice } from './utils/markOrder'
-export { BigNumber, NULL_ADDRESS, NULL_BLOCK_HASH,ELEMENT_FEE_RECIPIENT } from './utils/constants'
+export { getTokenList, getSchemaList, orderToJSON, getPriceParameters, getCurrentPrice } from './utils/markOrder'
+export {
+  BigNumber,
+  NULL_ADDRESS,
+  NULL_BLOCK_HASH,
+  ELEMENT_FEE_RECIPIENT,
+  DEFAULT_SELLER_FEE_BASIS_POINTS,
+  ORDERBOOK_VERSION
+} from './utils/constants'
 export { orderFromJSON, transferFromERC1155, transferFromERC721, transferFromWETH } from './utils'
 export { toBaseUnitAmount, makeBigNumber } from './utils/helper'
 

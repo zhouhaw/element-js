@@ -15,6 +15,7 @@ const ExchangeHelper = require(`../abi/ExchangeHelper.json`)
 const ElementixTokenTransferProxy = require(`../abi/ElementixTokenTransferProxy.json`)
 const WETH = require(`../abi/WETH9Mocked.json`)
 const MakeTokenID = require(`../abi/MakeTokenID.json`)
+import { CONTRACTS_ADDRESSES } from './utils/constants'
 
 export class Contracts {
   public web3: any
@@ -24,6 +25,7 @@ export class Contracts {
   public tokenTransferProxyAddr: string
   public WETHAddr: string
   public elementSharedAssetAddr: string
+  public elementixExchangeKeeperAddr: string
 
   // abi
   public erc20: any
@@ -37,24 +39,31 @@ export class Contracts {
   public exchangeHelper: any
   public elementSharedAsset: any
   public WETH: any
-  public makeTokenID: any
+  // public makeTokenID: any
 
   // let networkID: number = await web3.eth.net.getId()
-  constructor(web3: any, apiConfig: ElementAPIConfig = { networkName: Network.Rinkeby, networkID: 1 }) {
-    const { networkID, networkName } = apiConfig
+  constructor(web3: any, apiConfig: ElementAPIConfig = { networkName: Network.Rinkeby }) {
+    const { networkName } = apiConfig
     const gasPrice = 10e9
     const gasLimit = 80e4
+
     this.networkName = networkName
-    const exchangeHelperAddr = ExchangeHelper.networks[networkID].address
-    const exchangeAddr = ElementixExchange.networks[networkID].address
-    const proxyRegistryAddr = ElementixProxyRegistry.networks[networkID].address
-    const elementSharedAssetAddr = ElementSharedAsset.networks[networkID].address
-    const makeTokenIDAddr = MakeTokenID.networks[networkID].address
+    const contracts = CONTRACTS_ADDRESSES[networkName]
+    const exchangeHelperAddr = contracts.ExchangeHelper.toLowerCase()
+    const exchangeAddr = contracts.ElementixExchange.toLowerCase()
+    const proxyRegistryAddr = contracts.ElementixProxyRegistry.toLowerCase()
+    const elementSharedAssetAddr = contracts.ElementSharedAsset.toLowerCase()
+    const elementixTokenTransferProxyAddr = contracts.ElementixTokenTransferProxy.toLowerCase()
+    const elementixExchangeKeeperAddr = contracts.ElementixExchangeKeeper.toLowerCase()
+    const wethAddr = contracts.WETH.toLowerCase()
+    // }
 
-    this.WETHAddr = WETH.networks[networkID].address
+    // const makeTokenIDAddr = MakeTokenID.networks[networkID].address
+
+    this.WETHAddr = wethAddr
     this.elementSharedAssetAddr = elementSharedAssetAddr
-
-    this.tokenTransferProxyAddr = ElementixTokenTransferProxy.networks[networkID].address
+    this.elementixExchangeKeeperAddr = elementixExchangeKeeperAddr
+    this.tokenTransferProxyAddr = elementixTokenTransferProxyAddr
 
     let options = {
       gas: gasLimit
@@ -65,8 +74,8 @@ export class Contracts {
       this.exchange = new web3.eth.Contract(ElementixExchange.abi, exchangeAddr, options)
 
       // asset
-      this.WETH = new web3.eth.Contract(WETH.abi, this.WETHAddr, options)
-      this.makeTokenID = new web3.eth.Contract(MakeTokenID.abi, makeTokenIDAddr, options)
+      this.WETH = new web3.eth.Contract(WETH.abi, wethAddr, options)
+      // this.makeTokenID = new web3.eth.Contract(MakeTokenID.abi, makeTokenIDAddr, options)
       this.elementSharedAsset = new web3.eth.Contract(ElementSharedAsset.abi, elementSharedAssetAddr, options)
       // abi
       this.erc20 = new web3.eth.Contract(ERC20.abi, options)
@@ -77,7 +86,7 @@ export class Contracts {
       this.web3 = web3
     } else {
       // eslint-disable-next-line no-throw-literal
-      throw `${this.networkName} networkID ${networkID} abi undefined`
+      throw `${this.networkName}  abi undefined`
     }
   }
 }

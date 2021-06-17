@@ -5,7 +5,7 @@ export { Network }
 
 export interface ElementAPIConfig {
   networkName: Network
-  networkID: number
+  networkID?: number
   account?: string
   gasPrice?: number
 }
@@ -55,6 +55,7 @@ export interface ElementBundle {
 export interface ExchangeMetadataForAsset {
   asset: ElementAsset
   schema: ElementSchemaName
+  version?: number
   referrerAddress?: string
 }
 
@@ -79,7 +80,7 @@ export enum TokenStandardVersion {
  */
 export interface Asset {
   // The asset's token ID, or null if ERC-20
-  tokenId: string | null
+  tokenId: string | undefined
   // The asset's contract address
   tokenAddress: string
   // The Element schema name (e.g. "ERC721") for this asset
@@ -294,10 +295,10 @@ export interface ComputedFees extends ElementFees {
 }
 
 export interface Token {
-  name: string;
-  symbol: string;
-  decimals: number;
-  address: string;
+  name: string
+  symbol: string
+  decimals: number
+  address: string
 }
 /**
  * Full annotated Fungible Token spec with OpenSea metadata
@@ -319,7 +320,7 @@ export interface ElementCollection extends ElementFees {
   // Image for the collection
   imageUrl: string
   // The per-transfer fee, in base units, for this asset in its transfer method
-  transferFee: BigNumber | string | null,
+  transferFee: BigNumber | string | null
   // The transfer fee token for this asset in its transfer method
   transferFeePaymentToken: ElemetnFungibleToken | null
 }

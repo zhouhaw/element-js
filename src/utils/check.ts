@@ -271,18 +271,32 @@ export async function checkMatchOrder(contract: any, buy: Order, sell: Order, ac
   if (!equalPrice) {
     throw new ElementError({ code: '1201' })
   }
-
-  await checkOrder(contract, buy)
-  // await checkOrder(contract, sell)
+  if (sell.feeRecipient != NULL_ADDRESS) {
+    /* Assert taker fee is less than or equal to maximum fee specified by buyer. */
+    if (!sell.takerRelayerFee.lte(buy.takerRelayerFee)) {
+      throw new ElementError({
+        code: '1000',
+        message: `sell.takerRelayerFee ${sell.takerRelayerFee} <= buy.takerRelayerFee ${buy.takerRelayerFee}`
+      })
+    }
+    await checkOrder(contract, sell)
+  } else {
+    /* Assert taker fee is less than or equal to maximum fee specified by seller. */
+    if (!buy.takerRelayerFee.lte(sell.takerRelayerFee)) {
+      throw new ElementError({
+        code: '1000',
+        message: `buy.takerRelayerFee ${buy.takerRelayerFee} <= sell.takerRelayerFee ${sell.takerRelayerFee}`
+      })
+    }
+    await checkOrder(contract, buy)
+  }
 
   return true
 }
 
-
-export async function cancelledOrFinalized(exchangeHelper: any, orderHash:string): Promise<boolean> {
+export async function cancelledOrFinalized(exchangeHelper: any, orderHash: string): Promise<boolean> {
   return exchangeHelper.methods.cancelledOrFinalized(orderHash).call()
 }
-
 
 export async function checkOrder(contract: any, order: Order, accountAddress?: string) {
   await checkRegisterProxy(contract.exchangeProxyRegistry, order.maker)
@@ -298,10 +312,11 @@ export async function checkOrder(contract: any, order: Order, accountAddress?: s
     throw new ElementError({ code: '1105' })
   }
 
-  const isCancelledOrFinalized =await cancelledOrFinalized(contract.exchange,order.hash)
-  // 检查 Sell 买单 Buy = 0, Sell = 1
+  const isCancelledOrFinalized = await cancelledOrFinalized(contract.exchange, order.hash)
+  // 检查 Sell 买单
   if (order.side == OrderSide.Sell) {
-    if (isCancelledOrFinalized ) {
+    console.log('OrderSide.Sell')
+    if (isCancelledOrFinalized) {
       throw new ElementError({ code: '1206' })
     }
     let sell = order
@@ -332,7 +347,8 @@ export async function checkOrder(contract: any, order: Order, accountAddress?: s
 
   // 检查 Buy 卖单
   if (order.side == OrderSide.Buy) {
-    if (isCancelledOrFinalized ) {
+    console.log('OrderSide.Buy')
+    if (isCancelledOrFinalized) {
       throw new ElementError({ code: '1207' })
     }
     let buy = order
@@ -360,7 +376,13 @@ export async function checkOrder(contract: any, order: Order, accountAddress?: s
 export function checkDataToCall(netWorkName: Network, sell: Order) {
   // encodeSell
   let schemas = getSchemaList(netWorkName, sell.metadata.schema)
-  let { target, dataToCall, replacementPattern } = encodeSell(schemas[0], sell.metadata.asset, sell.maker)
+  // TODO data sell.metadata.asset
+  let asset: any = sell.metadata.asset
+  if (!asset.data) {
+    asset = { ...asset, data: '' }
+  }
+
+  let { target, dataToCall, replacementPattern } = encodeSell(schemas[0], asset, sell.maker)
 
   if (dataToCall != sell.dataToCall) {
     console.log('sell.dataToCall error')
@@ -381,7 +403,7 @@ export async function validateOrder(exchangeHelper: any, order: any): Promise<an
   try {
     let isValidate = await exchangeHelper.methods.validateOrder(orderParamValueArray, orderSigArray).call()
     if (!isValidate) {
-      console.log("validateOrder",orderParamValueArray)
+      console.log('validateOrder', orderParamValueArray)
       throw new ElementError({ code: '1203' })
     }
     return isValidate
@@ -407,7 +429,8 @@ export function validateAndFormatWalletAddress(web3: any, address: string): stri
 }
 
 let canSettleOrder = (listingTime: any, expirationTime: any) => {
-  let now = new Date().getTime() / 1000
+  let now = Math.round(Date.now() / 1000)
+
   if (BigNumber.isBigNumber(listingTime)) {
     listingTime = listingTime.toNumber()
   } else {
@@ -419,31 +442,37 @@ let canSettleOrder = (listingTime: any, expirationTime: any) => {
   } else {
     expirationTime = Number(expirationTime)
   }
-  return listingTime < now && (expirationTime == 0 || now < expirationTime)
+  const canSettle = listingTime <= now && (expirationTime == 0 || now < expirationTime)
+  // console.log(`canSettleOrder ${canSettle} ${listingTime} <  now: ${now} < ${expirationTime} `)
+  return canSettle
 }
 
 export function _ordersCanMatch(buy: Order, sell: Order) {
+  const errorLog = (msg: string): boolean => {
+    console.log('_ordersCanMatch false ', msg)
+    return false
+  }
   return (
-    buy.side == 0 &&
-    sell.side == 1 &&
+    (buy.side == 0 || errorLog('buy.side')) &&
+    (sell.side == 1 || errorLog('sell.side')) &&
     /* Must use same fee method. */
-    buy.feeMethod == sell.feeMethod &&
+    (buy.feeMethod == sell.feeMethod || errorLog('feeMethod !=')) &&
     /* Must use same payment token. */
-    buy.paymentToken == sell.paymentToken &&
+    (buy.paymentToken == sell.paymentToken || errorLog('paymentToken !=')) &&
     /* Must match maker/taker addresses. */
-    (sell.taker == NULL_ADDRESS || sell.taker == buy.maker) &&
-    (buy.taker == NULL_ADDRESS || buy.taker == sell.maker) &&
+    (sell.taker == NULL_ADDRESS || sell.taker == buy.maker || errorLog('sell.taker != buy.maker')) &&
+    (buy.taker == NULL_ADDRESS || buy.taker == sell.maker || errorLog('buy.taker != sell.maker')) &&
     /* One must be maker and the other must be taker (no bool XOR in Solidity). */
     ((sell.feeRecipient == NULL_ADDRESS && buy.feeRecipient != NULL_ADDRESS) ||
       (sell.feeRecipient != NULL_ADDRESS && buy.feeRecipient == NULL_ADDRESS)) &&
     /* Must match target. */
-    buy.target == sell.target &&
+    (buy.target == sell.target || errorLog('target != ')) &&
     /* Must match howToCall. */
-    buy.howToCall == sell.howToCall &&
+    (buy.howToCall == sell.howToCall || errorLog('howToCall != ')) &&
     /* Buy-side order must be settleable. */
-    canSettleOrder(buy.listingTime, buy.expirationTime) &&
+    (canSettleOrder(buy.listingTime, buy.expirationTime) || errorLog(`buy.expirationTime != `)) &&
     /* Sell-side order must be settleable. */
-    canSettleOrder(sell.listingTime, sell.expirationTime)
+    (canSettleOrder(sell.listingTime, sell.expirationTime) || errorLog(`sell.expirationTime != `))
   )
 }
 
@@ -456,5 +485,3 @@ export async function ordersCanMatch(exchangeHelper: any, buy: Order, sell: Orde
   }
   return true
 }
-
-
