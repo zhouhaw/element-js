@@ -15,10 +15,7 @@ const ExchangeHelper = require(`../abi/ExchangeHelper.json`)
 // const ElementixTokenTransferProxy = require(`../abi/ElementixTokenTransferProxy.json`)
 const WETH = require(`../abi/WETH9Mocked.json`)
 const MakeTokenID = require(`../abi/MakeTokenID.json`)
-import {
-  CONTRACTS_ADDRESSES,
-  NULL_ADDRESS
-} from './utils/constants'
+import { CONTRACTS_ADDRESSES, NULL_ADDRESS } from './utils/constants'
 
 import { tokens } from './schema/tokens'
 
@@ -75,7 +72,7 @@ export class Contracts {
     const elementixExchangeKeeperAddr = contracts.ElementixExchangeKeeper.toLowerCase()
     const wethAddr = contracts.WETH.toLowerCase()
 
-    console.log("ElementAPIConfig",networkName,proxyRegistryAddr)
+    console.log('ElementAPIConfig', networkName, proxyRegistryAddr)
 
     // const makeTokenIDAddr = MakeTokenID.networks[networkID].address
     this.contractsAddr = contracts

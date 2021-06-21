@@ -217,7 +217,6 @@ export async function checkOrder(contract: any, order: UnhashedOrder, accountAdd
     let sell = order
     let sellNFTs = await checkAssetApprove(contract, sell)
 
-
     let bal = await getAccountNFTsBalance(sellNFTs, sell.maker, sell.metadata.asset.id)
     if (sell.quantity.gt(bal.toString())) {
       throw new ElementError({ code: '1103' })
