@@ -1,6 +1,6 @@
 import { BigNumber } from './constants'
 import { Network, Order, Orders, schemas } from '../index'
-import { tokens } from '../schema'
+// import { tokens } from '@utils/orders/src/schema'
 import { Schema } from '../schema/types'
 import { ECSignature, ElementOrder, UnhashedOrder, UnsignedOrder } from '../types'
 
@@ -39,14 +39,14 @@ export async function getTokenIDOwner(elementAssetContract: any, tokenId: any): 
   return elementAssetContract.methods.creator(tokenId).call()
 }
 
-export function getTokenList(network: Network, symbol?: string): Array<any> {
-  const payTokens = tokens[network]
-  if (symbol) {
-    return [payTokens.canonicalWrappedEther, ...payTokens.otherTokens].filter((x: any) => x.symbol === symbol)
-  } else {
-    return [payTokens.canonicalWrappedEther, ...payTokens.otherTokens]
-  }
-}
+// export function getTokenList(network: Network, symbol?: string): Array<any> {
+//   const payTokens = tokens[network]
+//   if (symbol) {
+//     return [payTokens.canonicalWrappedEther, ...payTokens.otherTokens].filter((x: any) => x.symbol === symbol)
+//   } else {
+//     return [payTokens.canonicalWrappedEther, ...payTokens.otherTokens]
+//   }
+// }
 
 export function getSchemaList(network: Network, schemaName?: string): Array<Schema<any>> {
   // @ts-ignore
@@ -120,6 +120,7 @@ export function orderParamsEncode(order: UnhashedOrder) {
   ]
   const orerParamValueArray = []
   for (const key of orderParamKeys) {
+    // @ts-ignore
     let val = order[key]
     if (val === undefined) {
       console.log('orderParamsEncode key undefined', key)
@@ -138,10 +139,12 @@ export function orderSigEncode(order: ECSignature) {
   const orderSigKeys = ['v', 'r', 's']
   const orderSigValueArray = []
   for (const key of orderSigKeys) {
+    // @ts-ignore
     if (order[key] === undefined) {
       console.log('orderSigEncode key undefined', key)
       continue
     }
+    // @ts-ignore
     orderSigValueArray.push(order[key])
   }
   return orderSigValueArray

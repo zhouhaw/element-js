@@ -5,6 +5,7 @@ export { Network }
 
 export interface ElementAPIConfig {
   networkName: Network
+  paymentTokens?:Array<Token>
   networkID?: number
   account?: string
   gasPrice?: number

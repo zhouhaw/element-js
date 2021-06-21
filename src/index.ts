@@ -33,7 +33,6 @@ export {
 export { orderFromJSON, transferFromERC1155, transferFromERC721, transferFromWETH } from './utils'
 export {
   toBaseUnitAmount,
-  getTokenList,
   getTokenIDOwner,
   getAccountBalance,
   getAccountNFTsBalance,

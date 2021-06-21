@@ -1,4 +1,4 @@
-import { ElementAPIConfig, Network } from './types'
+import { ElementAPIConfig, Network, Token } from './types'
 
 const abiPath = '../abi/'
 
@@ -12,10 +12,15 @@ const ElementSharedAsset = require(`../abi/ElementSharedAsset.json`)
 const ElementixProxyRegistry = require(`../abi/ElementixProxyRegistry.json`)
 const ElementixExchange = require(`../abi/ElementixExchange.json`)
 const ExchangeHelper = require(`../abi/ExchangeHelper.json`)
-const ElementixTokenTransferProxy = require(`../abi/ElementixTokenTransferProxy.json`)
+// const ElementixTokenTransferProxy = require(`../abi/ElementixTokenTransferProxy.json`)
 const WETH = require(`../abi/WETH9Mocked.json`)
 const MakeTokenID = require(`../abi/MakeTokenID.json`)
-import { CONTRACTS_ADDRESSES, RINKEBY_CONTRACTS_ADDRESSES, PRIVATE_CONTRACTS_ADDRESSES } from './utils/constants'
+import {
+  CONTRACTS_ADDRESSES,
+  NULL_ADDRESS
+} from './utils/constants'
+
+import { tokens } from './schema/tokens'
 
 export class Contracts {
   public web3: any
@@ -44,13 +49,23 @@ export class Contracts {
   public WETH: any
   // public makeTokenID: any
 
+  public paymentTokenList: Array<Token>
+  public ETH: Token = {
+    name: 'etherem',
+    symbol: 'ETH',
+    address: NULL_ADDRESS,
+    decimals: 18
+  }
+
   // let networkID: number = await web3.eth.net.getId()
   constructor(web3: any, apiConfig: ElementAPIConfig = { networkName: Network.Rinkeby }) {
-    const { networkName } = apiConfig
+    const { networkName, paymentTokens } = apiConfig
+    this.paymentTokenList = paymentTokens || tokens[networkName].otherTokens
     const gasPrice = 10e9
     const gasLimit = 80e4
 
     this.networkName = networkName
+
     const contracts = CONTRACTS_ADDRESSES[networkName]
     const exchangeHelperAddr = contracts.ExchangeHelper.toLowerCase()
     const exchangeAddr = contracts.ElementixExchange.toLowerCase()
@@ -59,6 +74,8 @@ export class Contracts {
     const elementixTokenTransferProxyAddr = contracts.ElementixTokenTransferProxy.toLowerCase()
     const elementixExchangeKeeperAddr = contracts.ElementixExchangeKeeper.toLowerCase()
     const wethAddr = contracts.WETH.toLowerCase()
+
+    console.log("ElementAPIConfig",networkName,proxyRegistryAddr)
 
     // const makeTokenIDAddr = MakeTokenID.networks[networkID].address
     this.contractsAddr = contracts

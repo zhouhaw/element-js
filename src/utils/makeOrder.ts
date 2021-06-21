@@ -14,7 +14,7 @@ import {
 } from '../types'
 // import { schemas, encodeBuy, encodeSell, encodeCall } from '../schema'
 import { encodeBuy, encodeSell, schemas } from '../schema'
-import { Schema } from '../schema/types'
+import { Schema, Token } from '../schema/types'
 import { ElementError } from '../base/error'
 import { _getBuyFeeParameters, _getSellFeeParameters, computeFees } from './fees'
 import {
@@ -28,7 +28,7 @@ import {
   STATIC_EXTRADATA
 } from './constants'
 import { validateOrder } from './check'
-import { getSchemaList, getTokenList, makeBigNumber, orderParamsEncode, toBaseUnitAmount } from './helper'
+import { getSchemaList, makeBigNumber, orderParamsEncode, toBaseUnitAmount } from './helper'
 
 // export { makeBigNumber }
 
@@ -80,7 +80,7 @@ export function generatePseudoRandomSalt(): BigNumber {
 export function getPriceParameters(
   network: Network,
   orderSide: OrderSide,
-  tokenAddress: string,
+  paymentTokenObj: Token,
   expirationTime: number,
   startAmount: number,
   endAmount?: number,
@@ -88,14 +88,16 @@ export function getPriceParameters(
   englishAuctionReservePrice?: number
 ) {
   const priceDiff = endAmount != undefined ? startAmount - endAmount : 0
-  const paymentToken = tokenAddress.toLowerCase()
+  let token = paymentTokenObj
 
-  const isEther = tokenAddress == NULL_ADDRESS
-  let token
-  if (!isEther) {
-    const tokenList = getTokenList(network)
-    token = tokenList.find((val) => val.address.toLowerCase() == paymentToken)
-  }
+  const paymentToken = token.address.toLowerCase()
+
+  const isEther = token.address == NULL_ADDRESS
+
+  // if (!isEther) {
+  //   const tokenList = getTokenList(network)
+  //   token = tokenList.find((val) => val.address.toLowerCase() == paymentToken)
+  // }
 
   // Validation
   if (isNaN(startAmount) || startAmount == undefined || startAmount < 0) {
@@ -128,18 +130,12 @@ export function getPriceParameters(
 
   // Note: WyvernProtocol.toBaseUnitAmount(makeBigNumber(startAmount), token.decimals)
   // will fail if too many decimal places, so special-case ether
-  const basePrice = isEther
-    ? toBaseUnitAmount(makeBigNumber(startAmount), 18)
-    : toBaseUnitAmount(makeBigNumber(startAmount), token.decimals)
+  const basePrice = toBaseUnitAmount(makeBigNumber(startAmount), token.decimals)
 
-  const extra = isEther
-    ? toBaseUnitAmount(makeBigNumber(priceDiff), 18)
-    : toBaseUnitAmount(makeBigNumber(priceDiff), token.decimals)
+  const extra = toBaseUnitAmount(makeBigNumber(priceDiff), token.decimals)
 
   const reservePrice = englishAuctionReservePrice
-    ? isEther
-      ? toBaseUnitAmount(makeBigNumber(englishAuctionReservePrice), 18)
-      : toBaseUnitAmount(makeBigNumber(englishAuctionReservePrice), token.decimals)
+    ? toBaseUnitAmount(makeBigNumber(englishAuctionReservePrice), token.decimals)
     : undefined
 
   return { basePrice, extra, paymentToken, reservePrice }
@@ -193,18 +189,18 @@ export function getTimeParameters(
 }
 
 export async function _makeBuyOrder({
-  networkName,
-  exchangeAddr,
-  asset,
-  quantity,
-  accountAddress,
-  startAmount,
-  expirationTime = 0,
-  paymentTokenAddress,
-  extraBountyBasisPoints = 0,
-  sellOrder,
-  referrerAddress
-}: {
+                                      networkName,
+                                      exchangeAddr,
+                                      asset,
+                                      quantity,
+                                      accountAddress,
+                                      startAmount,
+                                      expirationTime = 0,
+                                      paymentTokenObj,
+                                      extraBountyBasisPoints = 0,
+                                      sellOrder,
+                                      referrerAddress
+                                    }: {
   networkName: Network
   exchangeAddr: string
   asset: Asset
@@ -212,7 +208,7 @@ export async function _makeBuyOrder({
   accountAddress: string
   startAmount: number
   expirationTime: number
-  paymentTokenAddress: string
+  paymentTokenObj: Token
   extraBountyBasisPoints: number
   sellOrder?: Order
   referrerAddress?: string
@@ -226,7 +222,7 @@ export async function _makeBuyOrder({
   const { basePrice, extra, paymentToken } = getPriceParameters(
     networkName,
     OrderSide.Buy,
-    paymentTokenAddress,
+    paymentTokenObj,
     expirationTime,
     startAmount
   )
@@ -296,21 +292,21 @@ export async function _makeBuyOrder({
 }
 
 export async function _makeSellOrder({
-  networkName,
-  exchangeAddr,
-  asset,
-  quantity,
-  accountAddress,
-  startAmount,
-  endAmount,
-  listingTime,
-  expirationTime,
-  waitForHighestBid,
-  englishAuctionReservePrice = 0,
-  paymentTokenAddress,
-  extraBountyBasisPoints,
-  buyerAddress
-}: {
+                                       networkName,
+                                       exchangeAddr,
+                                       asset,
+                                       quantity,
+                                       accountAddress,
+                                       startAmount,
+                                       endAmount,
+                                       listingTime,
+                                       expirationTime,
+                                       waitForHighestBid,
+                                       englishAuctionReservePrice = 0,
+                                       paymentTokenObj,
+                                       extraBountyBasisPoints,
+                                       buyerAddress
+                                     }: {
   networkName: Network
   exchangeAddr: string
   asset: Asset
@@ -322,7 +318,7 @@ export async function _makeSellOrder({
   englishAuctionReservePrice?: number
   listingTime?: number
   expirationTime: number
-  paymentTokenAddress: string
+  paymentTokenObj: Token
   extraBountyBasisPoints: number
   buyerAddress: string
 }): Promise<UnhashedOrder> {
@@ -336,7 +332,7 @@ export async function _makeSellOrder({
   const { basePrice, extra, paymentToken, reservePrice } = getPriceParameters(
     networkName,
     OrderSide.Sell,
-    paymentTokenAddress,
+    paymentTokenObj,
     expirationTime,
     startAmount,
     endAmount,
@@ -563,10 +559,10 @@ export async function getCurrentPrice(exchangeHelper: any, order: Order): Promis
 }
 
 export async function _getStaticCallTargetAndExtraData({
-  networkName,
-  asset,
-  useTxnOriginStaticCall
-}: {
+                                                         networkName,
+                                                         asset,
+                                                         useTxnOriginStaticCall
+                                                       }: {
   networkName: Network
   asset: Asset
   useTxnOriginStaticCall: boolean
@@ -588,11 +584,11 @@ export async function _getStaticCallTargetAndExtraData({
 }
 
 export function _makeMatchingOrder({
-  networkName,
-  signedOrder,
-  accountAddress,
-  recipientAddress
-}: {
+                                     networkName,
+                                     signedOrder,
+                                     accountAddress,
+                                     recipientAddress
+                                   }: {
   networkName: Network
   signedOrder: UnsignedOrder
   accountAddress: string

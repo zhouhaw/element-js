@@ -217,7 +217,6 @@ export async function checkOrder(contract: any, order: UnhashedOrder, accountAdd
     let sell = order
     let sellNFTs = await checkAssetApprove(contract, sell)
 
-    // = contract.erc20.clone()
 
     let bal = await getAccountNFTsBalance(sellNFTs, sell.maker, sell.metadata.asset.id)
     if (sell.quantity.gt(bal.toString())) {
@@ -234,7 +233,7 @@ export async function checkOrder(contract: any, order: UnhashedOrder, accountAdd
   if (order.side == OrderSide.Buy) {
     log('OrderSide.Buy')
     let buy = order
-    await checkAssetApprove(contract, order)
+    // await checkAssetApprove(contract, order)
     // let sendAccount = contract.defaultAccount
     if (buy.paymentToken !== NULL_ADDRESS) {
       erc20Contract.options.address = buy.paymentToken

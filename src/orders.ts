@@ -146,6 +146,13 @@ export class Orders extends Contracts {
     // await checkBuyUser(this, paymentTokenAddress, accountAddress)
     let networkName = this.networkName
     let exchangeAddr = this.exchange.options.address
+
+    let paymentTokenObj = paymentTokenAddress ==NULL_ADDRESS ?this.ETH: this.paymentTokenList.find(val=>val.address ==paymentTokenAddress)
+
+    if(!paymentTokenObj){
+      throw new ElementError({ code: '1000', message: `No ERC-20 token found for '${paymentTokenAddress}'` })
+    }
+
     const buyOrder = await _makeBuyOrder({
       networkName,
       exchangeAddr,
@@ -154,14 +161,15 @@ export class Orders extends Contracts {
       accountAddress,
       startAmount,
       expirationTime,
-      paymentTokenAddress,
+      paymentTokenObj,
       extraBountyBasisPoints: 0,
       sellOrder,
       referrerAddress
     })
 
-    await checkOrder(this, buyOrder, accountAddress)
 
+    await checkOrder(this, buyOrder, accountAddress)
+    debugger
     if (feeRecipient) {
       buyOrder.feeRecipient = feeRecipient
     }
@@ -219,6 +227,12 @@ export class Orders extends Contracts {
     let networkName = this.networkName
     let exchangeAddr = this.exchange.options.address
 
+    let paymentTokenObj = paymentTokenAddress ==NULL_ADDRESS ?this.ETH: this.paymentTokenList.find(val=>val.address ==paymentTokenAddress)
+
+    if(!paymentTokenObj){
+      throw new ElementError({ code: '1000', message: `No ERC-20 token found for '${paymentTokenAddress}'` })
+    }
+
     const sellOrder = await _makeSellOrder({
       networkName,
       exchangeAddr,
@@ -231,7 +245,7 @@ export class Orders extends Contracts {
       expirationTime,
       waitForHighestBid,
       englishAuctionReservePrice,
-      paymentTokenAddress: paymentTokenAddress || NULL_ADDRESS,
+      paymentTokenObj,
       extraBountyBasisPoints,
       buyerAddress: buyerAddress || NULL_ADDRESS
     })

@@ -6,7 +6,7 @@ export {
   encodeDefaultCall, 
 } from './schemaFunctions';
 export { schemas } from './schemas';
-export { tokens } from './tokens';
+// export { tokens } from '../del/tokens';
 
 export {
   AbiType,
