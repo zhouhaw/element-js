@@ -1,8 +1,8 @@
 import { BigNumber } from './constants'
-import { Network, Order, Orders, schemas } from '@utils/orders/src'
-import { tokens } from '@utils/orders/src/schema'
-import { Schema } from '@utils/orders/src/schema/types'
-import { ECSignature, ElementOrder, UnhashedOrder, UnsignedOrder } from '@utils/orders/src/types'
+import { Network, Order, Orders, schemas } from '../index'
+import { tokens } from '../schema'
+import { Schema } from '../schema/types'
+import { ECSignature, ElementOrder, UnhashedOrder, UnsignedOrder } from '../types'
 
 export function toBaseUnitAmount(amount: BigNumber, decimals: number): BigNumber {
   const unit = new BigNumber(10).pow(decimals)

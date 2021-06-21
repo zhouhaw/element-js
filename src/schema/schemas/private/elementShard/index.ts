@@ -44,7 +44,7 @@ export const privateElementShardSchema: Schema<ElementShardType> = {
       payable: false,
       constant: false,
       stateMutability: StateMutability.Nonpayable,
-      target: '0x4cDdBf865Ee2A1a3711648Bb192E285f290f7985',
+      target: '',
       inputs: [
         { kind: FunctionInputKind.Owner, name: '_from', type: 'address' },
         { kind: FunctionInputKind.Replaceable, name: '_to', type: 'address' },
@@ -60,7 +60,7 @@ export const privateElementShardSchema: Schema<ElementShardType> = {
       payable: false,
       constant: true,
       stateMutability: StateMutability.View,
-      target: '0x4cDdBf865Ee2A1a3711648Bb192E285f290f7985',
+      target: '',
       inputs: [{ kind: FunctionInputKind.Asset, name: '_tokenId', type: 'uint256', value: asset.id }],
       outputs: [{ kind: FunctionOutputKind.Owner, name: '_owner', type: 'address' }]
     }),
@@ -71,7 +71,7 @@ export const privateElementShardSchema: Schema<ElementShardType> = {
       {
         type: AbiType.Event,
         name: 'Transfer',
-        target: '0x4cDdBf865Ee2A1a3711648Bb192E285f290f7985',
+        target: '',
         anonymous: false,
         inputs: [
           { kind: EventInputKind.Source, indexed: true, name: '_from', type: 'address' },

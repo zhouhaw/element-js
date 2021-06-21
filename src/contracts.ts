@@ -15,13 +15,14 @@ const ExchangeHelper = require(`../abi/ExchangeHelper.json`)
 const ElementixTokenTransferProxy = require(`../abi/ElementixTokenTransferProxy.json`)
 const WETH = require(`../abi/WETH9Mocked.json`)
 const MakeTokenID = require(`../abi/MakeTokenID.json`)
-import { CONTRACTS_ADDRESSES } from './utils/constants'
+import { CONTRACTS_ADDRESSES, RINKEBY_CONTRACTS_ADDRESSES, PRIVATE_CONTRACTS_ADDRESSES } from './utils/constants'
 
 export class Contracts {
   public web3: any
 
   public networkName: Network
   // addr
+  public contractsAddr: any
   public tokenTransferProxyAddr: string
   public WETHAddr: string
   public elementSharedAssetAddr: string
@@ -39,6 +40,7 @@ export class Contracts {
   public exchangeProxyRegistry: any
   public exchangeHelper: any
   public elementSharedAsset: any
+  public elementSharedAssetV1: any
   public WETH: any
   // public makeTokenID: any
 
@@ -57,10 +59,9 @@ export class Contracts {
     const elementixTokenTransferProxyAddr = contracts.ElementixTokenTransferProxy.toLowerCase()
     const elementixExchangeKeeperAddr = contracts.ElementixExchangeKeeper.toLowerCase()
     const wethAddr = contracts.WETH.toLowerCase()
-    // }
 
     // const makeTokenIDAddr = MakeTokenID.networks[networkID].address
-
+    this.contractsAddr = contracts
     this.WETHAddr = wethAddr
     this.elementSharedAssetAddr = elementSharedAssetAddr
     this.elementixExchangeKeeperAddr = elementixExchangeKeeperAddr
@@ -89,6 +90,12 @@ export class Contracts {
     } else {
       // eslint-disable-next-line no-throw-literal
       throw `${this.networkName}  abi undefined`
+    }
+
+    // @ts-ignore
+    if (contracts.ElementSharedAssetV1) {
+      // @ts-ignore
+      this.elementSharedAssetV1 = new web3.eth.Contract(ElementSharedAsset.abi, contracts.ElementSharedAssetV1, options)
     }
   }
 }
