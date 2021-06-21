@@ -3,6 +3,7 @@ import { Network } from './schema/types';
 export { Network };
 export interface ElementAPIConfig {
     networkName: Network;
+    paymentTokens?: Array<Token>;
     networkID?: number;
     account?: string;
     gasPrice?: number;
@@ -16,11 +17,7 @@ export declare enum AbiType {
 export declare enum ElementSchemaName {
     ERC20 = "ERC20",
     ERC721 = "ERC721",
-    ERC1155 = "ERC1155",
-    LegacyEnjin = "Enjin",
-    ENSShortNameAuction = "ENSShortNameAuction",
-    ElementShardType = "ElementShardType",
-    CryptoPunks = "CryptoPunks"
+    ERC1155 = "ERC1155"
 }
 interface ElementNFTAsset {
     id: string;

@@ -16,17 +16,27 @@ export declare const INVERSE_BASIS_POINT = 10000;
 export declare const ORDERBOOK_VERSION: number;
 export declare const API_VERSION: number;
 export declare const STATIC_EXTRADATA = "0x0c225aad";
-declare enum PRIVATE_CONTRACTS_ADDRESSES {
+export declare enum RINKEBY_CONTRACTS_ADDRESSES {
+    ElementixProxyRegistry = "0x03C4C60555DEc99E1830449524aDe323fF508a62",
+    ElementixTokenTransferProxy = "0x48126f4a2894231Ba274429F98Fd62DfeD9056D9",
+    ElementixExchange = "0x7ac5c8568122341f5D2c404eC8F9dE56456D60CA",
+    ExchangeHelper = "0x11716B79a85B6FaA9BA469AA40050901a675E49c",
+    ElementSharedAsset = "0x4cDdBf865Ee2A1a3711648Bb192E285f290f7985",
+    ElementixExchangeKeeper = "0x8A5Bf74022fCe84947e92A05fAdD34730FeB4ca9",
+    WETH = "0xc778417e063141139fce010982780140aa0cd5ab"
+}
+export declare enum PRIVATE_CONTRACTS_ADDRESSES {
     ElementixProxyRegistry = "0x023CA02bFB85A3901316EdFE6BBA92B8cb54C9E3",
     ElementixTokenTransferProxy = "0x20E1af184c5A40cFE63a377d8eE2A2029f1296FD",
     ElementixExchange = "0xb328610a54A438C80EE6103F8679d75D6c0E20Ab",
     ExchangeHelper = "0x5A5E397CfEAfc27e54648DD2cF63AF7c8af0fDf2",
     ElementSharedAsset = "0x09656BC39B5162012c595c0797740Dc1B0D62E9D",
+    ElementSharedAssetV1 = "0x4cDdBf865Ee2A1a3711648Bb192E285f290f7985",
     ElementixExchangeKeeper = "0x2FB4580243D72fC1374262E9fe7a1003Dffd4c1d",
     WETH = "0x37e5C2ADEcAfb0f5d9335d69c62dBae0aD610E3c"
 }
 export declare const CONTRACTS_ADDRESSES: {
-    rinkeby: typeof PRIVATE_CONTRACTS_ADDRESSES;
+    rinkeby: typeof RINKEBY_CONTRACTS_ADDRESSES;
     private: typeof PRIVATE_CONTRACTS_ADDRESSES;
     main: typeof PRIVATE_CONTRACTS_ADDRESSES;
 };

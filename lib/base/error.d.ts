@@ -11,5 +11,6 @@ export declare type ElementErrorCodes = Array<Readonly<CustomError>>;
 export declare const ErrorCodes: ElementErrorCodes;
 export declare class ElementError extends Error {
     code: string;
+    data: any;
     constructor(err: CustomError);
 }

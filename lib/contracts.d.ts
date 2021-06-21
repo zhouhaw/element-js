@@ -1,11 +1,13 @@
-import { ElementAPIConfig, Network } from './types';
+import { ElementAPIConfig, Network, Token } from './types';
 export declare class Contracts {
     web3: any;
     networkName: Network;
+    contractsAddr: any;
     tokenTransferProxyAddr: string;
     WETHAddr: string;
     elementSharedAssetAddr: string;
     elementixExchangeKeeperAddr: string;
+    defaultAccount: string;
     erc20: any;
     erc721: any;
     erc1155: any;
@@ -14,6 +16,9 @@ export declare class Contracts {
     exchangeProxyRegistry: any;
     exchangeHelper: any;
     elementSharedAsset: any;
+    elementSharedAssetV1: any;
     WETH: any;
+    paymentTokenList: Array<Token>;
+    ETH: Token;
     constructor(web3: any, apiConfig?: ElementAPIConfig);
 }
