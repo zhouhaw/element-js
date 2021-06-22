@@ -3,7 +3,6 @@ export declare class Contracts {
     web3: any;
     networkName: Network;
     contractsAddr: any;
-    tokenTransferProxyAddr: string;
     WETHAddr: string;
     elementSharedAssetAddr: string;
     elementixExchangeKeeperAddr: string;
