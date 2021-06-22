@@ -83,14 +83,7 @@ export async function checkApproveTokenTransferProxy(
 ): Promise<boolean> {
   let tokenTransferProxyAddr = await exchangeContract.methods.tokenTransferProxy().call()
   const allowAmount = await erc20Contract.methods.allowance(account, tokenTransferProxyAddr).call()
-  // log(
-  //   'checkApproveTokenTransferProxy',
-  //   account,
-  //   'allowAmount=0',
-  //   new BigNumber(allowAmount).eq(0),
-  //   'Token',
-  //   erc20Contract.options.address
-  // )
+
   if (new BigNumber(allowAmount).eq(0)) {
     //  log('checkApproveTokenTransferProxy allowAmount %s amount', allowAmount, amount)
     throw new ElementError({ code: '1101', data: erc20Contract.options.address })
@@ -105,7 +98,6 @@ export async function checkApproveERC1155TransferProxy(
 ): Promise<boolean> {
   let operator = await proxyRegistryContract.methods.proxies(account).call()
   let isApprove = await nftsContract.methods.isApprovedForAll(account, operator).call()
-  // log('checkApproveERC1155TransferProxy', account, isApprove, 'nft', nftsContract.options.address, 'operator', operator)
   if (!isApprove) {
     throw new ElementError({ code: '1102', data: nftsContract.options.address })
   }
@@ -203,7 +195,7 @@ export async function checkBuyUser(contract: any, paymentTokenAddr: any, account
 }
 
 export async function checkOrder(contract: any, order: UnhashedOrder ) {
-  await checkRegisterProxy(contract.exchangeProxyRegistry, order.maker)
+
   const equalPrice: boolean = order.basePrice.gt(0)
   if (!equalPrice) throw new ElementError({ code: '1201' })
 
@@ -212,6 +204,9 @@ export async function checkOrder(contract: any, order: UnhashedOrder ) {
   // 检查 Sell 买单
   if (order.side == OrderSide.Sell) {
     let sell = order
+
+    await checkRegisterProxy(contract.exchangeProxyRegistry, order.maker)
+
     let sellNFTs = await checkAssetApprove(contract, sell)
 
 
@@ -220,6 +215,7 @@ export async function checkOrder(contract: any, order: UnhashedOrder ) {
       throw new ElementError({ code: '1103' })
     }
 
+    //transfer fee
     if (sell.paymentToken != NULL_ADDRESS) {
       erc20Contract.options.address = sell.paymentToken
       await checkApproveTokenTransferProxy(contract.exchange, erc20Contract, sell.maker)

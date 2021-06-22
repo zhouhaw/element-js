@@ -28,7 +28,7 @@ export class Contracts {
   public networkName: Network
   // addr
   public contractsAddr: any
-  public tokenTransferProxyAddr: string
+  // public tokenTransferProxyAddr: string
   public WETHAddr: string
   public elementSharedAssetAddr: string
   public elementixExchangeKeeperAddr: string
@@ -71,7 +71,7 @@ export class Contracts {
     const exchangeAddr = contracts.ElementixExchange.toLowerCase()
     const proxyRegistryAddr = contracts.ElementixProxyRegistry.toLowerCase()
     const elementSharedAssetAddr = contracts.ElementSharedAsset.toLowerCase()
-    const elementixTokenTransferProxyAddr = contracts.ElementixTokenTransferProxy.toLowerCase()
+    // const elementixTokenTransferProxyAddr = contracts.ElementixTokenTransferProxy.toLowerCase()
     const elementixExchangeKeeperAddr = contracts.ElementixExchangeKeeper.toLowerCase()
     const wethAddr = contracts.WETH.toLowerCase()
 
@@ -81,7 +81,7 @@ export class Contracts {
     this.WETHAddr = wethAddr
     this.elementSharedAssetAddr = elementSharedAssetAddr
     this.elementixExchangeKeeperAddr = elementixExchangeKeeperAddr
-    this.tokenTransferProxyAddr = elementixTokenTransferProxyAddr
+    // this.tokenTransferProxyAddr = elementixTokenTransferProxyAddr
 
     let options = {
       gas: gasLimit
