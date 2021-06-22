@@ -6,8 +6,8 @@ export declare function checkApproveERC1155TransferProxy(proxyRegistryContract: 
 export declare function checkApproveERC721TransferProxy(proxyRegistryContract: any, nftsContract: any, account: string, tokenID: string): Promise<boolean>;
 export declare function checkSellUser(contract: any, asset: Asset, paymentTokenAddr: string, accountAddress: string): Promise<boolean>;
 export declare function checkBuyUser(contract: any, paymentTokenAddr: any, accountAddress: string): Promise<boolean>;
-export declare function checkOrder(contract: any, order: UnhashedOrder, accountAddress: string): Promise<boolean>;
-export declare function checkMatchOrder(contract: any, buy: Order, sell: Order, accountAddress: string): Promise<boolean>;
+export declare function checkOrder(contract: any, order: UnhashedOrder): Promise<boolean>;
+export declare function checkMatchOrder(contract: any, buy: Order, sell: Order): Promise<boolean>;
 export declare function checkDataToCall(netWorkName: Network, order: UnhashedOrder): void;
 export declare function validateOrder(exchangeHelper: any, order: Order): Promise<any>;
 export declare function validateAndFormatWalletAddress(web3: any, address: string): string;

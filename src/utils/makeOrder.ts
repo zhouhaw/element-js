@@ -155,7 +155,6 @@ export function getTimeParameters(
       message: `Expiration time must be at least ${MIN_EXPIRATION_SECONDS} seconds from now, or zero (non-expiring).`
     })
   }
-  console.log('listingTimestamp', listingTimestamp)
   if (listingTimestamp && listingTimestamp < minListingTimestamp) {
     throw new ElementError({ code: '1000', message: 'Listing time cannot be in the past.' })
   }

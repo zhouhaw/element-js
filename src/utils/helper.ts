@@ -1,6 +1,6 @@
 import { BigNumber } from './constants'
 import { Network, Order, Orders, schemas } from '../index'
-// import { tokens } from '@utils/orders/src/schema'
+import { tokens } from '../schema/tokens'
 import { Schema } from '../schema/types'
 import { ECSignature, ElementOrder, UnhashedOrder, UnsignedOrder } from '../types'
 
@@ -38,15 +38,6 @@ export async function getTokenIDOwner(elementAssetContract: any, tokenId: any): 
   // let exists = await elementAssetContract.methods.exists(tokenId).call()
   return elementAssetContract.methods.creator(tokenId).call()
 }
-
-// export function getTokenList(network: Network, symbol?: string): Array<any> {
-//   const payTokens = tokens[network]
-//   if (symbol) {
-//     return [payTokens.canonicalWrappedEther, ...payTokens.otherTokens].filter((x: any) => x.symbol === symbol)
-//   } else {
-//     return [payTokens.canonicalWrappedEther, ...payTokens.otherTokens]
-//   }
-// }
 
 export function getSchemaList(network: Network, schemaName?: string): Array<Schema<any>> {
   // @ts-ignore
@@ -148,4 +139,21 @@ export function orderSigEncode(order: ECSignature) {
     orderSigValueArray.push(order[key])
   }
   return orderSigValueArray
+}
+
+export function getTokenList(network: Network, { symbol, address }: { symbol?: string; address?: string }): Array<any> {
+  const payTokens = tokens[network]
+  if (symbol) {
+    return [payTokens.canonicalWrappedEther, ...payTokens.otherTokens].filter(
+      (x: any) => x.symbol.toLowerCase() === symbol.toLowerCase()
+    )
+  }
+
+  if (address) {
+    return [payTokens.canonicalWrappedEther, ...payTokens.otherTokens].filter(
+      (x: any) => x.address.toLowerCase() === address.toLowerCase()
+    )
+  }
+
+  return [payTokens.canonicalWrappedEther, ...payTokens.otherTokens]
 }

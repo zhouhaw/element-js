@@ -32,6 +32,7 @@ export {
 } from './utils/constants'
 export { orderFromJSON, transferFromERC1155, transferFromERC721, transferFromWETH } from './utils'
 export {
+  getTokenList,
   toBaseUnitAmount,
   getTokenIDOwner,
   getAccountBalance,

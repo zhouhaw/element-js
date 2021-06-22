@@ -7,7 +7,6 @@ export declare class Contracts {
     WETHAddr: string;
     elementSharedAssetAddr: string;
     elementixExchangeKeeperAddr: string;
-    defaultAccount: string;
     erc20: any;
     erc721: any;
     erc1155: any;

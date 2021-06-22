@@ -65,7 +65,7 @@ export class Orders extends Contracts {
 
     const { buy, sell } = assignOrdersToSides(signedOrder, unsignData)
 
-    console.log('fulfillOrder Sell', 'buy', buy, 'sell', sell)
+    // console.log('fulfillOrder Sell', 'buy', buy, 'sell', sell)
     return this.orderMatch({ buy, sell, accountAddress })
   }
 
@@ -87,7 +87,7 @@ export class Orders extends Contracts {
       throw new ElementError({ code: '1202' })
     }
 
-    await checkMatchOrder(this, buy, sell, accountAddress)
+    await checkMatchOrder(this, buy, sell)
 
     const sellOrderParamArray = orderParamsEncode(sell as UnhashedOrder)
     const sellOrderSigArray = orderSigEncode(sell as ECSignature)
@@ -166,10 +166,7 @@ export class Orders extends Contracts {
       sellOrder,
       referrerAddress
     })
-
-
-    await checkOrder(this, buyOrder, accountAddress)
-    debugger
+    await checkOrder(this, buyOrder)
     if (feeRecipient) {
       buyOrder.feeRecipient = feeRecipient
     }
@@ -249,7 +246,7 @@ export class Orders extends Contracts {
       extraBountyBasisPoints,
       buyerAddress: buyerAddress || NULL_ADDRESS
     })
-    await checkOrder(this, sellOrder, accountAddress)
+    await checkOrder(this, sellOrder)
 
     if (feeRecipient) {
       sellOrder.feeRecipient = feeRecipient

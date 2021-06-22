@@ -15,7 +15,10 @@ const ExchangeHelper = require(`../abi/ExchangeHelper.json`)
 // const ElementixTokenTransferProxy = require(`../abi/ElementixTokenTransferProxy.json`)
 const WETH = require(`../abi/WETH9Mocked.json`)
 const MakeTokenID = require(`../abi/MakeTokenID.json`)
-import { CONTRACTS_ADDRESSES, NULL_ADDRESS } from './utils/constants'
+import {
+  CONTRACTS_ADDRESSES,
+  NULL_ADDRESS
+} from './utils/constants'
 
 import { tokens } from './schema/tokens'
 
@@ -29,7 +32,7 @@ export class Contracts {
   public WETHAddr: string
   public elementSharedAssetAddr: string
   public elementixExchangeKeeperAddr: string
-  public defaultAccount: string
+  // public defaultAccount: string
 
   // abi
   public erc20: any
@@ -72,7 +75,6 @@ export class Contracts {
     const elementixExchangeKeeperAddr = contracts.ElementixExchangeKeeper.toLowerCase()
     const wethAddr = contracts.WETH.toLowerCase()
 
-    console.log('ElementAPIConfig', networkName, proxyRegistryAddr)
 
     // const makeTokenIDAddr = MakeTokenID.networks[networkID].address
     this.contractsAddr = contracts
@@ -100,7 +102,7 @@ export class Contracts {
       this.authenticatedProxy = new web3.eth.Contract(AuthenticatedProxy.abi, options)
 
       this.web3 = web3
-      this.defaultAccount = web3.eth.defaultAccount.toLowerCase()
+      // this.defaultAccount = web3.eth.defaultAccount?.toLowerCase()
     } else {
       // eslint-disable-next-line no-throw-literal
       throw `${this.networkName}  abi undefined`

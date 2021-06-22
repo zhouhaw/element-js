@@ -83,14 +83,14 @@ export async function checkApproveTokenTransferProxy(
 ): Promise<boolean> {
   let tokenTransferProxyAddr = await exchangeContract.methods.tokenTransferProxy().call()
   const allowAmount = await erc20Contract.methods.allowance(account, tokenTransferProxyAddr).call()
-  log(
-    'checkApproveTokenTransferProxy',
-    account,
-    'allowAmount=0',
-    new BigNumber(allowAmount).eq(0),
-    'Token',
-    erc20Contract.options.address
-  )
+  // log(
+  //   'checkApproveTokenTransferProxy',
+  //   account,
+  //   'allowAmount=0',
+  //   new BigNumber(allowAmount).eq(0),
+  //   'Token',
+  //   erc20Contract.options.address
+  // )
   if (new BigNumber(allowAmount).eq(0)) {
     //  log('checkApproveTokenTransferProxy allowAmount %s amount', allowAmount, amount)
     throw new ElementError({ code: '1101', data: erc20Contract.options.address })
@@ -105,8 +105,7 @@ export async function checkApproveERC1155TransferProxy(
 ): Promise<boolean> {
   let operator = await proxyRegistryContract.methods.proxies(account).call()
   let isApprove = await nftsContract.methods.isApprovedForAll(account, operator).call()
-  log('checkApproveERC1155TransferProxy', account, isApprove, 'nft', nftsContract.options.address, 'operator', operator)
-  // debugger
+  // log('checkApproveERC1155TransferProxy', account, isApprove, 'nft', nftsContract.options.address, 'operator', operator)
   if (!isApprove) {
     throw new ElementError({ code: '1102', data: nftsContract.options.address })
   }
@@ -203,7 +202,7 @@ export async function checkBuyUser(contract: any, paymentTokenAddr: any, account
   return true
 }
 
-export async function checkOrder(contract: any, order: UnhashedOrder, accountAddress: string) {
+export async function checkOrder(contract: any, order: UnhashedOrder ) {
   await checkRegisterProxy(contract.exchangeProxyRegistry, order.maker)
   const equalPrice: boolean = order.basePrice.gt(0)
   if (!equalPrice) throw new ElementError({ code: '1201' })
@@ -212,10 +211,9 @@ export async function checkOrder(contract: any, order: UnhashedOrder, accountAdd
 
   // 检查 Sell 买单
   if (order.side == OrderSide.Sell) {
-    log('OrderSide.Sell')
-
     let sell = order
     let sellNFTs = await checkAssetApprove(contract, sell)
+
 
     let bal = await getAccountNFTsBalance(sellNFTs, sell.maker, sell.metadata.asset.id)
     if (sell.quantity.gt(bal.toString())) {
@@ -230,7 +228,6 @@ export async function checkOrder(contract: any, order: UnhashedOrder, accountAdd
 
   // 检查 Buy 卖单
   if (order.side == OrderSide.Buy) {
-    log('OrderSide.Buy')
     let buy = order
     // await checkAssetApprove(contract, order)
     // let sendAccount = contract.defaultAccount
@@ -241,7 +238,7 @@ export async function checkOrder(contract: any, order: UnhashedOrder, accountAdd
 
       await checkApproveTokenTransferProxy(contract.exchange, erc20Contract, buy.maker)
     } else {
-      if (accountAddress != buy.maker.toLowerCase()) throw new ElementError({ code: '1204' })
+      // if (accountAddress != buy.maker.toLowerCase()) throw new ElementError({ code: '1204' })
 
       let { ethBal } = await getAccountBalance(contract.web3, buy.maker)
       if (makeBigNumber(ethBal).lt(buy.basePrice)) throw new ElementError({ code: '1105' })
@@ -252,7 +249,7 @@ export async function checkOrder(contract: any, order: UnhashedOrder, accountAdd
   return true
 }
 
-export async function checkMatchOrder(contract: any, buy: Order, sell: Order, accountAddress: string) {
+export async function checkMatchOrder(contract: any, buy: Order, sell: Order) {
   const equalPrice: boolean = sell.basePrice.gte(buy.basePrice)
   if (!equalPrice) {
     throw new ElementError({ code: '1201' })
@@ -275,8 +272,8 @@ export async function checkMatchOrder(contract: any, buy: Order, sell: Order, ac
         message: `sell.takerRelayerFee ${sell.takerRelayerFee} <= buy.takerRelayerFee ${buy.takerRelayerFee}`
       })
     }
-    await checkOrder(contract, buy, accountAddress)
-    await checkOrder(contract, sell, accountAddress)
+    await checkOrder(contract, buy)
+    await checkOrder(contract, sell)
 
     await cancelledOrFinalized(contract.exchange, sell.hash).catch((err) => {
       log(err)
@@ -291,8 +288,8 @@ export async function checkMatchOrder(contract: any, buy: Order, sell: Order, ac
         message: `buy.takerRelayerFee ${buy.takerRelayerFee} <= sell.takerRelayerFee ${sell.takerRelayerFee}`
       })
     }
-    await checkOrder(contract, sell, accountAddress)
-    await checkOrder(contract, buy, accountAddress)
+    await checkOrder(contract, sell)
+    await checkOrder(contract, buy)
 
     await cancelledOrFinalized(contract.exchange, buy.hash).catch((err) => {
       log(err)
@@ -320,15 +317,15 @@ export function checkDataToCall(netWorkName: Network, order: UnhashedOrder) {
   }
 
   if (encodeData.dataToCall != order.dataToCall) {
-    log('sell.dataToCall error')
+    log('checkDataToCall.dataToCall error')
   }
 
   if (encodeData.target != order.target) {
-    log('sell.target error')
+    log('checkDataToCall.target error')
   }
 
   if (encodeData.replacementPattern != order.replacementPattern) {
-    log('sell.replacementPattern error')
+    log('checkDataToCall.replacementPattern error')
   }
 }
 

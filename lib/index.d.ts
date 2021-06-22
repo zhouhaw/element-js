@@ -6,7 +6,7 @@ export { registerProxy, approveTokenTransferProxy, approveERC1155TransferProxy, 
 export { orderToJSON, getPriceParameters, getCurrentPrice } from './utils/makeOrder';
 export { BigNumber, NULL_ADDRESS, NULL_BLOCK_HASH, ELEMENT_FEE_RECIPIENT, DEFAULT_SELLER_FEE_BASIS_POINTS, ORDERBOOK_VERSION } from './utils/constants';
 export { orderFromJSON, transferFromERC1155, transferFromERC721, transferFromWETH } from './utils';
-export { toBaseUnitAmount, getTokenIDOwner, getAccountBalance, getAccountNFTsBalance, getSchemaList, makeBigNumber } from './utils/helper';
+export { getTokenList, toBaseUnitAmount, getTokenIDOwner, getAccountBalance, getAccountNFTsBalance, getSchemaList, makeBigNumber } from './utils/helper';
 export { Orders, OrderCheckStatus } from './orders';
 export type { CallBack } from './orders';
 export { Contracts } from './contracts';

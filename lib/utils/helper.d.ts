@@ -11,3 +11,7 @@ export declare function getSchemaList(network: Network, schemaName?: string): Ar
 export declare function hashOrder(web3: any, order: UnhashedOrder): string;
 export declare function orderParamsEncode(order: UnhashedOrder): any[];
 export declare function orderSigEncode(order: ECSignature): any[];
+export declare function getTokenList(network: Network, { symbol, address }: {
+    symbol?: string;
+    address?: string;
+}): Array<any>;
