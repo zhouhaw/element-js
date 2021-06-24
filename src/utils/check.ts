@@ -195,11 +195,13 @@ export async function checkBuyUser(contract: any, paymentTokenAddr: any, account
 }
 
 export async function checkOrder(contract: any, order: UnhashedOrder ) {
-
   const equalPrice: boolean = order.basePrice.gt(0)
   if (!equalPrice) throw new ElementError({ code: '1201' })
 
   const erc20Contract = contract.erc20.clone()
+
+  let metadata = order.metadata
+  const { tokenId, assetAddress } = getAssetInfo(metadata)
 
   // 检查 Sell 买单
   if (order.side == OrderSide.Sell) {
@@ -210,7 +212,7 @@ export async function checkOrder(contract: any, order: UnhashedOrder ) {
     let sellNFTs = await checkAssetApprove(contract, sell)
 
 
-    let bal = await getAccountNFTsBalance(sellNFTs, sell.maker, sell.metadata.asset.id)
+    let bal = await getAccountNFTsBalance(sellNFTs, sell.maker,tokenId)
     if (sell.quantity.gt(bal.toString())) {
       throw new ElementError({ code: '1103' })
     }
@@ -226,6 +228,11 @@ export async function checkOrder(contract: any, order: UnhashedOrder ) {
   if (order.side == OrderSide.Buy) {
     let buy = order
     // await checkAssetApprove(contract, order)
+
+    if (assetAddress != contract.elementSharedAssetAddr) {
+      await checkAssetMint(contract, metadata)
+    }
+
     // let sendAccount = contract.defaultAccount
     if (buy.paymentToken !== NULL_ADDRESS) {
       erc20Contract.options.address = buy.paymentToken
@@ -235,7 +242,6 @@ export async function checkOrder(contract: any, order: UnhashedOrder ) {
       await checkApproveTokenTransferProxy(contract.exchange, erc20Contract, buy.maker)
     } else {
       // if (accountAddress != buy.maker.toLowerCase()) throw new ElementError({ code: '1204' })
-
       let { ethBal } = await getAccountBalance(contract.web3, buy.maker)
       if (makeBigNumber(ethBal).lt(buy.basePrice)) throw new ElementError({ code: '1105' })
     }

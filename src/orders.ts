@@ -14,50 +14,55 @@ import {
 import { makeBigNumber, orderParamsEncode, orderSigEncode } from './utils/helper'
 
 import { Contracts } from './contracts'
-// import { orderFromJSON } from '@utils/orders/src/utils'
-
-// export enum OrderCheckPoints {
-//   OrderHashSign = 'orderHashSign',
-//   TokenApprove = 'tokenApprove',
-//   ETHBalance = 'ethBalance',
-//   NFTBalance = 'nftBalance'
-// }
 
 export enum OrderCheckStatus {
   StartOrderHashSign = 'startOrderHashSign',
   EndOrderHashSign = 'endOrderHashSign',
   StartOrderMatch = 'startOrderMatch',
+  OrderMatchTxHash = 'orderMatchTxHash',
   EndOrderMatch = 'endOrderMatch',
+  StartCancelOrder = 'startCancelOrder',
+  EndCancelOrder = 'endCancelOrder',
   End = 'End'
 }
 
 // export type CallBackFunc = (arg: OrderCheckPoints) => OrderCheckStatus
 
 export interface CallBack {
-  next<T>(arg: OrderCheckStatus): OrderCheckStatus
+  next<T>(arg: OrderCheckStatus, data?: any): OrderCheckStatus
+}
+
+function sleep(ms: number) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve({ status: 'hi' })
+    }, ms)
+  })
 }
 
 export class Orders extends Contracts {
   public async fulfillOrder({
-    signedOrder,
-    accountAddress,
-    recipientAddress
-  }: {
+                              signedOrder,
+                              accountAddress,
+                              recipientAddress
+                            }: {
     signedOrder: Order
     accountAddress: string
     recipientAddress?: string
-  }): Promise<boolean> {
-    let networkName = this.networkName
-    let recipient = recipientAddress
-    if (!recipient || signedOrder.side == OrderSide.Buy) {
-      recipient = accountAddress
+  }, callBack?: CallBack): Promise<boolean> {
+    const networkName = this.networkName
+    let assetRecipientAddress = recipientAddress
+    if (!assetRecipientAddress || signedOrder.side == OrderSide.Buy) {
+      assetRecipientAddress = accountAddress
     }
+    const feeRecipientAddress = this.feeRecipientAddress
 
     const matchingOrder = _makeMatchingOrder({
       networkName,
       signedOrder,
       accountAddress,
-      recipientAddress: recipient
+      assetRecipientAddress,
+      feeRecipientAddress
     })
 
     // 伪造买单 Buy
@@ -66,7 +71,7 @@ export class Orders extends Contracts {
     const { buy, sell } = assignOrdersToSides(signedOrder, unsignData)
 
     // console.log('fulfillOrder Sell', 'buy', buy, 'sell', sell)
-    return this.orderMatch({ buy, sell, accountAddress })
+    return this.orderMatch({ buy, sell, accountAddress }, callBack)
   }
 
   async orderMatch(
@@ -94,7 +99,9 @@ export class Orders extends Contracts {
     const buyOrderParamArray = orderParamsEncode(buy as UnhashedOrder)
     const buyOrderSigArray = orderSigEncode(buy as ECSignature)
 
-    callBack?.next(OrderCheckStatus.StartOrderMatch)
+    callBack?.next(OrderCheckStatus.StartOrderMatch, { buy, sell })
+
+    // const matchTx = await sleep(5000)
 
     const matchTx = await this.exchange.methods
       .orderMatch(buyOrderParamArray, buyOrderSigArray, sellOrderParamArray, sellOrderSigArray, metadata)
@@ -103,6 +110,18 @@ export class Orders extends Contracts {
         from: accountAddress,
         gas: (80e4).toString()
       })
+      .on('transactionHash', (txHash: string) => {
+        callBack?.next(OrderCheckStatus.OrderMatchTxHash, { txHash })
+        console.log('Send success tx hash：', txHash)
+      })
+      .on('confirmation', (confirmationNumber: number, receipt: string) => {
+        console.log(' confirmation num：', confirmationNumber)
+        console.log(' confirmation receipt：', receipt)
+      })
+      .on('receipt', (receipt: string) => {
+        console.log('receipt：', receipt)
+      })
+      .on('error', console.error) // 如果是 out of gas 错误, 第二个参数为交易收据
       .catch((error: any) => {
         if (error.code == '4001') {
           throw new ElementError(error)
@@ -110,7 +129,7 @@ export class Orders extends Contracts {
           throw new ElementError({ code: '1000', message: 'OrderMatch failure' })
         }
       })
-    callBack?.next(OrderCheckStatus.EndOrderMatch)
+    callBack?.next(OrderCheckStatus.EndOrderMatch, { matchTx, buy, sell })
 
     if (matchTx) {
       return matchTx.status
@@ -128,8 +147,7 @@ export class Orders extends Contracts {
       expirationTime = 0,
       paymentTokenAddress = this.WETHAddr,
       sellOrder,
-      referrerAddress,
-      feeRecipient
+      referrerAddress
     }: {
       asset: Asset
       accountAddress: string
@@ -139,7 +157,6 @@ export class Orders extends Contracts {
       paymentTokenAddress?: string
       sellOrder?: Order
       referrerAddress?: string
-      feeRecipient?: string
     },
     callBack?: CallBack
   ): Promise<OrderJSON | boolean> {
@@ -147,9 +164,11 @@ export class Orders extends Contracts {
     let networkName = this.networkName
     let exchangeAddr = this.exchange.options.address
 
-    let paymentTokenObj = paymentTokenAddress ==NULL_ADDRESS ?this.ETH: this.paymentTokenList.find(val=>val.address ==paymentTokenAddress)
+    let paymentTokenObj = paymentTokenAddress == NULL_ADDRESS
+      ? this.ETH
+      : this.paymentTokenList.find(val => val.address.toLowerCase() == paymentTokenAddress?.toLowerCase())
 
-    if(!paymentTokenObj){
+    if (!paymentTokenObj) {
       throw new ElementError({ code: '1000', message: `No ERC-20 token found for '${paymentTokenAddress}'` })
     }
 
@@ -163,19 +182,20 @@ export class Orders extends Contracts {
       expirationTime,
       paymentTokenObj,
       extraBountyBasisPoints: 0,
+      feeRecipientAddr:this.feeRecipientAddress,
       sellOrder,
       referrerAddress
     })
     await checkOrder(this, buyOrder)
-    if (feeRecipient) {
-      buyOrder.feeRecipient = feeRecipient
-    }
+    // if (feeRecipient) {
+    //   buyOrder.feeRecipient = feeRecipient
+    // }
 
-    callBack?.next(OrderCheckStatus.StartOrderHashSign)
+    callBack?.next(OrderCheckStatus.StartOrderHashSign, { buyOrder })
 
     let signBuyOrder = await hashAndValidateOrder(this.web3, this.exchangeHelper, buyOrder)
 
-    callBack?.next(OrderCheckStatus.EndOrderHashSign)
+    callBack?.next(OrderCheckStatus.EndOrderHashSign, { signBuyOrder })
 
     return signBuyOrder
   }
@@ -193,7 +213,6 @@ export class Orders extends Contracts {
       englishAuctionReservePrice,
       paymentTokenAddress = NULL_ADDRESS,
       extraBountyBasisPoints = 0,
-      feeRecipient,
       buyerAddress,
       buyerEmail
     }: {
@@ -208,7 +227,6 @@ export class Orders extends Contracts {
       englishAuctionReservePrice?: number
       paymentTokenAddress?: string
       extraBountyBasisPoints?: number
-      feeRecipient?: string
       buyerAddress?: string
       buyerEmail?: string
     },
@@ -224,9 +242,11 @@ export class Orders extends Contracts {
     let networkName = this.networkName
     let exchangeAddr = this.exchange.options.address
 
-    let paymentTokenObj = paymentTokenAddress ==NULL_ADDRESS ?this.ETH: this.paymentTokenList.find(val=>val.address ==paymentTokenAddress)
+    let paymentTokenObj = paymentTokenAddress == NULL_ADDRESS
+      ? this.ETH
+      : this.paymentTokenList.find(val => val.address.toLowerCase() == paymentTokenAddress?.toLowerCase())
 
-    if(!paymentTokenObj){
+    if (!paymentTokenObj) {
       throw new ElementError({ code: '1000', message: `No ERC-20 token found for '${paymentTokenAddress}'` })
     }
 
@@ -244,31 +264,33 @@ export class Orders extends Contracts {
       englishAuctionReservePrice,
       paymentTokenObj,
       extraBountyBasisPoints,
+      feeRecipientAddr:this.feeRecipientAddress,
       buyerAddress: buyerAddress || NULL_ADDRESS
     })
     await checkOrder(this, sellOrder)
 
-    if (feeRecipient) {
-      sellOrder.feeRecipient = feeRecipient
-      sellOrder.takerRelayerFee = sellOrder.makerRelayerFee
-      sellOrder.makerRelayerFee = makeBigNumber(0)
-    }
+    // if (feeRecipient) {
+    //   sellOrder.feeRecipient = feeRecipient
+    //   sellOrder.takerRelayerFee = sellOrder.makerRelayerFee
+    //   sellOrder.makerRelayerFee = makeBigNumber(0)
+    // }
 
-    callBack?.next(OrderCheckStatus.StartOrderHashSign)
+    callBack?.next(OrderCheckStatus.StartOrderHashSign, { sellOrder })
 
     let signSellOrder = await hashAndValidateOrder(this.web3, this.exchangeHelper, sellOrder)
 
-    callBack?.next(OrderCheckStatus.EndOrderHashSign)
+    callBack?.next(OrderCheckStatus.EndOrderHashSign, { signSellOrder })
 
     return signSellOrder
   }
 
-  public async cancelOrder({ order, accountAddress }: { order: Order; accountAddress: string }): Promise<boolean> {
+  public async cancelOrder({ order, accountAddress }: { order: Order; accountAddress: string }, callBack?: CallBack): Promise<boolean> {
     if (order.maker.toLowerCase() != accountAddress.toLowerCase()) {
       throw new ElementError({ code: '1000', message: 'CancelOrder order.maker not equle accountAddress' })
     }
     const orderParamArray = orderParamsEncode(order)
     const orderSigArray = orderSigEncode(order as ECSignature)
+    callBack?.next(OrderCheckStatus.StartCancelOrder)
     const cancelTx = await this.exchange.methods
       .cancelOrder(orderParamArray, orderSigArray)
       .send({
@@ -282,6 +304,7 @@ export class Orders extends Contracts {
           throw new ElementError({ code: '1000', message: 'CancelOrder failure' })
         }
       })
+    callBack?.next(OrderCheckStatus.EndCancelOrder)
     return cancelTx.status
   }
 }

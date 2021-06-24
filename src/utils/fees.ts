@@ -1,6 +1,6 @@
 import { makeBigNumber } from './helper'
 import {
-  ELEMENT_FEE_RECIPIENT, INVERSE_BASIS_POINT, NULL_ADDRESS,
+  INVERSE_BASIS_POINT,
   DEFAULT_SELLER_FEE_BASIS_POINTS, DEFAULT_BUYER_FEE_BASIS_POINTS, DEFAULT_MAX_BOUNTY,
   ELEMENT_SELLER_BOUNTY_BASIS_POINTS
 } from './constants'
@@ -24,7 +24,7 @@ export function computeFees(
       isPrivate?: boolean;
       extraBountyBasisPoints?: number
     }
-):  ComputedFees {
+): ComputedFees {
 
   let elementBuyerFeeBasisPoints = DEFAULT_BUYER_FEE_BASIS_POINTS
   let elementSellerFeeBasisPoints = DEFAULT_SELLER_FEE_BASIS_POINTS
@@ -91,9 +91,11 @@ export function computeFees(
   }
 }
 
-export function _getBuyFeeParameters(totalBuyerFeeBasisPoints: number, totalSellerFeeBasisPoints: number, sellOrder?: UnhashedOrder) {
+export function _getBuyFeeParameters(totalBuyerFeeBasisPoints: number,
+                                     totalSellerFeeBasisPoints: number,
+                                     sellOrder?: UnhashedOrder) {
 
-   _validateFees(totalBuyerFeeBasisPoints, totalSellerFeeBasisPoints)
+  _validateFees(totalBuyerFeeBasisPoints, totalSellerFeeBasisPoints)
 
   let makerRelayerFee
   let takerRelayerFee
@@ -120,20 +122,17 @@ export function _getBuyFeeParameters(totalBuyerFeeBasisPoints: number, totalSell
     makerProtocolFee: makeBigNumber(0),
     takerProtocolFee: makeBigNumber(0),
     makerReferrerFee: makeBigNumber(0), // TODO use buyerBountyBPS
-    feeRecipient: ELEMENT_FEE_RECIPIENT,
     feeMethod: FeeMethod.SplitFee
   }
 }
 
 // waitForHighestBid true 英式拍卖
-export function _getSellFeeParameters(totalBuyerFeeBasisPoints: number, totalSellerFeeBasisPoints: number, waitForHighestBid: boolean, sellerBountyBasisPoints = 0) {
+export function _getSellFeeParameters(totalBuyerFeeBasisPoints: number,
+                                      totalSellerFeeBasisPoints: number,
+                                      waitForHighestBid: boolean,
+                                      sellerBountyBasisPoints = 0) {
 
   _validateFees(totalBuyerFeeBasisPoints, totalSellerFeeBasisPoints)
-  // waitForHighestBid = false
-  // Use buyer as the maker when it's an English auction, so Wyvern sets prices correctly
-  const feeRecipient = waitForHighestBid
-    ? NULL_ADDRESS
-    : ELEMENT_FEE_RECIPIENT
 
 
   // Swap maker/taker fees when it's an English auction,
@@ -151,7 +150,6 @@ export function _getSellFeeParameters(totalBuyerFeeBasisPoints: number, totalSel
     makerProtocolFee: makeBigNumber(0),
     takerProtocolFee: makeBigNumber(0),
     makerReferrerFee: makeBigNumber(sellerBountyBasisPoints),
-    feeRecipient,
     feeMethod: FeeMethod.SplitFee
   }
 }

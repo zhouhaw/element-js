@@ -1,5 +1,5 @@
 export { ElementSchemaName, FeeMethod, HowToCall, Network, OrderSide, SaleKind } from './types'
-export type { Asset, Order } from './types'
+export type { Asset, Order,Token } from './types'
 export { schemas, encodeBuy, encodeSell, encodeCall } from './schema'
 export {
   ordersCanMatch,
@@ -26,7 +26,6 @@ export {
   BigNumber,
   NULL_ADDRESS,
   NULL_BLOCK_HASH,
-  ELEMENT_FEE_RECIPIENT,
   DEFAULT_SELLER_FEE_BASIS_POINTS,
   ORDERBOOK_VERSION
 } from './utils/constants'

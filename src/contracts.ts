@@ -32,6 +32,7 @@ export class Contracts {
   public WETHAddr: string
   public elementSharedAssetAddr: string
   public elementixExchangeKeeperAddr: string
+  public feeRecipientAddress: string
   // public defaultAccount: string
 
   // abi
@@ -61,6 +62,7 @@ export class Contracts {
   constructor(web3: any, apiConfig: ElementAPIConfig = { networkName: Network.Rinkeby }) {
     const { networkName, paymentTokens } = apiConfig
     this.paymentTokenList = paymentTokens || tokens[networkName].otherTokens
+    // debugger
     const gasPrice = 10e9
     const gasLimit = 80e4
 
@@ -73,6 +75,7 @@ export class Contracts {
     const elementSharedAssetAddr = contracts.ElementSharedAsset.toLowerCase()
     // const elementixTokenTransferProxyAddr = contracts.ElementixTokenTransferProxy.toLowerCase()
     const elementixExchangeKeeperAddr = contracts.ElementixExchangeKeeper.toLowerCase()
+    const feeRecipientAddress = contracts.FeeRecipientAddress.toLowerCase()
     const wethAddr = contracts.WETH.toLowerCase()
 
 
@@ -81,6 +84,8 @@ export class Contracts {
     this.WETHAddr = wethAddr
     this.elementSharedAssetAddr = elementSharedAssetAddr
     this.elementixExchangeKeeperAddr = elementixExchangeKeeperAddr
+    this.feeRecipientAddress = feeRecipientAddress
+
     // this.tokenTransferProxyAddr = elementixTokenTransferProxyAddr
 
     let options = {

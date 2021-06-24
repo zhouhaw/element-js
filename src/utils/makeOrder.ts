@@ -19,7 +19,6 @@ import { ElementError } from '../base/error'
 import { _getBuyFeeParameters, _getSellFeeParameters, computeFees } from './fees'
 import {
   BigNumber,
-  ELEMENT_FEE_RECIPIENT,
   MAX_DIGITS_IN_UNSIGNED_256_INT,
   MIN_EXPIRATION_SECONDS,
   NULL_ADDRESS,
@@ -30,7 +29,6 @@ import {
 import { validateOrder } from './check'
 import { getSchemaList, makeBigNumber, orderParamsEncode, toBaseUnitAmount } from './helper'
 
-// export { makeBigNumber }
 
 export function getSchema(network: Network, schemaName?: ElementSchemaName): Schema<any> {
   const schemaName_ = schemaName || ElementSchemaName.ERC1155
@@ -77,6 +75,7 @@ export function generatePseudoRandomSalt(): BigNumber {
   return randomNumber.times(factor).integerValue()
 }
 
+
 export function getPriceParameters(
   network: Network,
   orderSide: OrderSide,
@@ -91,6 +90,8 @@ export function getPriceParameters(
   let token = paymentTokenObj
 
   const paymentToken = token.address.toLowerCase()
+  // @ts-ignore
+  const tokenDecimals = token.decimals||token.decimal
 
   const isEther = token.address == NULL_ADDRESS
 
@@ -128,14 +129,14 @@ export function getPriceParameters(
     })
   }
 
-  // Note: WyvernProtocol.toBaseUnitAmount(makeBigNumber(startAmount), token.decimals)
+  // Note: WyvernProtocol.toBaseUnitAmount(makeBigNumber(startAmount), tokenDecimals)
   // will fail if too many decimal places, so special-case ether
-  const basePrice = toBaseUnitAmount(makeBigNumber(startAmount), token.decimals)
+  const basePrice = toBaseUnitAmount(makeBigNumber(startAmount), tokenDecimals)
 
-  const extra = toBaseUnitAmount(makeBigNumber(priceDiff), token.decimals)
+  const extra = toBaseUnitAmount(makeBigNumber(priceDiff), tokenDecimals)
 
   const reservePrice = englishAuctionReservePrice
-    ? toBaseUnitAmount(makeBigNumber(englishAuctionReservePrice), token.decimals)
+    ? toBaseUnitAmount(makeBigNumber(englishAuctionReservePrice), tokenDecimals)
     : undefined
 
   return { basePrice, extra, paymentToken, reservePrice }
@@ -197,6 +198,7 @@ export async function _makeBuyOrder({
                                       expirationTime = 0,
                                       paymentTokenObj,
                                       extraBountyBasisPoints = 0,
+                                      feeRecipientAddr,
                                       sellOrder,
                                       referrerAddress
                                     }: {
@@ -209,6 +211,7 @@ export async function _makeBuyOrder({
   expirationTime: number
   paymentTokenObj: Token
   extraBountyBasisPoints: number
+  feeRecipientAddr:string
   sellOrder?: Order
   referrerAddress?: string
 }): Promise<UnhashedOrder> {
@@ -235,7 +238,7 @@ export async function _makeBuyOrder({
   })
 
   // OrderSide.Buy
-  // const feeRecipient = NULL_ADDRESS
+  const feeRecipient = feeRecipientAddr
   // const feeMethod = FeeMethod.SplitFee
 
   const {
@@ -244,7 +247,6 @@ export async function _makeBuyOrder({
     makerProtocolFee,
     takerProtocolFee,
     makerReferrerFee,
-    feeRecipient,
     feeMethod
   } = _getBuyFeeParameters(totalBuyerFeeBasisPoints, totalSellerFeeBasisPoints, sellOrder)
 
@@ -304,6 +306,7 @@ export async function _makeSellOrder({
                                        englishAuctionReservePrice = 0,
                                        paymentTokenObj,
                                        extraBountyBasisPoints,
+                                       feeRecipientAddr,
                                        buyerAddress
                                      }: {
   networkName: Network
@@ -319,6 +322,7 @@ export async function _makeSellOrder({
   expirationTime: number
   paymentTokenObj: Token
   extraBountyBasisPoints: number
+  feeRecipientAddr:string
   buyerAddress: string
 }): Promise<UnhashedOrder> {
   let { schema, elementAsset, quantityBN } = getSchemaAndAsset(networkName, asset, quantity)
@@ -349,13 +353,18 @@ export async function _makeSellOrder({
     extraBountyBasisPoints
   })
 
+  // waitForHighestBid = false
+  // Use buyer as the maker when it's an English auction, so Wyvern sets prices correctly
+  const feeRecipient = waitForHighestBid
+    ? NULL_ADDRESS
+    : feeRecipientAddr
+
   const {
     makerRelayerFee,
     takerRelayerFee,
     makerProtocolFee,
     takerProtocolFee,
     makerReferrerFee,
-    feeRecipient,
     feeMethod
   } = _getSellFeeParameters(
     totalBuyerFeeBasisPoints,
@@ -586,12 +595,14 @@ export function _makeMatchingOrder({
                                      networkName,
                                      signedOrder,
                                      accountAddress,
-                                     recipientAddress
+                                     assetRecipientAddress,
+                                     feeRecipientAddress
                                    }: {
   networkName: Network
   signedOrder: UnsignedOrder
   accountAddress: string
-  recipientAddress: string
+  assetRecipientAddress: string
+  feeRecipientAddress:string
 }): UnhashedOrder {
   const order = signedOrder
   const computeOrderParams = () => {
@@ -604,8 +615,8 @@ export function _makeMatchingOrder({
       }
 
       return order.side == OrderSide.Buy
-        ? encodeSell(schema, asset, recipientAddress)
-        : encodeBuy(schema, asset, recipientAddress)
+        ? encodeSell(schema, asset, assetRecipientAddress)
+        : encodeBuy(schema, asset, assetRecipientAddress)
     } else {
       throw new Error('Invalid order metadata')
     }
@@ -614,7 +625,7 @@ export function _makeMatchingOrder({
   const { target, dataToCall, replacementPattern } = computeOrderParams()
   const times = getTimeParameters(0)
   // Compat for matching buy orders that have fee recipient still on them
-  const feeRecipient = order.feeRecipient == NULL_ADDRESS ? ELEMENT_FEE_RECIPIENT : NULL_ADDRESS
+  const feeRecipient = order.feeRecipient == NULL_ADDRESS ? feeRecipientAddress : NULL_ADDRESS
 
   const makerRelayerFee = order.makerRelayerFee
   const takerRelayerFee = order.takerRelayerFee
