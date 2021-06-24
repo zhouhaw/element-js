@@ -141,18 +141,19 @@ export function orderSigEncode(order: ECSignature) {
   return orderSigValueArray
 }
 
-export function getTokenList(network: Network, { symbol, address }: { symbol?: string, address?: string }): Array<any> {
+export function getTokenList(network: Network, { symbol, address }: { symbol?: string; address?: string }): Array<any> {
   const payTokens = tokens[network]
   if (symbol) {
-    return [payTokens.canonicalWrappedEther, ...payTokens.otherTokens]
-      .filter((x: any) => x.symbol.toLowerCase() === symbol.toLowerCase())
+    return [payTokens.canonicalWrappedEther, ...payTokens.otherTokens].filter(
+      (x: any) => x.symbol.toLowerCase() === symbol.toLowerCase()
+    )
   }
 
   if (address) {
-    return [payTokens.canonicalWrappedEther, ...payTokens.otherTokens]
-      .filter((x: any) => x.address.toLowerCase() === address.toLowerCase())
+    return [payTokens.canonicalWrappedEther, ...payTokens.otherTokens].filter(
+      (x: any) => x.address.toLowerCase() === address.toLowerCase()
+    )
   }
 
   return [payTokens.canonicalWrappedEther, ...payTokens.otherTokens]
-
 }

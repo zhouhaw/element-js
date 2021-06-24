@@ -1,5 +1,5 @@
 export { ElementSchemaName, FeeMethod, HowToCall, Network, OrderSide, SaleKind } from './types'
-export type { Asset, Order,Token } from './types'
+export type { Asset, Order, Token } from './types'
 export { schemas, encodeBuy, encodeSell, encodeCall } from './schema'
 export {
   ordersCanMatch,
