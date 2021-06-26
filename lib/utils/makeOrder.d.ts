@@ -19,7 +19,7 @@ export declare function getTimeParameters(expirationTimestamp: number, listingTi
     listingTime: BigNumber;
     expirationTime: BigNumber;
 };
-export declare function _makeBuyOrder({ networkName, exchangeAddr, asset, quantity, accountAddress, startAmount, expirationTime, paymentTokenObj, extraBountyBasisPoints, sellOrder, referrerAddress }: {
+export declare function _makeBuyOrder({ networkName, exchangeAddr, asset, quantity, accountAddress, startAmount, expirationTime, paymentTokenObj, extraBountyBasisPoints, feeRecipientAddr, sellOrder, referrerAddress }: {
     networkName: Network;
     exchangeAddr: string;
     asset: Asset;
@@ -29,10 +29,11 @@ export declare function _makeBuyOrder({ networkName, exchangeAddr, asset, quanti
     expirationTime: number;
     paymentTokenObj: Token;
     extraBountyBasisPoints: number;
+    feeRecipientAddr: string;
     sellOrder?: Order;
     referrerAddress?: string;
 }): Promise<UnhashedOrder>;
-export declare function _makeSellOrder({ networkName, exchangeAddr, asset, quantity, accountAddress, startAmount, endAmount, listingTime, expirationTime, waitForHighestBid, englishAuctionReservePrice, paymentTokenObj, extraBountyBasisPoints, buyerAddress }: {
+export declare function _makeSellOrder({ networkName, exchangeAddr, asset, quantity, accountAddress, startAmount, endAmount, listingTime, expirationTime, waitForHighestBid, englishAuctionReservePrice, paymentTokenObj, extraBountyBasisPoints, feeRecipientAddr, buyerAddress }: {
     networkName: Network;
     exchangeAddr: string;
     asset: Asset;
@@ -46,6 +47,7 @@ export declare function _makeSellOrder({ networkName, exchangeAddr, asset, quant
     expirationTime: number;
     paymentTokenObj: Token;
     extraBountyBasisPoints: number;
+    feeRecipientAddr: string;
     buyerAddress: string;
 }): Promise<UnhashedOrder>;
 export declare function getOrderHash(web3: any, exchangeHelper: any, order: UnhashedOrder): Promise<string>;
@@ -66,11 +68,12 @@ export declare function _getStaticCallTargetAndExtraData({ networkName, asset, u
     staticTarget: string;
     staticExtradata: string;
 }>;
-export declare function _makeMatchingOrder({ networkName, signedOrder, accountAddress, recipientAddress }: {
+export declare function _makeMatchingOrder({ networkName, signedOrder, accountAddress, assetRecipientAddress, feeRecipientAddress }: {
     networkName: Network;
     signedOrder: UnsignedOrder;
     accountAddress: string;
-    recipientAddress: string;
+    assetRecipientAddress: string;
+    feeRecipientAddress: string;
 }): UnhashedOrder;
 /**
  * Assign an order and a new matching order to their buy/sell sides

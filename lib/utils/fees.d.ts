@@ -21,7 +21,6 @@ export declare function _getBuyFeeParameters(totalBuyerFeeBasisPoints: number, t
     makerProtocolFee: import("bignumber.js").default;
     takerProtocolFee: import("bignumber.js").default;
     makerReferrerFee: import("bignumber.js").default;
-    feeRecipient: string;
     feeMethod: FeeMethod;
 };
 export declare function _getSellFeeParameters(totalBuyerFeeBasisPoints: number, totalSellerFeeBasisPoints: number, waitForHighestBid: boolean, sellerBountyBasisPoints?: number): {
@@ -30,7 +29,6 @@ export declare function _getSellFeeParameters(totalBuyerFeeBasisPoints: number, 
     makerProtocolFee: import("bignumber.js").default;
     takerProtocolFee: import("bignumber.js").default;
     makerReferrerFee: import("bignumber.js").default;
-    feeRecipient: string;
     feeMethod: FeeMethod;
 };
 /**
