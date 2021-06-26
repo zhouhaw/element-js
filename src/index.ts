@@ -40,7 +40,7 @@ export {
   makeBigNumber
 } from './utils/helper'
 
-export { Orders, OrderCheckStatus } from './orders'
+export { Orders, OrderCheckStatus, Sleep } from './orders'
 export type { CallBack } from './orders'
 export { Contracts } from './contracts'
 export { ErrorCodes, ElementError } from './base/error'
