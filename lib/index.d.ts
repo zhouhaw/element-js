@@ -5,7 +5,7 @@ export { ordersCanMatch, validateOrder, checkSellUser, checkBuyUser, checkOrder,
 export { registerProxy, approveTokenTransferProxy, approveERC1155TransferProxy, approveERC721TransferProxy } from './utils/approve';
 export { orderToJSON, getPriceParameters, getCurrentPrice } from './utils/makeOrder';
 export { BigNumber, NULL_ADDRESS, NULL_BLOCK_HASH, DEFAULT_SELLER_FEE_BASIS_POINTS, ORDERBOOK_VERSION } from './utils/constants';
-export { orderFromJSON, transferFromERC1155, transferFromERC721, transferFromWETH } from './utils';
+export { orderFromJSON, transferFromERC1155, transferFromERC721, transferFromERC20, transferFromWETH } from './utils';
 export { getTokenList, toBaseUnitAmount, getTokenIDOwner, getAccountBalance, getAccountNFTsBalance, getSchemaList, makeBigNumber } from './utils/helper';
 export { Orders, OrderCheckStatus, Sleep } from './orders';
 export type { CallBack } from './orders';
