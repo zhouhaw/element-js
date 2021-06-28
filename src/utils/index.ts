@@ -62,23 +62,32 @@ export const orderFromJSON = (order: any): Order => {
   return fromJSON
 }
 
-function transferFailure(error:any) {
-  const error_ = error.code === '4001'
-    ? new ElementError(error)
-    : new ElementError({ code: '1000', message: 'Transfer Asset failure' })
+function transferFailure(error: any) {
+  const error_ =
+    error.code === '4001'
+      ? new ElementError(error)
+      : new ElementError({ code: '1000', message: 'Transfer Asset failure' })
   throw error_
 }
 
 export async function transferFromERC1155(
   {
-    erc1155Contract, from, to, tokenId, amount
-  }:
-    {
-      erc1155Contract: any; from: string; to: string; tokenId: any; amount: number
-    },
+    erc1155Contract,
+    from,
+    to,
+    tokenId,
+    amount
+  }: {
+    erc1155Contract: any
+    from: string
+    to: string
+    tokenId: any
+    amount: number
+  },
   callBack?: CallBack
 ): Promise<any> {
-  return erc1155Contract.methods.safeTransferFrom(from, to, tokenId, amount, '0x')
+  return erc1155Contract.methods
+    .safeTransferFrom(from, to, tokenId, amount, '0x')
     .send({ from: from })
     .on('transactionHash', (txHash: string) => {
       // console.log('Send success tx hash：', txHash)
@@ -91,43 +100,64 @@ export async function transferFromERC1155(
 
 export async function transferFromERC721(
   {
-    erc721Contract, from, to, tokenId, amount
-  }:
-    {
-      erc721Contract: any; from: string; to: string; tokenId: any; amount: number
-    },
+    erc721Contract,
+    from,
+    to,
+    tokenId,
+    amount
+  }: {
+    erc721Contract: any
+    from: string
+    to: string
+    tokenId: any
+    amount: number
+  },
   callBack?: CallBack
 ): Promise<any> {
-  return erc721Contract.methods.safeTransferFrom(from, to, tokenId, amount, '0x')
+  return erc721Contract.methods
+    .safeTransferFrom(from, to, tokenId, amount, '0x')
     .send({ from: from })
     .on('transactionHash', (txHash: string) => {
       callBack?.next(OrderCheckStatus.OrderMatchTxHash, { txHash })
       console.log('Send success tx hash：', txHash)
     })
-
 }
 
 export async function transferFromERC20(
   {
-    erc20Contract, from, to, tokenId, amount
-  }:
-    {
-      erc20Contract: any; from: string; to: string; tokenId: any; amount: number
-    },
+    erc20Contract,
+    from,
+    to,
+    tokenId,
+    amount
+  }: {
+    erc20Contract: any
+    from: string
+    to: string
+    tokenId: any
+    amount: number
+  },
   callBack?: CallBack
 ): Promise<any> {
   return erc20Contract.methods.safeTransferFrom(from, to, tokenId, amount, '0x').send({ from: from })
-
 }
 
 export async function transferFromWETH(
   {
-    WETHContract, from, to, tokenId, amount
-  }:
-    {
-      WETHContract: any; from: string; to: string; tokenId: any; amount: number
-    },
-  callBack?: CallBack) {
+    WETHContract,
+    from,
+    to,
+    tokenId,
+    amount
+  }: {
+    WETHContract: any
+    from: string
+    to: string
+    tokenId: any
+    amount: number
+  },
+  callBack?: CallBack
+) {
   let sellBal = await WETHContract.methods.balanceOf(from).call()
   if (Number(sellBal) < 1e18) {
     await WETHContract.methods.deposit().send({
