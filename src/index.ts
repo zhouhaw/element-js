@@ -29,7 +29,7 @@ export {
   DEFAULT_SELLER_FEE_BASIS_POINTS,
   ORDERBOOK_VERSION
 } from './utils/constants'
-export { orderFromJSON, transferFromERC1155, transferFromERC721, transferFromWETH } from './utils'
+export { orderFromJSON, transferFromERC1155, transferFromERC721,transferFromERC20, transferFromWETH } from './utils'
 export {
   getTokenList,
   toBaseUnitAmount,
