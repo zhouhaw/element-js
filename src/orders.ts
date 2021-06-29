@@ -1,6 +1,6 @@
-import { Asset, ECSignature, Order, OrderJSON, OrderSide, UnhashedOrder } from './types'
+import { Asset, ECSignature, Order, OrderJSON, OrderSide, UnhashedOrder, Token } from './types'
 import { NULL_ADDRESS, NULL_BLOCK_HASH } from './utils/constants'
-import { _ordersCanMatch, cancelledOrFinalized, checkMatchOrder, checkOrder, checkSellUser } from './utils/check'
+import { _ordersCanMatch, cancelledOrFinalized, checkMatchOrder, checkOrder } from './utils/check'
 import { ElementError } from './base/error'
 
 import {
@@ -134,7 +134,7 @@ export class Orders extends Contracts {
       startAmount,
       quantity = 1,
       expirationTime = 0,
-      paymentTokenAddress = this.WETHAddr,
+      paymentTokenObj,
       sellOrder,
       referrerAddress
     }: {
@@ -143,24 +143,14 @@ export class Orders extends Contracts {
       startAmount: number
       quantity?: number
       expirationTime?: number
-      paymentTokenAddress?: string
+      paymentTokenObj: Token
       sellOrder?: Order
       referrerAddress?: string
     },
     callBack?: CallBack
   ): Promise<OrderJSON | boolean> {
-
     let networkName = this.networkName
     let exchangeAddr = this.exchange.options.address
-
-    let paymentTokenObj =
-      paymentTokenAddress == NULL_ADDRESS
-        ? this.ETH
-        : this.paymentTokenList.find((val) => val.address.toLowerCase() == paymentTokenAddress?.toLowerCase())
-
-    if (!paymentTokenObj) {
-      throw new ElementError({ code: '1000', message: `No ERC-20 token found for '${paymentTokenAddress}'` })
-    }
 
     const buyOrder = await _makeBuyOrder({
       networkName,
@@ -192,13 +182,13 @@ export class Orders extends Contracts {
       asset,
       accountAddress,
       startAmount,
+      paymentTokenObj = this.ETH,
       endAmount,
       quantity = 1,
       listingTime,
       expirationTime = 0,
       waitForHighestBid = false,
       englishAuctionReservePrice,
-      paymentTokenAddress = NULL_ADDRESS,
       extraBountyBasisPoints = 0,
       buyerAddress,
       buyerEmail
@@ -206,35 +196,32 @@ export class Orders extends Contracts {
       asset: Asset
       accountAddress: string
       startAmount: number
+      paymentTokenObj?: Token
       endAmount?: number
       quantity?: number
       listingTime?: number
       expirationTime?: number
       waitForHighestBid?: boolean
       englishAuctionReservePrice?: number
-      paymentTokenAddress?: string
       extraBountyBasisPoints?: number
       buyerAddress?: string
       buyerEmail?: string
     },
     callBack?: CallBack
   ): Promise<OrderJSON | boolean> {
-    if (paymentTokenAddress == '') {
-      paymentTokenAddress = NULL_ADDRESS
-    }
     expirationTime = expirationTime ? parseInt(String(expirationTime)) : expirationTime
 
     let networkName = this.networkName
     let exchangeAddr = this.exchange.options.address
 
-    let paymentTokenObj =
-      paymentTokenAddress == NULL_ADDRESS
-        ? this.ETH
-        : this.paymentTokenList.find((val) => val.address.toLowerCase() == paymentTokenAddress?.toLowerCase())
-
-    if (!paymentTokenObj) {
-      throw new ElementError({ code: '1000', message: `No ERC-20 token found for '${paymentTokenAddress}'` })
-    }
+    // let paymentTokenObj =
+    //   paymentTokenAddress == NULL_ADDRESS
+    //     ? this.ETH
+    //     : this.paymentTokenList.find((val) => val.address.toLowerCase() == paymentTokenAddress?.toLowerCase())
+    //
+    // if (!paymentTokenObj) {
+    //   throw new ElementError({ code: '1000', message: `No ERC-20 token found for '${paymentTokenAddress}'` })
+    // }
 
     const sellOrder = await _makeSellOrder({
       networkName,
@@ -253,6 +240,8 @@ export class Orders extends Contracts {
       feeRecipientAddr: this.feeRecipientAddress,
       buyerAddress: buyerAddress || NULL_ADDRESS
     })
+
+    debugger
     await checkOrder(this, sellOrder)
 
     callBack?.next(OrderCheckStatus.StartOrderHashSign, { sellOrder })

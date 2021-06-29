@@ -115,7 +115,7 @@ export async function transferFromERC721(
   callBack?: CallBack
 ): Promise<any> {
   return erc721Contract.methods
-    .safeTransferFrom(from, to, tokenId, amount, '0x')
+    .safeTransferFrom(from, to, tokenId)
     .send({ from: from })
     .on('transactionHash', (txHash: string) => {
       callBack?.next(OrderCheckStatus.OrderMatchTxHash, { txHash })

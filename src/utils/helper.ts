@@ -28,10 +28,10 @@ export async function getAccountBalance(web3: any, account: string, erc20?: any)
   return { ethBal: Number(ethBal), erc20Bal: Number(erc20Bal) }
 }
 
-export async function getAccountNFTsBalance(nftsContract: any, account: string, tokenId: any): Promise<Number> {
-  let bal = await nftsContract.methods.balanceOf(account, tokenId).call()
-  return Number(bal)
-}
+// export async function getAccountNFTsBalance(nftsContract: any, account: string, tokenId: any): Promise<Number> {
+//   let bal = await nftsContract.methods.balanceOf(account, tokenId).call()
+//   return Number(bal)
+// }
 
 export async function getTokenIDOwner(elementAssetContract: any, tokenId: any): Promise<string> {
   // token id 的 creator

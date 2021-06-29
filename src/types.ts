@@ -32,6 +32,7 @@ export enum ElementSchemaName {
 interface ElementNFTAsset {
   id: string
   address: string
+  data?:string
   collection?: ElementCollection
 }
 
@@ -39,6 +40,7 @@ interface ElementFTAsset {
   id?: string
   address: string
   quantity: string
+  data?:string
   collection?: ElementCollection
 }
 
@@ -85,7 +87,7 @@ export interface Asset {
   // The asset's contract address
   tokenAddress: string
   // The Element schema name (e.g. "ERC721") for this asset
-  schemaName?: ElementSchemaName
+  schemaName: ElementSchemaName
   // The token standard version of this asset
   version?: TokenStandardVersion
   // Optional for ENS names

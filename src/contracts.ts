@@ -14,7 +14,7 @@ const ElementixExchange = require(`../abi/ElementixExchange.json`)
 const ExchangeHelper = require(`../abi/ExchangeHelper.json`)
 // const ElementixTokenTransferProxy = require(`../abi/ElementixTokenTransferProxy.json`)
 const WETH = require(`../abi/WETH9Mocked.json`)
-const MakeTokenID = require(`../abi/MakeTokenID.json`)
+// const MakeTokenID = require(`../abi/MakeTokenID.json`)
 import {
   CONTRACTS_ADDRESSES,
   NULL_ADDRESS

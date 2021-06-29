@@ -57,6 +57,10 @@ export const ErrorCodes: ElementErrorCodes = [
     message: 'ETH balance equel 0 '
   },
   {
+    code: '1106',
+    message: 'ERC721TransferProxy NFTs getApproved is false '
+  },
+  {
     code: '1201',
     message: 'Order: buy.basePrice to be greater than sell.basePrice!'
   },

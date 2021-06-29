@@ -14,7 +14,6 @@ import { ElementError } from '../base/error'
 
 import {
   getAccountBalance,
-  getAccountNFTsBalance,
   getSchemaList,
   makeBigNumber,
   orderParamsEncode,
@@ -85,7 +84,6 @@ export async function checkApproveTokenTransferProxy(
   const allowAmount = await erc20Contract.methods.allowance(account, tokenTransferProxyAddr).call()
 
   if (new BigNumber(allowAmount).eq(0)) {
-    //  log('checkApproveTokenTransferProxy allowAmount %s amount', allowAmount, amount)
     throw new ElementError({ code: '1101', data: erc20Contract.options.address })
   }
   return true
@@ -112,110 +110,27 @@ export async function checkApproveERC721TransferProxy(
 ): Promise<boolean> {
   let isApprove = await nftsContract.methods.getApproved(tokenID).call()
   if (!isApprove) {
-    throw new ElementError({ code: '1102', data: nftsContract.options.address })
+    throw new ElementError({ code: '1106', data: { nftAddress: nftsContract.options.address, tokenId: tokenID } })
   }
   return true
 }
 
-export async function checkSellUser(contract: any, asset: Asset, paymentTokenAddr: string, accountAddress: string) {
-  if (paymentTokenAddr == '') {
-    paymentTokenAddr = NULL_ADDRESS
-  }
-  let { ethBal } = await getAccountBalance(contract.web3, accountAddress)
-  if (ethBal == 0) {
-    throw new ElementError({ code: '1105' })
-  }
-
-  const sellNFTs = contract.erc1155.clone()
-  sellNFTs.options.address = asset.tokenAddress
-  let bal = await getAccountNFTsBalance(sellNFTs, accountAddress, asset.tokenId)
-  if (bal == 0) {
-    throw new ElementError({ code: '1103' })
-  }
-
-  let isRegister = await checkRegisterProxy(contract.exchangeProxyRegistry, accountAddress)
-  if (!isRegister) {
-    // await registerProxy(contract.exchangeProxyRegistry, accountAddress)
-  }
-
-  if (asset.schemaName == ElementSchemaName.ERC1155) {
-    let isApproveERC1155 = await checkApproveERC1155TransferProxy(
-      contract.exchangeProxyRegistry,
-      sellNFTs,
-      accountAddress
-    )
-    if (!isApproveERC1155) {
-      // await approveERC1155TransferProxy(contract.exchangeProxyRegistry, sellNFTs, accountAddress)
-    }
-  }
-
-  if (paymentTokenAddr != NULL_ADDRESS) {
-    let erc20Contract = contract.erc20.clone()
-    erc20Contract.options.address = paymentTokenAddr
-    let isApproveToken = await checkApproveTokenTransferProxy(contract.exchange, erc20Contract, accountAddress)
-    if (!isApproveToken) {
-      // await approveTokenTransferProxy(contract.exchange, erc20Contract, accountAddress)
-    }
-  }
-
-  return true
-}
-
-export async function checkBuyUser(contract: any, paymentTokenAddr: any, accountAddress: string) {
-  let { ethBal } = await getAccountBalance(contract.web3, accountAddress)
-  if (ethBal == 0) {
-    throw new ElementError({ code: '1105' })
-  }
-
-  let isRegister = await checkRegisterProxy(contract.exchangeProxyRegistry, accountAddress)
-
-  if (!isRegister) {
-    // await registerProxy(contract.exchangeProxyRegistry, accountAddress)
-  }
-
-  let isApproveWETH = await checkApproveTokenTransferProxy(contract.exchange, contract.WETH, accountAddress)
-  if (!isApproveWETH) {
-    // await approveTokenTransferProxy(contract.exchange, contract.WETH, accountAddress)
-  }
-
-  // 直接购买 paytoken 可以为空
-  if (paymentTokenAddr != NULL_ADDRESS) {
-    let erc20Contract = contract.erc20.clone()
-    erc20Contract.options.address = paymentTokenAddr
-    let { erc20Bal } = await getAccountBalance(contract.web3, accountAddress, erc20Contract)
-    if (erc20Bal == 0) {
-      throw new ElementError({ code: '1104' })
-    }
-    let isApproveToken = await checkApproveTokenTransferProxy(contract.exchange, erc20Contract, accountAddress)
-    if (!isApproveToken) {
-      // await approveTokenTransferProxy(contract.exchange, erc20Contract, accountAddress)
-    }
-  }
-  return true
-}
-
-export async function checkOrder(contract: any, order: UnhashedOrder ) {
+export async function checkOrder(contract: any, order: UnhashedOrder) {
   const equalPrice: boolean = order.basePrice.gt(0)
   if (!equalPrice) throw new ElementError({ code: '1201' })
 
   const erc20Contract = contract.erc20.clone()
 
   let metadata = order.metadata
-  const { tokenId, assetAddress } = getAssetInfo(metadata)
+
 
   // 检查 Sell 买单
   if (order.side == OrderSide.Sell) {
     let sell = order
 
     await checkRegisterProxy(contract.exchangeProxyRegistry, order.maker)
-
-    let sellNFTs = await checkAssetApprove(contract, sell)
-
-
-    let bal = await getAccountNFTsBalance(sellNFTs, sell.maker,tokenId)
-    if (sell.quantity.gt(bal.toString())) {
-      throw new ElementError({ code: '1103' })
-    }
+    await checkAssetApprove(contract, sell)
+    await checkAssetBalance(contract, sell)
 
     //transfer fee
     if (sell.paymentToken != NULL_ADDRESS) {
@@ -227,8 +142,8 @@ export async function checkOrder(contract: any, order: UnhashedOrder ) {
   // 检查 Buy 卖单
   if (order.side == OrderSide.Buy) {
     let buy = order
-    // await checkAssetApprove(contract, order)
 
+    const { assetAddress } = getAssetInfo(metadata)
     if (assetAddress != contract.elementSharedAssetAddr) {
       await checkAssetMint(contract, metadata)
     }
@@ -256,15 +171,6 @@ export async function checkMatchOrder(contract: any, buy: Order, sell: Order) {
   if (!equalPrice) {
     throw new ElementError({ code: '1201' })
   }
-
-  // await checkApproveTokenTransferProxy(contract.exchange, contract.WETH, accountAddress)
-
-  // await checkSenderOfAuthenticatedProxy(
-  //   contract.exchange,
-  //   contract.authenticatedProxy,
-  //   contract.exchangeProxyRegistry,
-  //   accountAddress
-  // )
 
   if (sell.feeRecipient != NULL_ADDRESS) {
     /* Assert taker fee is less than or equal to maximum fee specified by buyer. */
@@ -488,3 +394,42 @@ export async function checkAssetApprove(contract: any, order: UnhashedOrder) {
   }
   return sellNFTs
 }
+
+export async function checkAssetBalance(contract: any, order: UnhashedOrder) {
+  let sell = order
+  let checkAddr = sell.maker.toLowerCase()
+  let metadata = sell.metadata
+  const { tokenId, assetAddress } = getAssetInfo(metadata)
+
+  let sellNFTs = contract.erc20.clone()
+  let balance = 0
+
+  switch (metadata.schema) {
+    case ElementSchemaName.ERC20:
+      sellNFTs = contract.erc20.clone()
+      sellNFTs.options.address = assetAddress
+      break
+    case ElementSchemaName.ERC721:
+      sellNFTs = contract.erc721.clone()
+      sellNFTs.options.address = assetAddress
+      let owner = await sellNFTs.methods.ownerOf(tokenId).call()
+      if (owner.toLowerCase() !== checkAddr) throw new ElementError({ code: '1206' })
+      balance = 1
+      break
+    case ElementSchemaName.ERC1155:
+      sellNFTs = contract.erc1155.clone()
+      sellNFTs.options.address = assetAddress
+      balance = await sellNFTs.methods.balanceOf(checkAddr, tokenId).call()
+      break
+    default:
+      throw new ElementError({ code: '1206' })
+      break
+  }
+
+  if (sell.quantity.gt(balance.toString())) {
+    throw new ElementError({ code: '1103' })
+  }
+
+  return Number(balance)
+}
+

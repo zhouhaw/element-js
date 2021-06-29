@@ -61,8 +61,10 @@ export async function approveERC721TransferProxy(
   tokenID: string
 ): Promise<boolean> {
   let operator = await proxyRegistryContract.methods.proxies(account).call()
-  let isApprove = await nftsContract.methods.getApproved(tokenID).call()
+  //isApprovedForAll
+  let isApprove = await nftsContract.methods.isApprovedForAll(operator, tokenID).call()
   if (!isApprove) {
+    //  function setApprovalForAll(address _operator, bool _approved) external;
     let res = await nftsContract.methods.approve(operator, tokenID).send({ from: account })
     if (!res.status) {
       throw new ElementError({ code: '2001', message: 'ERC721 NFTs approve()' })

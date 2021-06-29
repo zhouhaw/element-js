@@ -4,8 +4,6 @@ export { schemas, encodeBuy, encodeSell, encodeCall } from './schema'
 export {
   ordersCanMatch,
   validateOrder,
-  checkSellUser,
-  checkBuyUser,
   checkOrder,
   checkMatchOrder,
   checkRegisterProxy,
@@ -29,13 +27,12 @@ export {
   DEFAULT_SELLER_FEE_BASIS_POINTS,
   ORDERBOOK_VERSION
 } from './utils/constants'
-export { orderFromJSON, transferFromERC1155, transferFromERC721,transferFromERC20, transferFromWETH } from './utils'
+export { orderFromJSON, transferFromERC1155, transferFromERC721, transferFromERC20, transferFromWETH } from './utils'
 export {
   getTokenList,
   toBaseUnitAmount,
   getTokenIDOwner,
   getAccountBalance,
-  getAccountNFTsBalance,
   getSchemaList,
   makeBigNumber
 } from './utils/helper'

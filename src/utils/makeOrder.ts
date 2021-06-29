@@ -30,14 +30,12 @@ import { validateOrder } from './check'
 import { getSchemaList, makeBigNumber, orderParamsEncode, toBaseUnitAmount } from './helper'
 
 
-export function getSchema(network: Network, schemaName?: ElementSchemaName): Schema<any> {
-  const schemaName_ = schemaName || ElementSchemaName.ERC1155
+export function getSchema(network: Network, schemaName: ElementSchemaName): Schema<any> {
+  const schemaName_ = schemaName
 
   const schemaInfo = getSchemaList(network, schemaName_) // scahmaList.find((val: Schema<any>) => val.name === schemaName_)
-
   if (schemaInfo.length == 0) {
     let msg = `Trading for this asset (${schemaName_}) is not yet supported. Please contact us or check back later!`
-
     throw new ElementError({ code: '1000', message: msg })
   }
   return schemaInfo[0]
