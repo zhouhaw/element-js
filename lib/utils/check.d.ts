@@ -1,11 +1,9 @@
-import { Asset, ExchangeMetadata, Network, Order, UnhashedOrder } from '../types';
+import { ExchangeMetadata, Network, Order, UnhashedOrder } from '../types';
 export declare function checkSenderOfAuthenticatedProxy(exchangeContract: any, authenticatedProxyContract: any, proxyRegistryContract: any, account: string): Promise<boolean>;
 export declare function checkRegisterProxy(proxyRegistryContract: any, account: string): Promise<boolean>;
 export declare function checkApproveTokenTransferProxy(exchangeContract: any, erc20Contract: any, account: string): Promise<boolean>;
 export declare function checkApproveERC1155TransferProxy(proxyRegistryContract: any, nftsContract: any, account: string): Promise<boolean>;
 export declare function checkApproveERC721TransferProxy(proxyRegistryContract: any, nftsContract: any, account: string, tokenID: string): Promise<boolean>;
-export declare function checkSellUser(contract: any, asset: Asset, paymentTokenAddr: string, accountAddress: string): Promise<boolean>;
-export declare function checkBuyUser(contract: any, paymentTokenAddr: any, accountAddress: string): Promise<boolean>;
 export declare function checkOrder(contract: any, order: UnhashedOrder): Promise<boolean>;
 export declare function checkMatchOrder(contract: any, buy: Order, sell: Order): Promise<boolean>;
 export declare function checkDataToCall(netWorkName: Network, order: UnhashedOrder): void;
@@ -16,3 +14,4 @@ export declare function ordersCanMatch(exchangeHelper: any, buy: Order, sell: Or
 export declare function cancelledOrFinalized(exchangeHelper: any, orderHash: string): Promise<boolean>;
 export declare function checkAssetMint(contract: any, metadata: ExchangeMetadata): Promise<boolean>;
 export declare function checkAssetApprove(contract: any, order: UnhashedOrder): Promise<any>;
+export declare function checkAssetBalance(contract: any, order: UnhashedOrder): Promise<number>;

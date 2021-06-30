@@ -12,13 +12,7 @@ import {
 } from '../types'
 import { ElementError } from '../base/error'
 
-import {
-  getAccountBalance,
-  getSchemaList,
-  makeBigNumber,
-  orderParamsEncode,
-  orderSigEncode
-} from './helper'
+import { getAccountBalance, getSchemaList, makeBigNumber, orderParamsEncode, orderSigEncode } from './helper'
 import { CallSpec } from '../schema/schemaFunctions'
 
 const log = console.log
@@ -108,7 +102,8 @@ export async function checkApproveERC721TransferProxy(
   account: string,
   tokenID: string
 ): Promise<boolean> {
-  let isApprove = await nftsContract.methods.getApproved(tokenID).call()
+  let operator = await proxyRegistryContract.methods.proxies(account).call()
+  let isApprove = await nftsContract.methods.isApprovedForAll(account, operator).call()
   if (!isApprove) {
     throw new ElementError({ code: '1106', data: { nftAddress: nftsContract.options.address, tokenId: tokenID } })
   }
@@ -122,7 +117,6 @@ export async function checkOrder(contract: any, order: UnhashedOrder) {
   const erc20Contract = contract.erc20.clone()
 
   let metadata = order.metadata
-
 
   // 检查 Sell 买单
   if (order.side == OrderSide.Sell) {
@@ -432,4 +426,3 @@ export async function checkAssetBalance(contract: any, order: UnhashedOrder) {
 
   return Number(balance)
 }
-

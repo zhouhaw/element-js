@@ -1,4 +1,4 @@
-import { Asset, Order, OrderJSON } from './types';
+import { Asset, Order, OrderJSON, Token } from './types';
 import { Contracts } from './contracts';
 export declare enum OrderCheckStatus {
     StartOrderHashSign = "startOrderHashSign",
@@ -26,27 +26,27 @@ export declare class Orders extends Contracts {
         accountAddress: string;
         metadata?: string;
     }, callBack?: CallBack): Promise<any>;
-    createBuyOrder({ asset, accountAddress, startAmount, quantity, expirationTime, paymentTokenAddress, sellOrder, referrerAddress }: {
+    createBuyOrder({ asset, accountAddress, startAmount, quantity, expirationTime, paymentTokenObj, sellOrder, referrerAddress }: {
         asset: Asset;
         accountAddress: string;
         startAmount: number;
         quantity?: number;
         expirationTime?: number;
-        paymentTokenAddress?: string;
+        paymentTokenObj: Token;
         sellOrder?: Order;
         referrerAddress?: string;
     }, callBack?: CallBack): Promise<OrderJSON | boolean>;
-    createSellOrder({ asset, accountAddress, startAmount, endAmount, quantity, listingTime, expirationTime, waitForHighestBid, englishAuctionReservePrice, paymentTokenAddress, extraBountyBasisPoints, buyerAddress, buyerEmail }: {
+    createSellOrder({ asset, accountAddress, startAmount, paymentTokenObj, endAmount, quantity, listingTime, expirationTime, waitForHighestBid, englishAuctionReservePrice, extraBountyBasisPoints, buyerAddress, buyerEmail }: {
         asset: Asset;
         accountAddress: string;
         startAmount: number;
+        paymentTokenObj?: Token;
         endAmount?: number;
         quantity?: number;
         listingTime?: number;
         expirationTime?: number;
         waitForHighestBid?: boolean;
         englishAuctionReservePrice?: number;
-        paymentTokenAddress?: string;
         extraBountyBasisPoints?: number;
         buyerAddress?: string;
         buyerEmail?: string;

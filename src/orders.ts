@@ -241,7 +241,7 @@ export class Orders extends Contracts {
       buyerAddress: buyerAddress || NULL_ADDRESS
     })
 
-    debugger
+
     await checkOrder(this, sellOrder)
 
     callBack?.next(OrderCheckStatus.StartOrderHashSign, { sellOrder })

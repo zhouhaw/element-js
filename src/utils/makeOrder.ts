@@ -29,7 +29,6 @@ import {
 import { validateOrder } from './check'
 import { getSchemaList, makeBigNumber, orderParamsEncode, toBaseUnitAmount } from './helper'
 
-
 export function getSchema(network: Network, schemaName: ElementSchemaName): Schema<any> {
   const schemaName_ = schemaName
 
@@ -73,7 +72,6 @@ export function generatePseudoRandomSalt(): BigNumber {
   return randomNumber.times(factor).integerValue()
 }
 
-
 export function getPriceParameters(
   network: Network,
   orderSide: OrderSide,
@@ -89,7 +87,7 @@ export function getPriceParameters(
 
   const paymentToken = token.address.toLowerCase()
   // @ts-ignore
-  const tokenDecimals = token.decimals||token.decimal
+  const tokenDecimals = token.decimals || token.decimal
 
   const isEther = token.address == NULL_ADDRESS
 
@@ -187,19 +185,19 @@ export function getTimeParameters(
 }
 
 export async function _makeBuyOrder({
-                                      networkName,
-                                      exchangeAddr,
-                                      asset,
-                                      quantity,
-                                      accountAddress,
-                                      startAmount,
-                                      expirationTime = 0,
-                                      paymentTokenObj,
-                                      extraBountyBasisPoints = 0,
-                                      feeRecipientAddr,
-                                      sellOrder,
-                                      referrerAddress
-                                    }: {
+  networkName,
+  exchangeAddr,
+  asset,
+  quantity,
+  accountAddress,
+  startAmount,
+  expirationTime = 0,
+  paymentTokenObj,
+  extraBountyBasisPoints = 0,
+  feeRecipientAddr,
+  sellOrder,
+  referrerAddress
+}: {
   networkName: Network
   exchangeAddr: string
   asset: Asset
@@ -209,7 +207,7 @@ export async function _makeBuyOrder({
   expirationTime: number
   paymentTokenObj: Token
   extraBountyBasisPoints: number
-  feeRecipientAddr:string
+  feeRecipientAddr: string
   sellOrder?: Order
   referrerAddress?: string
 }): Promise<UnhashedOrder> {
@@ -291,22 +289,22 @@ export async function _makeBuyOrder({
 }
 
 export async function _makeSellOrder({
-                                       networkName,
-                                       exchangeAddr,
-                                       asset,
-                                       quantity,
-                                       accountAddress,
-                                       startAmount,
-                                       endAmount,
-                                       listingTime,
-                                       expirationTime,
-                                       waitForHighestBid,
-                                       englishAuctionReservePrice = 0,
-                                       paymentTokenObj,
-                                       extraBountyBasisPoints,
-                                       feeRecipientAddr,
-                                       buyerAddress
-                                     }: {
+  networkName,
+  exchangeAddr,
+  asset,
+  quantity,
+  accountAddress,
+  startAmount,
+  endAmount,
+  listingTime,
+  expirationTime,
+  waitForHighestBid,
+  englishAuctionReservePrice = 0,
+  paymentTokenObj,
+  extraBountyBasisPoints,
+  feeRecipientAddr,
+  buyerAddress
+}: {
   networkName: Network
   exchangeAddr: string
   asset: Asset
@@ -320,7 +318,7 @@ export async function _makeSellOrder({
   expirationTime: number
   paymentTokenObj: Token
   extraBountyBasisPoints: number
-  feeRecipientAddr:string
+  feeRecipientAddr: string
   buyerAddress: string
 }): Promise<UnhashedOrder> {
   let { schema, elementAsset, quantityBN } = getSchemaAndAsset(networkName, asset, quantity)
@@ -353,9 +351,7 @@ export async function _makeSellOrder({
 
   // waitForHighestBid = false
   // Use buyer as the maker when it's an English auction, so Wyvern sets prices correctly
-  const feeRecipient = waitForHighestBid
-    ? NULL_ADDRESS
-    : feeRecipientAddr
+  const feeRecipient = waitForHighestBid ? NULL_ADDRESS : feeRecipientAddr
 
   const {
     makerRelayerFee,
@@ -565,10 +561,10 @@ export async function getCurrentPrice(exchangeHelper: any, order: Order): Promis
 }
 
 export async function _getStaticCallTargetAndExtraData({
-                                                         networkName,
-                                                         asset,
-                                                         useTxnOriginStaticCall
-                                                       }: {
+  networkName,
+  asset,
+  useTxnOriginStaticCall
+}: {
   networkName: Network
   asset: Asset
   useTxnOriginStaticCall: boolean
@@ -590,17 +586,17 @@ export async function _getStaticCallTargetAndExtraData({
 }
 
 export function _makeMatchingOrder({
-                                     networkName,
-                                     signedOrder,
-                                     accountAddress,
-                                     assetRecipientAddress,
-                                     feeRecipientAddress
-                                   }: {
+  networkName,
+  signedOrder,
+  accountAddress,
+  assetRecipientAddress,
+  feeRecipientAddress
+}: {
   networkName: Network
   signedOrder: UnsignedOrder
   accountAddress: string
   assetRecipientAddress: string
-  feeRecipientAddress:string
+  feeRecipientAddress: string
 }): UnhashedOrder {
   const order = signedOrder
   const computeOrderParams = () => {
@@ -611,7 +607,7 @@ export function _makeMatchingOrder({
       if (!asset.data) {
         asset = { ...asset, data: '' }
       }
-
+      debugger
       return order.side == OrderSide.Buy
         ? encodeSell(schema, asset, assetRecipientAddress)
         : encodeBuy(schema, asset, assetRecipientAddress)

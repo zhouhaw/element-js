@@ -22,12 +22,14 @@ export declare enum ElementSchemaName {
 interface ElementNFTAsset {
     id: string;
     address: string;
+    data?: string;
     collection?: ElementCollection;
 }
 interface ElementFTAsset {
     id?: string;
     address: string;
     quantity: string;
+    data?: string;
     collection?: ElementCollection;
 }
 export declare type ElementAsset = ElementNFTAsset | ElementFTAsset;
@@ -63,7 +65,7 @@ export declare enum TokenStandardVersion {
 export interface Asset {
     tokenId: string | undefined;
     tokenAddress: string;
-    schemaName?: ElementSchemaName;
+    schemaName: ElementSchemaName;
     version?: TokenStandardVersion;
     name?: string;
     data?: string;

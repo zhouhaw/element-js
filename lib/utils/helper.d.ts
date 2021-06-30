@@ -5,7 +5,6 @@ import { ECSignature, UnhashedOrder } from '../types';
 export declare function toBaseUnitAmount(amount: BigNumber, decimals: number): BigNumber;
 export declare function makeBigNumber(arg: number | string | BigNumber): BigNumber;
 export declare function getAccountBalance(web3: any, account: string, erc20?: any): Promise<any>;
-export declare function getAccountNFTsBalance(nftsContract: any, account: string, tokenId: any): Promise<Number>;
 export declare function getTokenIDOwner(elementAssetContract: any, tokenId: any): Promise<string>;
 export declare function getSchemaList(network: Network, schemaName?: string): Array<Schema<any>>;
 export declare function hashOrder(web3: any, order: UnhashedOrder): string;

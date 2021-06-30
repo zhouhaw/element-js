@@ -5,22 +5,22 @@
       "inputs": [
         {
           "internalType": "string",
-          "name": "name",
+          "name": "_name",
           "type": "string"
         },
         {
           "internalType": "string",
-          "name": "symbol",
+          "name": "_symbol",
           "type": "string"
         },
         {
           "internalType": "address",
-          "name": "proxyRegistryAddr",
+          "name": "_proxyRegistryAddress",
           "type": "address"
         },
         {
           "internalType": "string",
-          "name": "defaultURI",
+          "name": "_templateURI",
           "type": "string"
         }
       ],
@@ -58,36 +58,17 @@
         {
           "indexed": true,
           "internalType": "uint256",
-          "name": "id",
+          "name": "_id",
           "type": "uint256"
         },
         {
           "indexed": true,
           "internalType": "address",
-          "name": "creator",
+          "name": "_creator",
           "type": "address"
         }
       ],
       "name": "CreatorChanged",
-      "type": "event"
-    },
-    {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": true,
-          "internalType": "address",
-          "name": "dao",
-          "type": "address"
-        },
-        {
-          "indexed": false,
-          "internalType": "address",
-          "name": "preDao",
-          "type": "address"
-        }
-      ],
-      "name": "DaoChanged",
       "type": "event"
     },
     {
@@ -203,73 +184,15 @@
       "type": "event"
     },
     {
-      "inputs": [],
-      "name": "_DaoAddress",
-      "outputs": [
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "id",
-          "type": "uint256"
-        }
-      ],
-      "name": "_getOverrideURI",
-      "outputs": [
-        {
-          "internalType": "string",
-          "name": "",
-          "type": "string"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "_uri",
-      "outputs": [
-        {
-          "internalType": "string",
-          "name": "",
-          "type": "string"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
       "inputs": [
         {
           "internalType": "address",
-          "name": "proxyAddr",
-          "type": "address"
-        }
-      ],
-      "name": "addSharedProxyAddress",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "owner",
+          "name": "_owner",
           "type": "address"
         },
         {
           "internalType": "uint256",
-          "name": "id",
+          "name": "_id",
           "type": "uint256"
         }
       ],
@@ -282,7 +205,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [
@@ -306,35 +230,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "to",
-          "type": "address"
-        },
-        {
-          "internalType": "uint256[]",
-          "name": "ids",
-          "type": "uint256[]"
-        },
-        {
-          "internalType": "uint256[]",
-          "name": "quantities",
-          "type": "uint256[]"
-        },
-        {
-          "internalType": "bytes",
-          "name": "data",
-          "type": "bytes"
-        }
-      ],
-      "name": "batchMint",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [
@@ -353,7 +250,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [
@@ -377,26 +275,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "id",
-          "type": "uint256"
-        }
-      ],
-      "name": "creator",
-      "outputs": [
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [
@@ -415,75 +295,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "id",
-          "type": "uint256"
-        },
-        {
-          "internalType": "address",
-          "name": "newCreator",
-          "type": "address"
-        },
-        {
-          "internalType": "uint256",
-          "name": "expiration",
-          "type": "uint256"
-        },
-        {
-          "internalType": "address",
-          "name": "tokenCreator",
-          "type": "address"
-        }
-      ],
-      "name": "hashCreatorModification",
-      "outputs": [
-        {
-          "internalType": "bytes32",
-          "name": "",
-          "type": "bytes32"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "id",
-          "type": "uint256"
-        },
-        {
-          "internalType": "string",
-          "name": "uri",
-          "type": "string"
-        },
-        {
-          "internalType": "uint256",
-          "name": "expiration",
-          "type": "uint256"
-        },
-        {
-          "internalType": "address",
-          "name": "tokenCreator",
-          "type": "address"
-        }
-      ],
-      "name": "hashURIModification",
-      "outputs": [
-        {
-          "internalType": "bytes32",
-          "name": "",
-          "type": "bytes32"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [
@@ -507,54 +320,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "id",
-          "type": "uint256"
-        }
-      ],
-      "name": "maxSupply",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "pure",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "to",
-          "type": "address"
-        },
-        {
-          "internalType": "uint256",
-          "name": "id",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "quantity",
-          "type": "uint256"
-        },
-        {
-          "internalType": "bytes",
-          "name": "data",
-          "type": "bytes"
-        }
-      ],
-      "name": "mint",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [],
@@ -567,7 +334,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [],
@@ -580,7 +348,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [],
@@ -593,20 +362,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "proxyAddr",
-          "type": "address"
-        }
-      ],
-      "name": "removeSharedProxyAddress",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [],
@@ -619,27 +376,27 @@
       "inputs": [
         {
           "internalType": "address",
-          "name": "from",
+          "name": "_from",
           "type": "address"
         },
         {
           "internalType": "address",
-          "name": "to",
+          "name": "_to",
           "type": "address"
         },
         {
           "internalType": "uint256[]",
-          "name": "ids",
+          "name": "_ids",
           "type": "uint256[]"
         },
         {
           "internalType": "uint256[]",
-          "name": "amounts",
+          "name": "_amounts",
           "type": "uint256[]"
         },
         {
           "internalType": "bytes",
-          "name": "data",
+          "name": "_data",
           "type": "bytes"
         }
       ],
@@ -652,27 +409,27 @@
       "inputs": [
         {
           "internalType": "address",
-          "name": "from",
+          "name": "_from",
           "type": "address"
         },
         {
           "internalType": "address",
-          "name": "to",
+          "name": "_to",
           "type": "address"
         },
         {
           "internalType": "uint256",
-          "name": "id",
+          "name": "_id",
           "type": "uint256"
         },
         {
           "internalType": "uint256",
-          "name": "amount",
+          "name": "_amount",
           "type": "uint256"
         },
         {
           "internalType": "bytes",
-          "name": "data",
+          "name": "_data",
           "type": "bytes"
         }
       ],
@@ -702,150 +459,12 @@
     {
       "inputs": [
         {
-          "internalType": "uint256",
-          "name": "id",
-          "type": "uint256"
-        },
-        {
-          "internalType": "address",
-          "name": "newCreator",
-          "type": "address"
-        }
-      ],
-      "name": "setCreator",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "id",
-          "type": "uint256"
-        },
-        {
-          "internalType": "address",
-          "name": "newCreator",
-          "type": "address"
-        },
-        {
-          "internalType": "uint256",
-          "name": "expiration",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint8",
-          "name": "v",
-          "type": "uint8"
-        },
-        {
-          "internalType": "bytes32",
-          "name": "r",
-          "type": "bytes32"
-        },
-        {
-          "internalType": "bytes32",
-          "name": "s",
-          "type": "bytes32"
-        }
-      ],
-      "name": "setCreatorByDaoSig",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "daoAddr",
-          "type": "address"
-        }
-      ],
-      "name": "setDaoAddress",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
           "internalType": "string",
-          "name": "newuri",
+          "name": "_uri",
           "type": "string"
         }
       ],
-      "name": "setDefaultURI",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "proxyAddr",
-          "type": "address"
-        }
-      ],
-      "name": "setProxyRegistryAddress",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "id",
-          "type": "uint256"
-        },
-        {
-          "internalType": "string",
-          "name": "uri",
-          "type": "string"
-        }
-      ],
-      "name": "setURI",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "id",
-          "type": "uint256"
-        },
-        {
-          "internalType": "string",
-          "name": "uri",
-          "type": "string"
-        },
-        {
-          "internalType": "uint256",
-          "name": "expiration",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint8",
-          "name": "v",
-          "type": "uint8"
-        },
-        {
-          "internalType": "bytes32",
-          "name": "r",
-          "type": "bytes32"
-        },
-        {
-          "internalType": "bytes32",
-          "name": "s",
-          "type": "bytes32"
-        }
-      ],
-      "name": "setURIByDaoSig",
+      "name": "setTemplateURI",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -867,18 +486,19 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [
         {
           "internalType": "address",
-          "name": "owner",
+          "name": "_owner",
           "type": "address"
         },
         {
           "internalType": "uint256",
-          "name": "id",
+          "name": "_id",
           "type": "uint256"
         }
       ],
@@ -891,7 +511,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [],
@@ -904,7 +525,8 @@
         }
       ],
       "stateMutability": "pure",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [
@@ -923,7 +545,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [],
@@ -936,7 +559,22 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
+    },
+    {
+      "inputs": [],
+      "name": "templateURI",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [
@@ -955,7 +593,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [
@@ -974,7 +613,7 @@
       "inputs": [
         {
           "internalType": "uint256",
-          "name": "id",
+          "name": "_id",
           "type": "uint256"
         }
       ],
@@ -987,46 +626,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "bytes32",
-          "name": "hash",
-          "type": "bytes32"
-        },
-        {
-          "internalType": "uint256",
-          "name": "expiration",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint8",
-          "name": "v",
-          "type": "uint8"
-        },
-        {
-          "internalType": "bytes32",
-          "name": "r",
-          "type": "bytes32"
-        },
-        {
-          "internalType": "bytes32",
-          "name": "s",
-          "type": "bytes32"
-        }
-      ],
-      "name": "validateDaoSig",
-      "outputs": [
-        {
-          "internalType": "bool",
-          "name": "",
-          "type": "bool"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [],
@@ -1039,7 +640,179 @@
         }
       ],
       "stateMutability": "view",
+      "type": "function",
+      "constant": true
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_address",
+          "type": "address"
+        }
+      ],
+      "name": "setProxyRegistryAddress",
+      "outputs": [],
+      "stateMutability": "nonpayable",
       "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_address",
+          "type": "address"
+        }
+      ],
+      "name": "addSharedProxyAddress",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_address",
+          "type": "address"
+        }
+      ],
+      "name": "removeSharedProxyAddress",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_id",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_quantity",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "_data",
+          "type": "bytes"
+        }
+      ],
+      "name": "mint",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "_ids",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "_quantities",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "bytes",
+          "name": "_data",
+          "type": "bytes"
+        }
+      ],
+      "name": "batchMint",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_id",
+          "type": "uint256"
+        },
+        {
+          "internalType": "string",
+          "name": "_uri",
+          "type": "string"
+        }
+      ],
+      "name": "setURI",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_id",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "_to",
+          "type": "address"
+        }
+      ],
+      "name": "setCreator",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_id",
+          "type": "uint256"
+        }
+      ],
+      "name": "creator",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function",
+      "constant": true
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_id",
+          "type": "uint256"
+        }
+      ],
+      "name": "maxSupply",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function",
+      "constant": true
     }
   ]
 }

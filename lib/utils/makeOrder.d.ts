@@ -1,7 +1,7 @@
 import { Asset, ECSignature, ElementAsset, ElementSchemaName, Network, Order, OrderJSON, OrderSide, UnhashedOrder, UnsignedOrder } from '../types';
 import { Schema, Token } from '../schema/types';
 import { BigNumber } from './constants';
-export declare function getSchema(network: Network, schemaName?: ElementSchemaName): Schema<any>;
+export declare function getSchema(network: Network, schemaName: ElementSchemaName): Schema<any>;
 export declare function getElementAsset(schema: Schema<ElementAsset>, asset: Asset, quantity?: BigNumber): ElementAsset;
 export declare function getSchemaAndAsset(networkName: Network, asset: Asset, quantity: number): {
     schema: Schema<any>;
