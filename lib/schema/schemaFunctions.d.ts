@@ -3,6 +3,7 @@ export interface LimitedCallSpec {
     target: string;
     dataToCall: string;
 }
+export declare const encodeCallOld: (abi: AnnotatedFunctionABI, parameters: any[]) => string;
 export declare const encodeCall: (abi: AnnotatedFunctionABI, parameters: any[]) => string;
 export interface CallSpec {
     target: string;
