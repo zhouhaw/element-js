@@ -204,11 +204,10 @@ export async function checkMatchOrder(contract: any, buy: Order, sell: Order) {
 }
 
 export function checkDataToCall(netWorkName: Network, order: UnhashedOrder) {
-  // encodeSell
   let schemas = getSchemaList(netWorkName, order.metadata.schema)
   // TODO data sell.metadata.asset
   let asset: any = order.metadata.asset
-  if (!asset.data) {
+  if (!asset.data && asset.schemaName === ElementSchemaName.ERC1155) {
     asset = { ...asset, data: '' }
   }
   let encodeData: CallSpec
@@ -220,14 +219,16 @@ export function checkDataToCall(netWorkName: Network, order: UnhashedOrder) {
 
   if (encodeData.dataToCall != order.dataToCall) {
     log('checkDataToCall.dataToCall error')
+    throw new ElementError({ code: '1208' })
   }
 
   if (encodeData.target != order.target) {
     log('checkDataToCall.target error')
+    throw new ElementError({ code: '1209' })
   }
 
   if (encodeData.replacementPattern != order.replacementPattern) {
-    log('checkDataToCall.replacementPattern error')
+    throw new ElementError({ code: '1210' })
   }
 }
 

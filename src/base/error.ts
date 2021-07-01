@@ -89,6 +89,18 @@ export const ErrorCodes: ElementErrorCodes = [
     message: 'Buy Order cancelledOrFinalized false '
   },
   {
+    code: '1208',
+    message: 'CheckDataToCall.dataToCall error '
+  },
+  {
+    code: '1209',
+    message: 'CheckDataToCall.target error '
+  },
+  {
+    code: '1210',
+    message: 'CheckDataToCall.replacementPattern error '
+  },
+  {
     code: '2001',
     message: 'rpc requset error '
   },
