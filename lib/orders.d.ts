@@ -1,4 +1,4 @@
-import { Asset, Order, OrderJSON, Token } from './types';
+import { Asset, Order, OrderJSON, Token, UnhashedOrder } from './types';
 import { Contracts } from './contracts';
 export declare enum OrderCheckStatus {
     StartOrderHashSign = "startOrderHashSign",
@@ -26,6 +26,9 @@ export declare class Orders extends Contracts {
         accountAddress: string;
         metadata?: string;
     }, callBack?: CallBack): Promise<any>;
+    creatSignedOrder({ unHashOrder }: {
+        unHashOrder: UnhashedOrder;
+    }, callBack?: CallBack): Promise<OrderJSON>;
     createBuyOrder({ asset, accountAddress, startAmount, quantity, expirationTime, paymentTokenObj, sellOrder, referrerAddress }: {
         asset: Asset;
         accountAddress: string;
@@ -35,7 +38,7 @@ export declare class Orders extends Contracts {
         paymentTokenObj: Token;
         sellOrder?: Order;
         referrerAddress?: string;
-    }, callBack?: CallBack): Promise<OrderJSON | boolean>;
+    }, callBack?: CallBack): Promise<OrderJSON>;
     createSellOrder({ asset, accountAddress, startAmount, paymentTokenObj, endAmount, quantity, listingTime, expirationTime, waitForHighestBid, englishAuctionReservePrice, extraBountyBasisPoints, buyerAddress, buyerEmail }: {
         asset: Asset;
         accountAddress: string;
@@ -50,7 +53,7 @@ export declare class Orders extends Contracts {
         extraBountyBasisPoints?: number;
         buyerAddress?: string;
         buyerEmail?: string;
-    }, callBack?: CallBack): Promise<OrderJSON | boolean>;
+    }, callBack?: CallBack): Promise<OrderJSON>;
     cancelOrder({ order, accountAddress }: {
         order: Order;
         accountAddress: string;

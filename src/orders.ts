@@ -1,6 +1,6 @@
-import { Asset, ECSignature, Order, OrderJSON, OrderSide, UnhashedOrder, Token } from './types'
+import { Asset, ECSignature, ElementSchemaName, Order, OrderJSON, OrderSide, Token, UnhashedOrder } from './types'
 import { NULL_ADDRESS, NULL_BLOCK_HASH } from './utils/constants'
-import { _ordersCanMatch, cancelledOrFinalized, checkMatchOrder, checkOrder } from './utils/check'
+import { _ordersCanMatch, cancelledOrFinalized, checkMatchOrder, checkUnhashedOrder } from './utils/check'
 import { ElementError } from './base/error'
 
 import {
@@ -11,7 +11,7 @@ import {
   hashAndValidateOrder
 } from './utils/makeOrder'
 
-import { makeBigNumber, orderParamsEncode, orderSigEncode } from './utils/helper'
+import { orderParamsEncode, orderSigEncode } from './utils/helper'
 
 import { Contracts } from './contracts'
 
@@ -60,11 +60,13 @@ export class Orders extends Contracts {
 
     const matchingOrder = _makeMatchingOrder({
       networkName,
-      signedOrder,
+      unSignedOrder:signedOrder,
       accountAddress,
       assetRecipientAddress,
       feeRecipientAddress
     })
+
+
     // 伪造买单  对手单
     const unsignData = { ...matchingOrder, hash: signedOrder.hash }
 
@@ -87,9 +89,6 @@ export class Orders extends Contracts {
     },
     callBack?: CallBack
   ): Promise<any> {
-    if (!_ordersCanMatch(buy, sell)) {
-      throw new ElementError({ code: '1202' })
-    }
 
     await checkMatchOrder(this, buy, sell)
 
@@ -127,6 +126,26 @@ export class Orders extends Contracts {
       })
   }
 
+  public async creatSignedOrder(
+    { unHashOrder }: { unHashOrder: UnhashedOrder },
+    callBack?: CallBack
+  ): Promise<OrderJSON> {
+
+    await checkUnhashedOrder(this, unHashOrder)
+
+    // if (asset.data === '' && asset.schemaName === ElementSchemaName.ERC1155 && asset.tokenAddress === this.elementSharedAssetAddr) {
+    //   throw new ElementError({ code: '1000', message: 'URI is null' })
+    // }
+
+    callBack?.next(OrderCheckStatus.StartOrderHashSign, { unHashOrder })
+
+    let signSellOrder = await hashAndValidateOrder(this.web3, this.exchangeHelper, unHashOrder)
+
+    callBack?.next(OrderCheckStatus.EndOrderHashSign, { signSellOrder })
+
+    return signSellOrder
+  }
+
   public async createBuyOrder(
     {
       asset,
@@ -148,9 +167,10 @@ export class Orders extends Contracts {
       referrerAddress?: string
     },
     callBack?: CallBack
-  ): Promise<OrderJSON | boolean> {
+  ): Promise<OrderJSON> {
     let networkName = this.networkName
     let exchangeAddr = this.exchange.options.address
+
 
     const buyOrder = await _makeBuyOrder({
       networkName,
@@ -166,15 +186,8 @@ export class Orders extends Contracts {
       sellOrder,
       referrerAddress
     })
-    await checkOrder(this, buyOrder)
 
-    callBack?.next(OrderCheckStatus.StartOrderHashSign, { buyOrder })
-
-    let signBuyOrder = await hashAndValidateOrder(this.web3, this.exchangeHelper, buyOrder)
-
-    callBack?.next(OrderCheckStatus.EndOrderHashSign, { signBuyOrder })
-
-    return signBuyOrder
+    return this.creatSignedOrder({ unHashOrder: buyOrder }, callBack)
   }
 
   public async createSellOrder(
@@ -208,21 +221,11 @@ export class Orders extends Contracts {
       buyerEmail?: string
     },
     callBack?: CallBack
-  ): Promise<OrderJSON | boolean> {
+  ): Promise<OrderJSON> {
     expirationTime = expirationTime ? parseInt(String(expirationTime)) : expirationTime
 
     let networkName = this.networkName
     let exchangeAddr = this.exchange.options.address
-
-    // let paymentTokenObj =
-    //   paymentTokenAddress == NULL_ADDRESS
-    //     ? this.ETH
-    //     : this.paymentTokenList.find((val) => val.address.toLowerCase() == paymentTokenAddress?.toLowerCase())
-    //
-    // if (!paymentTokenObj) {
-    //   throw new ElementError({ code: '1000', message: `No ERC-20 token found for '${paymentTokenAddress}'` })
-    // }
-
     const sellOrder = await _makeSellOrder({
       networkName,
       exchangeAddr,
@@ -241,17 +244,9 @@ export class Orders extends Contracts {
       buyerAddress: buyerAddress || NULL_ADDRESS
     })
 
-
-    await checkOrder(this, sellOrder)
-
-    callBack?.next(OrderCheckStatus.StartOrderHashSign, { sellOrder })
-
-    let signSellOrder = await hashAndValidateOrder(this.web3, this.exchangeHelper, sellOrder)
-
-    callBack?.next(OrderCheckStatus.EndOrderHashSign, { signSellOrder })
-
-    return signSellOrder
+    return this.creatSignedOrder({ unHashOrder: sellOrder }, callBack)
   }
+
 
   public async cancelOrder(
     { order, accountAddress }: { order: Order; accountAddress: string },

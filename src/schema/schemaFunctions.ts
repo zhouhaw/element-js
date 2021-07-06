@@ -1,7 +1,4 @@
 const ethABI = require('ethereumjs-abi')
-const Web3 = require('web3')
-
-const web3 = new Web3()
 
 import { AnnotatedFunctionABI, FunctionInputKind, Schema } from './types'
 
@@ -33,7 +30,7 @@ const generateDefaultValue = (type: string): any => {
   }
 }
 
-const encodeReplacementPattern: ReplacementEncoder = (
+export const encodeReplacementPattern: ReplacementEncoder = (
   abi,
   replaceKind = FunctionInputKind.Replaceable,
   encodeToBytes = true
@@ -75,19 +72,12 @@ export interface LimitedCallSpec {
   dataToCall: string
 }
 
-export const encodeCallOld = (abi: AnnotatedFunctionABI, parameters: any[]): string => {
+export const encodeCall = (abi: AnnotatedFunctionABI, parameters: any[]): string => {
   const inputTypes = abi.inputs.map((i) => i.type)
   return (
     '0x' +
     Buffer.concat([ethABI.methodID(abi.name, inputTypes), ethABI.rawEncode(inputTypes, parameters)]).toString('hex')
   )
-}
-
-export const encodeCall = (abi: AnnotatedFunctionABI, parameters: any[]): string => {
-  // let methodID = web3.eth.abi.encodeFunctionSignature(abi)
-  let callData = web3.eth.abi.encodeFunctionCall(abi, parameters)
-  // console.log("methodID",callData)
-  return callData
 }
 
 export interface CallSpec {

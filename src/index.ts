@@ -1,5 +1,4 @@
 export { ElementSchemaName, FeeMethod, HowToCall, Network, OrderSide, SaleKind } from './types'
-export type { UnsignedOrder } from './types'
 export type { Asset, Order, Token } from './types'
 export { schemas, encodeBuy, encodeSell, encodeCall } from './schema'
 export {
@@ -20,13 +19,16 @@ export {
   approveERC721TransferProxy
 } from './utils/approve'
 
-export { orderToJSON, getPriceParameters, getCurrentPrice } from './utils/makeOrder'
+export { orderToJSON, getPriceParameters, getCurrentPrice,computeOrderCallData } from './utils/makeOrder'
 export {
   BigNumber,
   NULL_ADDRESS,
   NULL_BLOCK_HASH,
   DEFAULT_SELLER_FEE_BASIS_POINTS,
-  ORDERBOOK_VERSION
+  PRIVATE_CONTRACTS_ADDRESSES,
+  MAIN_CONTRACTS_ADDRESSES,
+  RINKEBY_CONTRACTS_ADDRESSES,
+  CONTRACTS_ADDRESSES
 } from './utils/constants'
 export { orderFromJSON, transferFromERC1155, transferFromERC721, transferFromERC20, transferFromWETH } from './utils'
 export {

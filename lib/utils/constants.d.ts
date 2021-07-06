@@ -8,12 +8,10 @@ export declare const MIN_EXPIRATION_SECONDS = 10;
 export declare const MIN_Listing_SECONDS = 10;
 export declare const ORDER_MATCHING_LATENCY_SECONDS: number;
 export declare const DEFAULT_BUYER_FEE_BASIS_POINTS = 0;
-export declare const DEFAULT_SELLER_FEE_BASIS_POINTS = 250;
-export declare const DEFAULT_MAX_BOUNTY = 250;
+export declare const DEFAULT_SELLER_FEE_BASIS_POINTS = 200;
+export declare const DEFAULT_MAX_BOUNTY = 200;
 export declare const ELEMENT_SELLER_BOUNTY_BASIS_POINTS = 100;
 export declare const INVERSE_BASIS_POINT = 10000;
-export declare const ORDERBOOK_VERSION: number;
-export declare const API_VERSION: number;
 export declare const STATIC_EXTRADATA = "0x0c225aad";
 export declare enum PRIVATE_CONTRACTS_ADDRESSES {
     ElementixProxyRegistry = "0x023CA02bFB85A3901316EdFE6BBA92B8cb54C9E3",

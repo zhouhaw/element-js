@@ -110,7 +110,7 @@ export async function checkApproveERC721TransferProxy(
   return true
 }
 
-export async function checkOrder(contract: any, order: UnhashedOrder) {
+export async function checkUnhashedOrder(contract: any, order: UnhashedOrder) {
   const equalPrice: boolean = order.basePrice.gt(0)
   if (!equalPrice) throw new ElementError({ code: '1201' })
 
@@ -160,10 +160,31 @@ export async function checkOrder(contract: any, order: UnhashedOrder) {
   return true
 }
 
+// 检查签名订单是否正确
+export async function checkOrder(contract: any, order: Order) {
+  await checkUnhashedOrder(contract, order)
+  await cancelledOrFinalized(contract.exchange, order.hash).catch((err) => {
+    log(err)
+    if (order.side === OrderSide.Sell) {
+      throw new ElementError({ code: '1206' })
+    } else {
+      throw new ElementError({ code: '1207' })
+    }
+  })
+  // 主要是检查Hash是否正确
+  await validateOrder(contract.exchangeHelper, order)
+
+  return true
+}
+
 export async function checkMatchOrder(contract: any, buy: Order, sell: Order) {
   const equalPrice: boolean = sell.basePrice.gte(buy.basePrice)
   if (!equalPrice) {
     throw new ElementError({ code: '1201' })
+  }
+
+  if (!_ordersCanMatch(buy, sell)) {
+    throw new ElementError({ code: '1202' })
   }
 
   if (sell.feeRecipient != NULL_ADDRESS) {
@@ -174,14 +195,7 @@ export async function checkMatchOrder(contract: any, buy: Order, sell: Order) {
         message: `sell.takerRelayerFee ${sell.takerRelayerFee} <= buy.takerRelayerFee ${buy.takerRelayerFee}`
       })
     }
-    await checkOrder(contract, buy)
     await checkOrder(contract, sell)
-
-    await cancelledOrFinalized(contract.exchange, sell.hash).catch((err) => {
-      log(err)
-      throw new ElementError({ code: '1206' })
-    })
-    await validateOrder(contract.exchangeHelper, sell)
   } else {
     /* Assert taker fee is less than or equal to maximum fee specified by seller. */
     if (!buy.takerRelayerFee.lte(sell.takerRelayerFee)) {
@@ -190,14 +204,8 @@ export async function checkMatchOrder(contract: any, buy: Order, sell: Order) {
         message: `buy.takerRelayerFee ${buy.takerRelayerFee} <= sell.takerRelayerFee ${sell.takerRelayerFee}`
       })
     }
-    await checkOrder(contract, sell)
+    await checkUnhashedOrder(contract, sell) // 检查 sell fee 是否授权
     await checkOrder(contract, buy)
-
-    await cancelledOrFinalized(contract.exchange, buy.hash).catch((err) => {
-      log(err)
-      throw new ElementError({ code: '1207' })
-    })
-    await validateOrder(contract.exchangeHelper, buy)
   }
 
   return true

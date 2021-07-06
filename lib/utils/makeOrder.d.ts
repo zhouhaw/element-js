@@ -51,7 +51,7 @@ export declare function _makeSellOrder({ networkName, exchangeAddr, asset, quant
     buyerAddress: string;
 }): Promise<UnhashedOrder>;
 export declare function getOrderHash(web3: any, exchangeHelper: any, order: UnhashedOrder): Promise<string>;
-export declare function hashAndValidateOrder(web3: any, exchangeHelper: any, order: UnhashedOrder): Promise<any>;
+export declare function hashAndValidateOrder(web3: any, exchangeHelper: any, order: UnhashedOrder): Promise<OrderJSON>;
 export declare function signOrderHash(web3: any, hashedOrder: UnsignedOrder): Promise<ECSignature>;
 export declare const orderToJSON: (order: Order) => OrderJSON;
 export declare function schemaEncodeSell(network: Network, schema: ElementSchemaName, owner: string, data: any): {
@@ -68,9 +68,11 @@ export declare function _getStaticCallTargetAndExtraData({ networkName, asset, u
     staticTarget: string;
     staticExtradata: string;
 }>;
-export declare function _makeMatchingOrder({ networkName, signedOrder, accountAddress, assetRecipientAddress, feeRecipientAddress }: {
+export declare const computeOrderParams: (order: UnsignedOrder, networkName: Network, assetRecipientAddress: string) => import("../schema/schemaFunctions").CallSpec;
+export declare const computeOrderCallData: (order: UnsignedOrder, networkName: Network, assetRecipientAddress: string) => import("../schema/schemaFunctions").CallSpec;
+export declare function _makeMatchingOrder({ networkName, unSignedOrder, accountAddress, assetRecipientAddress, feeRecipientAddress }: {
     networkName: Network;
-    signedOrder: UnsignedOrder;
+    unSignedOrder: UnsignedOrder;
     accountAddress: string;
     assetRecipientAddress: string;
     feeRecipientAddress: string;

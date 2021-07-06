@@ -101,6 +101,14 @@ export const ErrorCodes: ElementErrorCodes = [
     message: 'CheckDataToCall.replacementPattern error '
   },
   {
+    code: '1211', // ElementShareAsset order uri 和 order version 中返回的 uri 不一致
+    message: 'The ElementShareAsset Order URI does not match the URI returned in Order Version '
+  },
+  {
+    code: '1212', // ElementShareAsset  tokenId 的暂时无法交易
+    message: 'ElementShareAsset TokenID cannot be traded for the time being '
+  },
+  {
     code: '2001',
     message: 'rpc requset error '
   },

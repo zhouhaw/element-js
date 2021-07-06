@@ -4,7 +4,8 @@ export declare function checkRegisterProxy(proxyRegistryContract: any, account: 
 export declare function checkApproveTokenTransferProxy(exchangeContract: any, erc20Contract: any, account: string): Promise<boolean>;
 export declare function checkApproveERC1155TransferProxy(proxyRegistryContract: any, nftsContract: any, account: string): Promise<boolean>;
 export declare function checkApproveERC721TransferProxy(proxyRegistryContract: any, nftsContract: any, account: string, tokenID: string): Promise<boolean>;
-export declare function checkOrder(contract: any, order: UnhashedOrder): Promise<boolean>;
+export declare function checkUnhashedOrder(contract: any, order: UnhashedOrder): Promise<boolean>;
+export declare function checkOrder(contract: any, order: Order): Promise<boolean>;
 export declare function checkMatchOrder(contract: any, buy: Order, sell: Order): Promise<boolean>;
 export declare function checkDataToCall(netWorkName: Network, order: UnhashedOrder): void;
 export declare function validateOrder(exchangeHelper: any, order: Order): Promise<any>;

@@ -14,7 +14,7 @@ export const ORDER_MATCHING_LATENCY_SECONDS = 60 * 60 * 24 * 7
 
 // FEE
 export const DEFAULT_BUYER_FEE_BASIS_POINTS = 0
-export const DEFAULT_SELLER_FEE_BASIS_POINTS = 250 //2.5%
+export const DEFAULT_SELLER_FEE_BASIS_POINTS = 200 //2.5%
 export const DEFAULT_MAX_BOUNTY = DEFAULT_SELLER_FEE_BASIS_POINTS
 
 //BOUNTY 版权费
@@ -22,8 +22,8 @@ export const ELEMENT_SELLER_BOUNTY_BASIS_POINTS = 100 //1%
 export const INVERSE_BASIS_POINT = 10000 //100%
 
 //VERSION
-export const ORDERBOOK_VERSION: number = 1
-export const API_VERSION: number = 1
+// export const ORDERBOOK_VERSION: number = 1
+// export const API_VERSION: number = 1
 
 //static call
 // export const STATIC_CALL_TX_ORIGIN_ADDRESS = '0xFa19a235568616c6BE9140eA3AF7864d63D6D072'.toLowerCase()
