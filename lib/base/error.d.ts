@@ -6,6 +6,9 @@ export interface CustomError {
     data?: any;
     code: string;
     message?: string;
+    context?: {
+        [key: string]: any;
+    };
 }
 export declare type ElementErrorCodes = Array<Readonly<CustomError>>;
 export declare const ErrorCodes: ElementErrorCodes;

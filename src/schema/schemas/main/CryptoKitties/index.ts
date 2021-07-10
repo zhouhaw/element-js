@@ -1,4 +1,4 @@
-import fetch from 'node-fetch'
+import fetch from 'isomorphic-unfetch'
 
 import { EventInputKind, FunctionInputKind, FunctionOutputKind, Schema, StateMutability, AbiType } from '../../../types'
 

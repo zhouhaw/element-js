@@ -19,7 +19,7 @@ export {
   approveERC721TransferProxy
 } from './utils/approve'
 
-export { orderToJSON, getPriceParameters, getCurrentPrice,computeOrderCallData } from './utils/makeOrder'
+export { orderToJSON, getPriceParameters, getCurrentPrice, computeOrderCallData } from './utils/makeOrder'
 export {
   BigNumber,
   NULL_ADDRESS,
@@ -30,7 +30,8 @@ export {
   RINKEBY_CONTRACTS_ADDRESSES,
   CONTRACTS_ADDRESSES
 } from './utils/constants'
-export { orderFromJSON, transferFromERC1155, transferFromERC721, transferFromERC20, transferFromWETH } from './utils'
+export { orderFromJSON } from './utils'
+export { transferFromERC1155, transferFromERC721, transferFromERC20, transferFromWETH } from './utils/transfer'
 export {
   getTokenList,
   toBaseUnitAmount,

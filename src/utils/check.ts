@@ -78,7 +78,7 @@ export async function checkApproveTokenTransferProxy(
   const allowAmount = await erc20Contract.methods.allowance(account, tokenTransferProxyAddr).call()
 
   if (new BigNumber(allowAmount).eq(0)) {
-    throw new ElementError({ code: '1101', data: erc20Contract.options.address })
+    throw new ElementError({ code: '1101', data: { erc20Address: erc20Contract.options.address } })
   }
   return true
 }
@@ -91,7 +91,7 @@ export async function checkApproveERC1155TransferProxy(
   let operator = await proxyRegistryContract.methods.proxies(account).call()
   let isApprove = await nftsContract.methods.isApprovedForAll(account, operator).call()
   if (!isApprove) {
-    throw new ElementError({ code: '1102', data: nftsContract.options.address })
+    throw new ElementError({ code: '1102', data: { nftAddress: nftsContract.options.address } })
   }
   return isApprove
 }
@@ -112,65 +112,66 @@ export async function checkApproveERC721TransferProxy(
 
 export async function checkUnhashedOrder(contract: any, order: UnhashedOrder) {
   const equalPrice: boolean = order.basePrice.gt(0)
-  if (!equalPrice) throw new ElementError({ code: '1201' })
+  if (!equalPrice) throw new ElementError({ code: '1201', data: { order } })
 
-  const erc20Contract = contract.erc20.clone()
+  try {
+    const erc20Contract = contract.erc20.clone()
+    let metadata = order.metadata
+    // 检查 Sell 买单
+    if (order.side == OrderSide.Sell) {
+      let sell = order
 
-  let metadata = order.metadata
-
-  // 检查 Sell 买单
-  if (order.side == OrderSide.Sell) {
-    let sell = order
-
-    await checkRegisterProxy(contract.exchangeProxyRegistry, order.maker)
-    await checkAssetApprove(contract, sell)
-    await checkAssetBalance(contract, sell)
-
-    //transfer fee
-    if (sell.paymentToken != NULL_ADDRESS) {
-      erc20Contract.options.address = sell.paymentToken
-      await checkApproveTokenTransferProxy(contract.exchange, erc20Contract, sell.maker)
+      await checkRegisterProxy(contract.exchangeProxyRegistry, order.maker)
+      await checkAssetApprove(contract, sell)
+      await checkAssetBalance(contract, sell)
+      //transfer fee
+      if (sell.paymentToken != NULL_ADDRESS) {
+        erc20Contract.options.address = sell.paymentToken
+        await checkApproveTokenTransferProxy(contract.exchange, erc20Contract, sell.maker)
+      }
     }
-  }
+    // 检查 Buy 卖单
+    if (order.side == OrderSide.Buy) {
+      let buy = order
 
-  // 检查 Buy 卖单
-  if (order.side == OrderSide.Buy) {
-    let buy = order
+      const { assetAddress } = getAssetInfo(metadata)
+      if (assetAddress != contract.elementSharedAssetAddr) {
+        await checkAssetMint(contract, metadata)
+      }
+      if (buy.paymentToken !== NULL_ADDRESS) {
+        erc20Contract.options.address = buy.paymentToken
+        let { erc20Bal } = await getAccountBalance(contract.web3, buy.maker, erc20Contract)
+        if (makeBigNumber(erc20Bal).lt(buy.basePrice))
+          throw new ElementError({ code: '1103', context: { assetType: "ERC20" } })
 
-    const { assetAddress } = getAssetInfo(metadata)
-    if (assetAddress != contract.elementSharedAssetAddr) {
-      await checkAssetMint(contract, metadata)
+        await checkApproveTokenTransferProxy(contract.exchange, erc20Contract, buy.maker)
+      } else {
+        // if (accountAddress != buy.maker.toLowerCase()) throw new ElementError({ code: '1204' })
+        let { ethBal } = await getAccountBalance(contract.web3, buy.maker)
+        if (makeBigNumber(ethBal).lt(buy.basePrice))
+          throw new ElementError({ code: '1103', context: { assetType: "ETH" } })
+      }
     }
-
-    // let sendAccount = contract.defaultAccount
-    if (buy.paymentToken !== NULL_ADDRESS) {
-      erc20Contract.options.address = buy.paymentToken
-      let { erc20Bal } = await getAccountBalance(contract.web3, buy.maker, erc20Contract)
-      if (makeBigNumber(erc20Bal).lt(buy.basePrice)) throw new ElementError({ code: '1104' })
-
-      await checkApproveTokenTransferProxy(contract.exchange, erc20Contract, buy.maker)
+    checkDataToCall(contract.networkName, order)
+  } catch (error) {
+    if (error.data) {
+      error.data.order = order
     } else {
-      // if (accountAddress != buy.maker.toLowerCase()) throw new ElementError({ code: '1204' })
-      let { ethBal } = await getAccountBalance(contract.web3, buy.maker)
-      if (makeBigNumber(ethBal).lt(buy.basePrice)) throw new ElementError({ code: '1105' })
+      console.log(error)
+      error = { ...error, message: error.message, data: { order } }
+      console.log('End', error)
     }
+    throw error
   }
-
-  checkDataToCall(contract.networkName, order)
   return true
 }
 
 // 检查签名订单是否正确
 export async function checkOrder(contract: any, order: Order) {
+  // 简单订单授权，资产余额
   await checkUnhashedOrder(contract, order)
-  await cancelledOrFinalized(contract.exchange, order.hash).catch((err) => {
-    log(err)
-    if (order.side === OrderSide.Sell) {
-      throw new ElementError({ code: '1206' })
-    } else {
-      throw new ElementError({ code: '1207' })
-    }
-  })
+  // 检查订单是否被取消
+  await checkOrderCancelledOrFinalized(contract, order)
   // 主要是检查Hash是否正确
   await validateOrder(contract.exchangeHelper, order)
 
@@ -182,7 +183,7 @@ export async function checkMatchOrder(contract: any, buy: Order, sell: Order) {
   if (!equalPrice) {
     throw new ElementError({ code: '1201' })
   }
-
+  // 检查对手单是否满足撮合条件
   if (!_ordersCanMatch(buy, sell)) {
     throw new ElementError({ code: '1202' })
   }
@@ -330,8 +331,18 @@ export async function ordersCanMatch(exchangeHelper: any, buy: Order, sell: Orde
 }
 
 // 是否取消或者完成
-export async function cancelledOrFinalized(exchangeHelper: any, orderHash: string): Promise<boolean> {
-  return exchangeHelper.methods.cancelledOrFinalized(orderHash).call()
+export async function checkOrderCancelledOrFinalized(contract: any, order: Order) {
+  const orderParamValueArray = orderParamsEncode(order as UnhashedOrder)
+  const hash = await contract.exchangeHelper.methods.hashToSign(orderParamValueArray).call()
+  const iscancelledOrFinalized = await contract.exchange.methods.cancelledOrFinalized(hash).call()
+
+  if (iscancelledOrFinalized) {
+    if (order.side === OrderSide.Sell) {
+      throw new ElementError({ code: '1207', context: { orderSide: 'Sell' } })
+    } else {
+      throw new ElementError({ code: '1207', context: { orderSide: 'Buy' } })
+    }
+  }
 }
 
 function getAssetInfo(metadata: ExchangeMetadata) {
@@ -392,7 +403,7 @@ export async function checkAssetApprove(contract: any, order: UnhashedOrder) {
       await checkApproveERC1155TransferProxy(contract.exchangeProxyRegistry, sellNFTs, checkAddr)
       break
     default:
-      throw new ElementError({ code: '1206' })
+      throw new ElementError({ code: '1206', context: { assetType: metadata.schema } })
       break
   }
   return sellNFTs
@@ -416,7 +427,8 @@ export async function checkAssetBalance(contract: any, order: UnhashedOrder) {
       sellNFTs = contract.erc721.clone()
       sellNFTs.options.address = assetAddress
       let owner = await sellNFTs.methods.ownerOf(tokenId).call()
-      if (owner.toLowerCase() !== checkAddr) throw new ElementError({ code: '1206' })
+      if (owner.toLowerCase() !== checkAddr)
+        throw new ElementError({ code: '1103', context: { assetType: metadata.schema } })
       balance = 1
       break
     case ElementSchemaName.ERC1155:
@@ -425,12 +437,12 @@ export async function checkAssetBalance(contract: any, order: UnhashedOrder) {
       balance = await sellNFTs.methods.balanceOf(checkAddr, tokenId).call()
       break
     default:
-      throw new ElementError({ code: '1206' })
+      throw new ElementError({ code: '1206', context: { assetType: metadata.schema } })
       break
   }
 
   if (sell.quantity.gt(balance.toString())) {
-    throw new ElementError({ code: '1103' })
+    throw new ElementError({ code: '1103', context: { assetType: metadata.schema } })
   }
 
   return Number(balance)

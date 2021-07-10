@@ -26,7 +26,7 @@ import {
   STATIC_EXTRADATA
 } from './constants'
 import { validateOrder } from './check'
-import { getSchemaList, makeBigNumber, orderParamsEncode, toBaseUnitAmount } from './helper'
+import { getSchemaList, hashOrder, makeBigNumber, orderParamsEncode, toBaseUnitAmount } from './helper'
 
 export function getSchema(network: Network, schemaName: ElementSchemaName): Schema<any> {
   const schemaName_ = schemaName
@@ -421,18 +421,21 @@ export async function getOrderHash(web3: any, exchangeHelper: any, order: Unhash
 
 export async function hashAndValidateOrder(web3: any, exchangeHelper: any, order: UnhashedOrder): Promise<OrderJSON> {
   const orderHash = await getOrderHash(web3, exchangeHelper, order)
-  // let orderHash = hashOrder(web3, order)
+  // const orderHash = hashOrder(web3, order)
   const hashedOrder = {
     ...order,
     hash: orderHash
   }
   let signature: ECSignature
   if (web3.eth.defaultAccount.toLowerCase() == hashedOrder.maker.toLowerCase()) {
-    signature = await signOrderHash(web3, hashedOrder).catch((err) => {
-      throw new ElementError(err)
+    signature = await signOrderHash(web3, hashedOrder).catch((error) => {
+      throw error
     })
   } else {
-    throw new ElementError({ code: '1000', message: 'web3.eth.defaultAccount and maker not equal' })
+    throw new ElementError({
+      code: '1000',
+      message: 'web3.eth.defaultAccount and maker not equal'
+    })
   }
 
   let orderWithSignature: Order = {
@@ -460,7 +463,7 @@ export async function signOrderHash(web3: any, hashedOrder: UnsignedOrder): Prom
       s: `0x${signatureHex.slice(64, 128)}`
     }
   } catch (error) {
-    throw new ElementError(error)
+    throw  error
     // throw new ElementError({ code: '1000', message: 'You declined to authorize your auction' })
   }
   return signature

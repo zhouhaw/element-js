@@ -15,11 +15,14 @@ export interface CallBack {
 }
 export declare function Sleep(ms: number): Promise<unknown>;
 export declare class Orders extends Contracts {
-    fulfillOrder({ signedOrder, accountAddress, recipientAddress }: {
+    makeMatchingOrder({ signedOrder, accountAddress, recipientAddress }: {
         signedOrder: Order;
         accountAddress: string;
         recipientAddress?: string;
-    }, callBack?: CallBack): Promise<any>;
+    }): {
+        buy: Order;
+        sell: Order;
+    };
     orderMatch({ buy, sell, accountAddress, metadata }: {
         buy: Order;
         sell: Order;

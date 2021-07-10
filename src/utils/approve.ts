@@ -9,7 +9,7 @@ export async function registerProxy(proxyRegistryContract: any, account: string)
       from: account
     })
     if (!res.status) {
-      throw new ElementError({ code: '2001', message: 'registerProxy()' })
+      throw new ElementError({ code: '2001', context: { funcName: 'registerProxy()' } })
     }
   }
   return true
@@ -28,7 +28,7 @@ export async function approveTokenTransferProxy(
       from: account
     })
     if (!res.status) {
-      throw new ElementError({ code: '2001', message: 'tokenTransferProxyAddr approve()' })
+      throw new ElementError({ code: '2001',context: { funcName: 'tokenTransferProxyAddr approve()'} })
     }
   }
   return true
@@ -47,7 +47,7 @@ export async function approveERC1155TransferProxy(
     let res = await nftsContract.methods.setApprovalForAll(operator, true).send({ from: account })
 
     if (!res.status) {
-      throw new ElementError({ code: '2001', message: 'ERC1155 NFTs setApprovalForAll()' })
+      throw new ElementError({ code: '2001', context: { funcName: 'ERC1155 NFTs setApprovalForAll()'} })
     }
   }
   return true
@@ -65,9 +65,10 @@ export async function approveERC721TransferProxy(
   let isApprove = await nftsContract.methods.isApprovedForAll(account, operator).call()
   if (!isApprove) {
     //  function setApprovalForAll(address _operator, bool _approved) external;
-    let res = await nftsContract.methods.approve(operator, tokenID).send({ from: account })
+    // let res = await nftsContract.methods.approve(operator, tokenID).send({ from: account })
+    let res = await nftsContract.methods.setApprovalForAll(operator, true).send({ from: account })
     if (!res.status) {
-      throw new ElementError({ code: '2001', message: 'ERC721 NFTs approve()' })
+      throw new ElementError({ code: '2001', context: { funcName: 'ERC721 NFTs approve()'} })
     }
   }
   return true

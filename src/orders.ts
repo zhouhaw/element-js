@@ -1,6 +1,6 @@
 import { Asset, ECSignature, ElementSchemaName, Order, OrderJSON, OrderSide, Token, UnhashedOrder } from './types'
 import { NULL_ADDRESS, NULL_BLOCK_HASH } from './utils/constants'
-import { _ordersCanMatch, cancelledOrFinalized, checkMatchOrder, checkUnhashedOrder } from './utils/check'
+import { checkOrderCancelledOrFinalized, checkMatchOrder, checkUnhashedOrder } from './utils/check'
 import { ElementError } from './base/error'
 
 import {
@@ -38,8 +38,9 @@ export async function Sleep(ms: number) {
   })
 }
 
+// 根据 DB签名过的订单 make一个对手单
 export class Orders extends Contracts {
-  public async fulfillOrder(
+  public makeMatchingOrder(
     {
       signedOrder,
       accountAddress,
@@ -48,9 +49,8 @@ export class Orders extends Contracts {
       signedOrder: Order
       accountAddress: string
       recipientAddress?: string
-    },
-    callBack?: CallBack
-  ): Promise<any> {
+    }
+  ) {
     const networkName = this.networkName
     let assetRecipientAddress = recipientAddress
     if (!assetRecipientAddress || signedOrder.side == OrderSide.Buy) {
@@ -60,21 +60,53 @@ export class Orders extends Contracts {
 
     const matchingOrder = _makeMatchingOrder({
       networkName,
-      unSignedOrder:signedOrder,
+      unSignedOrder: signedOrder,
       accountAddress,
       assetRecipientAddress,
       feeRecipientAddress
     })
-
-
     // 伪造买单  对手单
     const unsignData = { ...matchingOrder, hash: signedOrder.hash }
-
-    const { buy, sell } = assignOrdersToSides(signedOrder, unsignData)
-
-    return this.orderMatch({ buy, sell, accountAddress }, callBack)
+    return assignOrdersToSides(signedOrder, unsignData)
   }
 
+  // public async fulfillOrder(
+  //   {
+  //     signedOrder,
+  //     accountAddress,
+  //     recipientAddress
+  //   }: {
+  //     signedOrder: Order
+  //     accountAddress: string
+  //     recipientAddress?: string
+  //   },
+  //   callBack?: CallBack
+  // ): Promise<any> {
+  //   // const networkName = this.networkName
+  //   // let assetRecipientAddress = recipientAddress
+  //   // if (!assetRecipientAddress || signedOrder.side == OrderSide.Buy) {
+  //   //   assetRecipientAddress = accountAddress
+  //   // }
+  //   // const feeRecipientAddress = this.feeRecipientAddress
+  //   //
+  //   // const matchingOrder = _makeMatchingOrder({
+  //   //   networkName,
+  //   //   unSignedOrder: signedOrder,
+  //   //   accountAddress,
+  //   //   assetRecipientAddress,
+  //   //   feeRecipientAddress
+  //   // })
+  //   //
+  //   //
+  //   //
+  //   // const unsignData = { ...matchingOrder, hash: signedOrder.hash }
+  //   // 伪造买单  对手单
+  //   const { buy, sell } = this.makeMatchingOrder({ signedOrder, accountAddress, recipientAddress })
+  //
+  //   return this.orderMatch({ buy, sell, accountAddress }, callBack)
+  // }
+
+  // 撮合订单
   async orderMatch(
     {
       buy,
@@ -105,15 +137,9 @@ export class Orders extends Contracts {
         gas: (80e4).toString()
       })
       .on('transactionHash', (txHash: string) => {
-        callBack?.next(OrderCheckStatus.OrderMatchTxHash, { txHash, buy, sell })
-        console.log('Send success tx hash：', txHash)
-      })
-      .on('confirmation', (confirmationNumber: number, receipt: string) => {
-        console.log(' confirmation num：', confirmationNumber)
-        console.log(' confirmation receipt：', receipt)
+        callBack?.next(OrderCheckStatus.OrderMatchTxHash, { txHash, buy, sell, accountAddress })
       })
       .on('receipt', (receipt: string) => {
-        console.log('receipt：', receipt)
         callBack?.next(OrderCheckStatus.EndOrderMatch, { receipt, buy, sell })
       })
       .on('error', console.error) // 如果是 out of gas 错误, 第二个参数为交易收据
@@ -133,17 +159,20 @@ export class Orders extends Contracts {
 
     await checkUnhashedOrder(this, unHashOrder)
 
-    // if (asset.data === '' && asset.schemaName === ElementSchemaName.ERC1155 && asset.tokenAddress === this.elementSharedAssetAddr) {
-    //   throw new ElementError({ code: '1000', message: 'URI is null' })
-    // }
-
-    callBack?.next(OrderCheckStatus.StartOrderHashSign, { unHashOrder })
-
-    let signSellOrder = await hashAndValidateOrder(this.web3, this.exchangeHelper, unHashOrder)
-
-    callBack?.next(OrderCheckStatus.EndOrderHashSign, { signSellOrder })
-
-    return signSellOrder
+    try {
+      callBack?.next(OrderCheckStatus.StartOrderHashSign, { unHashOrder })
+      const signSellOrder = await hashAndValidateOrder(this.web3, this.exchangeHelper, unHashOrder)
+      callBack?.next(OrderCheckStatus.EndOrderHashSign, { signSellOrder })
+      return signSellOrder
+    } catch (error) {
+      debugger
+      if (error.data) {
+        error.data.order = unHashOrder
+      } else {
+        error = { ...error, message: error.message, data: { order: unHashOrder } }
+      }
+      throw error
+    }
   }
 
   public async createBuyOrder(
@@ -252,13 +281,11 @@ export class Orders extends Contracts {
     { order, accountAddress }: { order: Order; accountAddress: string },
     callBack?: CallBack
   ): Promise<any> {
-    if (order.maker.toLowerCase() != accountAddress.toLowerCase()) {
+    if (order.maker.toLowerCase() !== accountAddress.toLowerCase()) {
       throw new ElementError({ code: '1000', message: 'CancelOrder order.maker not equle accountAddress' })
     }
 
-    await cancelledOrFinalized(this.exchange, order.hash).catch((err) => {
-      throw new ElementError({ code: '1000', message: 'CancelOrder is success!' })
-    })
+    await checkOrderCancelledOrFinalized(this, order)
 
     const orderParamArray = orderParamsEncode(order)
     const orderSigArray = orderSigEncode(order as ECSignature)

@@ -6,6 +6,9 @@ export interface CustomError {
   data?: any
   code: string
   message?: string
+  context?: {
+    [key: string]: any
+  }
 }
 
 export type ElementErrorCodes = Array<Readonly<CustomError>>
@@ -26,7 +29,7 @@ export const ErrorCodes: ElementErrorCodes = [
   },
   {
     code: '1000',
-    message: 'Custom information'
+    message: 'SDK error'
   },
   {
     code: '1001',
@@ -46,15 +49,7 @@ export const ErrorCodes: ElementErrorCodes = [
   },
   {
     code: '1103',
-    message: 'ElementSharedAsset balanceOf equal 0 !'
-  },
-  {
-    code: '1104',
-    message: 'ERC20 balance balance equal 0 !'
-  },
-  {
-    code: '1105',
-    message: 'ETH balance equel 0 '
+    message: '{{assetType}} balanceOf equal 0 !'
   },
   {
     code: '1106',
@@ -82,11 +77,11 @@ export const ErrorCodes: ElementErrorCodes = [
   },
   {
     code: '1206',
-    message: 'Sell Order cancelledOrFinalized false '
+    message: '{{assetType}} does not support '
   },
   {
     code: '1207',
-    message: 'Buy Order cancelledOrFinalized false '
+    message: '{{orderSide}} Order cancelledOrFinalized false '
   },
   {
     code: '1208',
@@ -110,7 +105,7 @@ export const ErrorCodes: ElementErrorCodes = [
   },
   {
     code: '2001',
-    message: 'rpc requset error '
+    message: '{{funcName}} RPC request error '
   },
   {
     code: '4001',
@@ -118,26 +113,25 @@ export const ErrorCodes: ElementErrorCodes = [
   }
 ]
 
+function render(template: string, context: Object) {
+  // @ts-ignore
+  return template.replace(/\{\{(.*?)\}\}/g, (match, key) => context[key.trim()])
+}
+
+// const template = "{{name   }}很厉name害，才{{age   }}岁";
+// const context = { name: "jawil", age: "15" };
+// console.log(render(template, context));
+
 export class ElementError extends Error {
   public code: string
   public data: any
+
   constructor(err: CustomError) {
     let _err: CustomError | undefined = ErrorCodes.find((val) => val.code == err.code)
 
     if (Number(_err?.code) > 1000) {
-      let _type = _err?.code.toString().charAt(0)
-      let message = err.message || ''
-      switch (_type) {
-        case '2':
-          super(message + '-' + _err?.message)
-          break
-        case '4':
-          super(message)
-          break
-        default:
-          super(_err?.message || 'sucess')
-          break
-      }
+      let message = err.context && _err?.message ? render(_err.message, err.context) : err.message
+      super(message)
     } else {
       if (_err?.code == '1000') {
         let message = err.message || ''
@@ -152,7 +146,7 @@ export class ElementError extends Error {
 }
 
 // try {
-//   throw new ElementError({ code: '1', data: 2 })
+//   throw new ElementError({ code: '4001' })
 // } catch (e) {
 //   console.log('ll', e)
 // }
