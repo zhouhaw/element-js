@@ -142,14 +142,14 @@ export async function checkUnhashedOrder(contract: any, order: UnhashedOrder) {
         erc20Contract.options.address = buy.paymentToken
         let { erc20Bal } = await getAccountBalance(contract.web3, buy.maker, erc20Contract)
         if (makeBigNumber(erc20Bal).lt(buy.basePrice))
-          throw new ElementError({ code: '1103', context: { assetType: "ERC20" } })
+          throw new ElementError({ code: '1103', context: { assetType: 'ERC20' } })
 
         await checkApproveTokenTransferProxy(contract.exchange, erc20Contract, buy.maker)
       } else {
         // if (accountAddress != buy.maker.toLowerCase()) throw new ElementError({ code: '1204' })
         let { ethBal } = await getAccountBalance(contract.web3, buy.maker)
         if (makeBigNumber(ethBal).lt(buy.basePrice))
-          throw new ElementError({ code: '1103', context: { assetType: "ETH" } })
+          throw new ElementError({ code: '1103', context: { assetType: 'ETH' } })
       }
     }
     checkDataToCall(contract.networkName, order)
@@ -157,9 +157,7 @@ export async function checkUnhashedOrder(contract: any, order: UnhashedOrder) {
     if (error.data) {
       error.data.order = order
     } else {
-      console.log(error)
       error = { ...error, message: error.message, data: { order } }
-      console.log('End', error)
     }
     throw error
   }

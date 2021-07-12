@@ -1,4 +1,4 @@
-import { Asset, ECSignature, ElementSchemaName, Order, OrderJSON, OrderSide, Token, UnhashedOrder } from './types'
+import { Asset, ECSignature, Order, OrderJSON, OrderSide, Token, UnhashedOrder } from './types'
 import { NULL_ADDRESS, NULL_BLOCK_HASH } from './utils/constants'
 import { checkOrderCancelledOrFinalized, checkMatchOrder, checkUnhashedOrder } from './utils/check'
 import { ElementError } from './base/error'
@@ -23,6 +23,16 @@ export enum OrderCheckStatus {
   EndOrderMatch = 'endOrderMatch',
   StartCancelOrder = 'startCancelOrder',
   EndCancelOrder = 'endCancelOrder',
+  RegisterTxHash = 'registerTxHash',
+  EndRegister = 'endRegister',
+  ApproveErc20TxHash = 'approveErc20TxHash',
+  EndApproveErc20 = 'endApproveErc20',
+  ApproveErc721TxHash = 'approveErc721TxHash',
+  EndApproveErc721 = 'endApproveErc721',
+  ApproveErc1155TxHash = 'approveErc1155TxHash',
+  EndApproveErc1155 = 'endApproveErc1155',
+  TransferErc1155 = 'transferErc1155',
+  TransferErc721 = 'transferErc721',
   End = 'End'
 }
 
@@ -69,42 +79,6 @@ export class Orders extends Contracts {
     const unsignData = { ...matchingOrder, hash: signedOrder.hash }
     return assignOrdersToSides(signedOrder, unsignData)
   }
-
-  // public async fulfillOrder(
-  //   {
-  //     signedOrder,
-  //     accountAddress,
-  //     recipientAddress
-  //   }: {
-  //     signedOrder: Order
-  //     accountAddress: string
-  //     recipientAddress?: string
-  //   },
-  //   callBack?: CallBack
-  // ): Promise<any> {
-  //   // const networkName = this.networkName
-  //   // let assetRecipientAddress = recipientAddress
-  //   // if (!assetRecipientAddress || signedOrder.side == OrderSide.Buy) {
-  //   //   assetRecipientAddress = accountAddress
-  //   // }
-  //   // const feeRecipientAddress = this.feeRecipientAddress
-  //   //
-  //   // const matchingOrder = _makeMatchingOrder({
-  //   //   networkName,
-  //   //   unSignedOrder: signedOrder,
-  //   //   accountAddress,
-  //   //   assetRecipientAddress,
-  //   //   feeRecipientAddress
-  //   // })
-  //   //
-  //   //
-  //   //
-  //   // const unsignData = { ...matchingOrder, hash: signedOrder.hash }
-  //   // 伪造买单  对手单
-  //   const { buy, sell } = this.makeMatchingOrder({ signedOrder, accountAddress, recipientAddress })
-  //
-  //   return this.orderMatch({ buy, sell, accountAddress }, callBack)
-  // }
 
   // 撮合订单
   async orderMatch(
@@ -165,7 +139,6 @@ export class Orders extends Contracts {
       callBack?.next(OrderCheckStatus.EndOrderHashSign, { signSellOrder })
       return signSellOrder
     } catch (error) {
-      debugger
       if (error.data) {
         error.data.order = unHashOrder
       } else {

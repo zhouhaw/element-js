@@ -32,7 +32,8 @@ export async function transferFromERC1155(
     .send({ from: from })
     .on('transactionHash', (txHash: string) => {
       // console.log('Send success tx hash：', txHash)
-      callBack?.next(OrderCheckStatus.OrderMatchTxHash, { txHash })
+      const assetAddress = erc1155Contract.options.address
+      callBack?.next(OrderCheckStatus.TransferErc1155, { txHash,from, to, tokenId, amount,assetAddress })
     })
     .catch((error: any) => {
       transferFailure(error)
@@ -59,7 +60,8 @@ export async function transferFromERC721(
     .safeTransferFrom(from, to, tokenId)
     .send({ from: from })
     .on('transactionHash', (txHash: string) => {
-      callBack?.next(OrderCheckStatus.OrderMatchTxHash, { txHash })
+      const assetAddress = erc721Contract.options.address
+      callBack?.next(OrderCheckStatus.TransferErc721, { txHash,from, to, tokenId,assetAddress })
       console.log('Send success tx hash：', txHash)
     })
 }

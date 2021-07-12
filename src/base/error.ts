@@ -130,7 +130,7 @@ export class ElementError extends Error {
     let _err: CustomError | undefined = ErrorCodes.find((val) => val.code == err.code)
 
     if (Number(_err?.code) > 1000) {
-      let message = err.context && _err?.message ? render(_err.message, err.context) : err.message
+      let message = err.context && _err?.message ? render(_err.message, err.context) : _err?.message
       super(message)
     } else {
       if (_err?.code == '1000') {
