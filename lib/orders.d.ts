@@ -8,6 +8,16 @@ export declare enum OrderCheckStatus {
     EndOrderMatch = "endOrderMatch",
     StartCancelOrder = "startCancelOrder",
     EndCancelOrder = "endCancelOrder",
+    RegisterTxHash = "registerTxHash",
+    EndRegister = "endRegister",
+    ApproveErc20TxHash = "approveErc20TxHash",
+    EndApproveErc20 = "endApproveErc20",
+    ApproveErc721TxHash = "approveErc721TxHash",
+    EndApproveErc721 = "endApproveErc721",
+    ApproveErc1155TxHash = "approveErc1155TxHash",
+    EndApproveErc1155 = "endApproveErc1155",
+    TransferErc1155 = "transferErc1155",
+    TransferErc721 = "transferErc721",
     End = "End"
 }
 export interface CallBack {
