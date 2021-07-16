@@ -1,11 +1,11 @@
 import { Base } from './base'
 
-import { NULL_ADDRESS } from '../src/utils/constants'
+import { NULL_ADDRESS } from '../../src/utils/constants'
 // import { checkOrder } from '../src/utils/check'
 
-import { orderFromJSON, transferFromERC1155 } from '../src/utils'
-import { Asset, ElementSchemaName, UnsignedOrder, checkOrder } from '../src'
-import { UnhashedOrder } from '../src/types'
+import { orderFromJSON, transferFromERC1155 } from '../../src/utils'
+import { Asset, ElementSchemaName, UnsignedOrder, checkOrder } from '../../src'
+import { UnhashedOrder } from '../../src/types'
 
 let erc721Order = {
   exchange: '0xb328610a54a438c80ee6103f8679d75d6c0e20ab',

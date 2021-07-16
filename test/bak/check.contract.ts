@@ -5,8 +5,8 @@ import {
   approveTokenTransferProxy,
   checkSenderOfAuthenticatedProxy,
   registerProxy
-} from '../src/utils/check'
-import { Network } from '../src'
+} from '../../src/utils/check'
+import { Network } from '../../src'
 ;(async () => {
   let base = new Base()
   await base.init()

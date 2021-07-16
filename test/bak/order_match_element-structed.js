@@ -16,7 +16,7 @@ const ExchangeHelper = require(abiPath + 'ExchangeHelper.json')
 const AuthenticatedProxy = require(abiPath + 'AuthenticatedProxy.json')
 const MakeTokenID = require(abiPath + 'MakeTokenID.json')
 
-const { getSchemaList, encodeSell, ElementSchemaName, Network, encodeBuy } = require('../lib/index')
+const { getSchemaList, encodeSell, ElementSchemaName, Network, encodeBuy } = require('../../lib')
 
 let provider = 'http://39.102.101.142:8545'
 // let provider = "http://127.0.0.1:8545"

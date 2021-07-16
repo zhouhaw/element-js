@@ -1,9 +1,9 @@
 import { Base } from './base'
 
-import { NULL_ADDRESS } from '../src/utils/constants'
-import { getAccountNFTsBalance } from '../src/utils/check'
+import { NULL_ADDRESS } from '../../src/utils/constants'
+import { getAccountNFTsBalance } from '../../src/utils/check'
 
-import { orderFromJSON, transferFromERC1155, getCurrentPrice } from '../src'
+import { orderFromJSON, transferFromERC1155, getCurrentPrice } from '../../src'
 import {
   Asset,
   ElementSchemaName,
@@ -12,12 +12,12 @@ import {
   OrderCheckStatus,
   getAccountBalance,
   chainValueConvert
-} from '../src'
+} from '../../src'
 ;(async () => {
   let base = new Base()
   await base.init()
-  let sellAccount = base.accounts[0].address
-  let buyAccount = base.accounts[1].address
+  let sellAccount = base.accounts[3].address
+  let buyAccount = base.accounts[2].address
   const order = base.orders
   let wETHAddr = NULL_ADDRESS
 
@@ -28,7 +28,7 @@ import {
   // payToken.options.address = wETHAddr
   // let bal = await getAccountBalance(order.web3, buyAccount, payToken)
 
-  let tokenId = '52110910509117159886520023034677676808462086871028572901793699248975699247105'
+  let tokenId = '33716853113536161489978336371468443552125006904605057389181032258813175007184'
   let assetAddr = order.elementSharedAssetAddr.toLowerCase() // ElementSharedAsset.networks[100].address
 
   let asset = {
@@ -40,8 +40,9 @@ import {
   const sellParm = {
     asset,
     accountAddress: sellAccount,
-    startAmount: 1000,
-    endAmount: 600,
+    startAmount: 5,
+    endAmount: 2,
+    quantity: 2,
     paymentTokenAddress: wETHAddr,
     listingTime: Number.parseInt(`${Date.now() / 1000 - 2 * 60}`, 10),
     expirationTime: Number.parseInt(`${Date.now() / 1000 + 2 * 60}`, 10)
@@ -52,19 +53,21 @@ import {
   let sell = orderFromJSON(sellOrderJson)
   const basePrice = await getCurrentPrice(base.contracts.exchangeHelper, sell)
 
-  console.log('getCurrentPrice', chainValueConvert(basePrice, 18))
+  let buyPrice = Number(chainValueConvert(basePrice, 18)) + 1
+  console.log(`getCurrentPrice ${basePrice} buyPrice: ${buyPrice}`)
 
   //------createBuyOrder
   const buyParm = {
     accountAddress: buyAccount,
-    paymentTokenAddress: wETHAddr,
+    paymentTokenAddress: sell.paymentToken,
     asset,
-    startAmount: chainValueConvert(basePrice, 18),
-    sellOrder: orderFromJSON(sellOrderJson)
+    startAmount: buyPrice,
+    quantity: sell.quantity,
+    sellOrder: sell
   }
 
   function next<OrderCheckStatus>(arg: OrderCheckStatus) {
-    console.log(arg)
+    console.log('next:', arg)
   }
 
   base.web3.eth.defaultAccount = buyAccount
@@ -75,11 +78,12 @@ import {
 
   const buyNFTs = order.erc1155.clone()
   buyNFTs.options.address = assetAddr
-  let assetBal = await getAccountNFTsBalance(buyNFTs, sellAccount, tokenId)
+  let sellAssetBal = await getAccountNFTsBalance(buyNFTs, sellAccount, tokenId)
+  let buyAssetBal = await getAccountNFTsBalance(buyNFTs, buyAccount, tokenId)
 
-  if (assetBal == 0) {
-    let tx = await transferFromERC1155(buyNFTs, buyAccount, sellAccount, tokenId, 1)
-    console.log('transferFromERC1155 to Sell', tx)
+  if (sellAssetBal == 0) {
+    // let tx = await transferFromERC1155(buyNFTs, buyAccount, sellAccount, tokenId, 1)
+    console.log('transferFromERC1155 to Sell', 'tx')
     return
   }
 
@@ -88,10 +92,11 @@ import {
   let buyBal = await getAccountBalance(order.web3, buyAccount)
   let sellBal = await getAccountBalance(order.web3, sellAccount)
   console.log(
-    `Match before Buyer ${chainValueConvert(buyBal.ethBal, 18).toString()} Seller ${chainValueConvert(
+    `Match before Buyer  ${chainValueConvert(buyBal.ethBal, 18).toString()} Seller ${chainValueConvert(
       sellBal.ethBal,
       18
-    )}, sell price ${sell.basePrice}`
+    )}, sell price ${chainValueConvert(sell.basePrice, 18)}
+    Seller bal ${sellAssetBal} , Buyer Bal ${buyAssetBal} `
   )
 
   base.web3.eth.defaultAccount = buyAccount
@@ -100,11 +105,14 @@ import {
   if (match) {
     buyBal = await getAccountBalance(order.web3, buyAccount)
     sellBal = await getAccountBalance(order.web3, sellAccount)
+    sellAssetBal = await getAccountNFTsBalance(buyNFTs, sellAccount, tokenId)
+    buyAssetBal = await getAccountNFTsBalance(buyNFTs, buyAccount, tokenId)
     console.log(
       `Match after Buyer ${chainValueConvert(buyBal.ethBal, 18).toString()} Seller ${chainValueConvert(
         sellBal.ethBal,
         18
-      )},buy price ${buy.basePrice}`
+      )},buy price ${chainValueConvert(buy.basePrice, 18)} 
+       Seller bal ${sellAssetBal} , Buyer Bal ${buyAssetBal} `
     )
   } else {
     console.log('matchOrder fail')

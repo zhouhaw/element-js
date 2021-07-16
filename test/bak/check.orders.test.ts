@@ -1,10 +1,10 @@
 import { Base } from './base'
 
-import { NULL_ADDRESS } from '../src/utils/constants'
-import { getAccountNFTsBalance } from '../src/utils/check'
+import { NULL_ADDRESS } from '../../src/utils/constants'
+import { getAccountNFTsBalance } from '../../src/utils/check'
 
-import { orderFromJSON, transferFromERC1155 } from '../src/utils'
-import { Asset, ElementSchemaName, Network, Orders, OrderCheckStatus, checkMatchOrder, checkOrder } from '../src'
+import { orderFromJSON, transferFromERC1155 } from '../../src/utils'
+import { Asset, ElementSchemaName, Network, Orders, OrderCheckStatus, checkMatchOrder, checkOrder } from '../../src'
 
 let orderHashError = {
   exchange: '0x5206e78b21ce315ce284fb24cf05e0585a93b1d9',

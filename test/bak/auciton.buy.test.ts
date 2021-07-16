@@ -1,10 +1,10 @@
 import { Base } from './base'
 
-import { NULL_ADDRESS } from '../src/utils/constants'
-import { getAccountNFTsBalance } from '../src/utils/check'
+import { NULL_ADDRESS } from '../../src/utils/constants'
+import { getAccountNFTsBalance } from '../../src/utils/check'
 
-import { orderFromJSON, transferFromERC1155 } from '../src/utils'
-import { Asset, ElementSchemaName, Network, Orders, OrderCheckStatus, getAccountBalance } from '../src'
+import { orderFromJSON, transferFromERC1155 } from '../../src/utils'
+import { Asset, ElementSchemaName, Network, Orders, OrderCheckStatus, getAccountBalance } from '../../src'
 ;(async () => {
   let base = new Base()
   await base.init()

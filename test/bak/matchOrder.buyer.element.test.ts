@@ -1,6 +1,6 @@
 import { Base } from './base'
 
-import { transferFromERC1155, orderFromJSON } from '../src/utils'
+import { transferFromERC1155, orderFromJSON } from '../../src/utils'
 
 import {
   Asset,
@@ -11,7 +11,7 @@ import {
   getTokenIDOwner,
   Orders,
   NULL_ADDRESS
-} from '../src'
+} from '../../src'
 ;(async () => {
   let base = new Base()
   await base.init()
@@ -36,15 +36,10 @@ import {
   let assetBal = await getAccountNFTsBalance(buyNFTs, sellAccount, tokenId)
 
   if (assetBal == 0) {
-    // let tx = await transferFromERC1155(buyNFTs, buyAccount, sellAccount, tokenId)
-    // console.log('transferFromERC1155 to Sell', tx)
-    let acc = sellAccount
-    sellAccount = buyAccount
-    buyAccount = acc
-    // return
+    let tx = await transferFromERC1155(buyNFTs, buyAccount, sellAccount, tokenId)
+    console.log('transferFromERC1155 to Sell', tx)
+    return
   }
-
-  console.log('sellAccount balance', assetBal)
 
   let asset = {
     tokenId,
@@ -56,8 +51,7 @@ import {
     accountAddress: sellAccount,
     paymentTokenAddress: wETHAddr,
     asset,
-    startAmount: 0.00012,
-    feeRecipient: NULL_ADDRESS
+    startAmount: 0.00012
   }
   base.web3.eth.defaultAccount = sellAccount
   let sell = await order.createSellOrder(sellParm)
@@ -66,24 +60,32 @@ import {
     accountAddress: buyAccount,
     paymentTokenAddress: wETHAddr,
     asset,
-    startAmount: 0.00012
+    startAmount: 0.00012,
+    feeRecipient: NULL_ADDRESS
   }
 
   base.web3.eth.defaultAccount = buyAccount
   let buy = await order.createBuyOrder(buyParm)
 
-  console.log('buy------\n', buy)
+  let owner = await getTokenIDOwner(base.contracts.elementSharedAsset, sell.metadata.asset.id)
+  let sellIsOwner = sell.maker.toLowerCase() == owner.toLowerCase()
+  if (!sellIsOwner) {
+    // return false
+  }
 
-  console.log('sell----------\n', sell)
+  // sell accept
+  // sell = orderFromJSON(sell)
+  // buy = orderFromJSON(buy)
+  // base.web3.eth.defaultAccount = sellAccount
+  // let match = await order.matchOrder({ buy, sell, accountAddress: sellAccount })
+
+  console.log('buy', buy, 'sell', sell)
   // // buy 一口价
   buy = orderFromJSON(buy)
   sell = orderFromJSON(sell)
 
-  // sell accept
-  base.web3.eth.defaultAccount = sellAccount
-
-  console.log('seller accept balance', sellAccount)
-  let match = await order.matchOrder({ buy, sell, accountAddress: sellAccount })
+  base.web3.eth.defaultAccount = buyAccount
+  let match = await order.matchOrder({ buy, sell, accountAddress: buyAccount })
 
   let newAssetBal = await getAccountNFTsBalance(buyNFTs, sellAccount, tokenId)
 

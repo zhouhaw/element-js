@@ -1,6 +1,6 @@
 {
   "name": "element-js",
-  "version": "2.3.3",
+  "version": "2.3.5",
   "description": "Javascript SDK for the Element ",
   "main": "lib/index.js",
   "author": "Project Element Developers",
@@ -10,10 +10,12 @@
   },
   "dependencies": {
     "bignumber.js": "^9.0.1",
+    "eth-rpc-errors": "^4.0.3",
     "ethereumjs-abi": "git+https://github.com/definancer/ethereumjs-abi.git",
     "isomorphic-unfetch": "^3.1.0"
   },
   "devDependencies": {
+    "https-proxy-agent": "^5.0.0",
     "@types/node": "^12.12.6",
     "@types/node-fetch": "^2.5.10",
     "ethers": "^5.2.0",

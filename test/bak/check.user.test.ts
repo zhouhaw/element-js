@@ -10,7 +10,7 @@ import {
   checkRegisterProxy,
   checkApproveTokenTransferProxy,
   checkApproveERC1155TransferProxy
-} from '../src/utils/check'
+} from '../../src/utils/check'
 ;(async () => {
   let base = new Base()
 

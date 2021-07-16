@@ -1,10 +1,10 @@
 import { Base } from './base'
 
-import { transferFromERC1155, orderFromJSON } from '../src/utils'
+import { transferFromERC1155, orderFromJSON } from '../../src/utils'
 
-import { getAccountBalance, getAccountNFTsBalance } from '../src/utils/check'
+import { getAccountBalance, getAccountNFTsBalance } from '../../src/utils/check'
 
-import { Asset, ElementSchemaName, Network, Orders } from '../src'
+import { Asset, ElementSchemaName, Network, Orders } from '../../src'
 ;(async () => {
   try {
     let base = new Base()

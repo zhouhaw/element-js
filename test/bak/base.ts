@@ -1,6 +1,6 @@
 import Web3 from 'web3'
-import { Contracts, Orders } from '../src/index'
-import { Network } from '../src'
+import { Contracts, Orders } from '../../src'
+import { Network } from '../../src'
 
 export class Base {
   public web3: any

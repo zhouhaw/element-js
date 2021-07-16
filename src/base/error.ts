@@ -29,7 +29,7 @@ export const ErrorCodes: ElementErrorCodes = [
   },
   {
     code: '1000',
-    message: 'SDK error'
+    message: 'SDK'
   },
   {
     code: '1001',
@@ -76,24 +76,16 @@ export const ErrorCodes: ElementErrorCodes = [
     message: 'Order parameter false '
   },
   {
-    code: '1206',
+    code: '1206', // Erc721..
     message: '{{assetType}} does not support '
   },
   {
-    code: '1207',
+    code: '1207', // buy sell
     message: '{{orderSide}} Order cancelledOrFinalized false '
   },
   {
-    code: '1208',
-    message: 'CheckDataToCall.dataToCall error '
-  },
-  {
-    code: '1209',
-    message: 'CheckDataToCall.target error '
-  },
-  {
-    code: '1210',
-    message: 'CheckDataToCall.replacementPattern error '
+    code: '1208', // dataToCall,target,replacementPattern
+    message: 'CheckDataToCall {{part}} error '
   },
   {
     code: '1211', // ElementShareAsset order uri 和 order version 中返回的 uri 不一致
@@ -101,11 +93,19 @@ export const ErrorCodes: ElementErrorCodes = [
   },
   {
     code: '1212', // ElementShareAsset  tokenId 的暂时无法交易
-    message: 'ElementShareAsset TokenID cannot be traded for the time being '
+    message: 'The ElementShareAsset TokenID cannot be traded for the time being '
   },
   {
     code: '2001',
-    message: '{{funcName}} RPC request error '
+    message: '{{funcName}} RPC send request error {{stack}}'
+  },
+  {
+    code: '2002',
+    message: '{{funcName}} RPC call request error {{stack}}'
+  },
+  {
+    code: '2003',
+    message: '{{funcName}} RPC web3 request error {{stack}}'
   },
   {
     code: '4001',

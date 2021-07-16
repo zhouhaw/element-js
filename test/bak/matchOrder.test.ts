@@ -1,5 +1,5 @@
 import { Base } from './base'
-import { Network } from '../src/types'
+import { Network } from '../../src/types'
 
 import {
   transferFromERC1155,
@@ -13,7 +13,7 @@ import {
   getSchemaList,
   encodeSell,
   encodeBuy
-} from '../src/utils'
+} from '../../src/utils'
 ;(async () => {
   let base = new Base()
   await base.init()

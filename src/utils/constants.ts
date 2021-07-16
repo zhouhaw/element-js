@@ -25,6 +25,8 @@ export const INVERSE_BASIS_POINT = 10000 //100%
 //static call
 export const STATIC_EXTRADATA = '0x0c225aad' //succeedIfTxOriginMatchesHardcodedAddress
 
+//
+export const CHECK_ETH_BALANCE = false
 
 export enum PRIVATE_CONTRACTS_ADDRESSES {
   ElementixProxyRegistry = '0x023CA02bFB85A3901316EdFE6BBA92B8cb54C9E3',

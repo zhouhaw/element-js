@@ -1,8 +1,8 @@
-import { BigNumber } from './constants'
-import { Network, schemas } from '../index'
+import { BigNumber, CHECK_ETH_BALANCE } from './constants'
+import { ElementError, Network, schemas } from '../index'
 import { tokens } from '../schema/tokens'
 import { Schema } from '../schema/types'
-import { ECSignature, ElementOrder, UnhashedOrder, UnsignedOrder } from '../types'
+import { ECSignature, UnhashedOrder } from '../types'
 
 export function toBaseUnitAmount(amount: BigNumber, decimals: number): BigNumber {
   const unit = new BigNumber(10).pow(decimals)
@@ -20,10 +20,22 @@ export function makeBigNumber(arg: number | string | BigNumber): BigNumber {
 }
 
 export async function getAccountBalance(web3: any, account: string, erc20?: any): Promise<any> {
-  let ethBal: number = await web3.eth.getBalance(account)
+  let ethBal: number = await web3.eth.getBalance(account, 'latest').catch((error: any) => {
+    const stack = error.message || JSON.stringify(error)
+    throw new ElementError({
+      code: '2003',
+      context: { funcName: 'getAccountBalance.getBalance ', stack }
+    })
+  })
   let erc20Bal: number = 0
   if (erc20) {
-    erc20Bal = await erc20.methods.balanceOf(account).call()
+    erc20Bal = await erc20.methods.balanceOf(account).call().catch((error: any) => {
+      const stack = error.message || JSON.stringify(error)
+      throw new ElementError({
+        code: '2002',
+        context: { funcName: 'getAccountBalance.balanceOf ', stack }
+      })
+    })
   }
   return { ethBal: Number(ethBal), erc20Bal: Number(erc20Bal) }
 }

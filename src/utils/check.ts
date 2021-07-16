@@ -111,7 +111,9 @@ export async function checkApproveERC721TransferProxy(
 }
 
 export async function checkUnhashedOrder(contract: any, order: UnhashedOrder) {
-  const equalPrice: boolean = order.basePrice.gt(0)
+  const equalPrice: boolean = BigNumber.isBigNumber(order.basePrice)
+    ? order.basePrice.gt(0)
+    : new BigNumber(order.basePrice).gt(0)
   if (!equalPrice) throw new ElementError({ code: '1201', data: { order } })
 
   try {
@@ -146,7 +148,6 @@ export async function checkUnhashedOrder(contract: any, order: UnhashedOrder) {
 
         await checkApproveTokenTransferProxy(contract.exchange, erc20Contract, buy.maker)
       } else {
-        // if (accountAddress != buy.maker.toLowerCase()) throw new ElementError({ code: '1204' })
         let { ethBal } = await getAccountBalance(contract.web3, buy.maker)
         if (makeBigNumber(ethBal).lt(buy.basePrice))
           throw new ElementError({ code: '1103', context: { assetType: 'ETH' } })
@@ -226,16 +227,16 @@ export function checkDataToCall(netWorkName: Network, order: UnhashedOrder) {
 
   if (encodeData.dataToCall != order.dataToCall) {
     log('checkDataToCall.dataToCall error')
-    throw new ElementError({ code: '1208' })
+    throw new ElementError({ code: '1208', context: { part: 'dataToCall' } })
   }
 
   if (encodeData.target != order.target) {
     log('checkDataToCall.target error')
-    throw new ElementError({ code: '1209' })
+    throw new ElementError({ code: '1208', context: { part: 'target' } })
   }
 
   if (encodeData.replacementPattern != order.replacementPattern) {
-    throw new ElementError({ code: '1210' })
+    throw new ElementError({ code: '1208', context: { part: 'replacementPattern' } })
   }
 }
 
