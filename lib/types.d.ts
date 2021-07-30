@@ -17,7 +17,8 @@ export declare enum AbiType {
 export declare enum ElementSchemaName {
     ERC20 = "ERC20",
     ERC721 = "ERC721",
-    ERC1155 = "ERC1155"
+    ERC1155 = "ERC1155",
+    CryptoKitties = "CryptoKitties"
 }
 interface ElementNFTAsset {
     id: string;

@@ -3,7 +3,7 @@ import { ElementError, Network, schemas } from '../index'
 import { tokens } from '../schema/tokens'
 import { Schema } from '../schema/types'
 import { ECSignature, UnhashedOrder, UnsignedOrder } from '../types'
-import { signOrderHash } from '@utils/orders/src/utils/makeOrder'
+// import { signOrderHash } from './makeOrder'
 
 export function toBaseUnitAmount(amount: BigNumber, decimals: number): BigNumber {
   const unit = new BigNumber(10).pow(decimals)
@@ -23,7 +23,7 @@ export function makeBigNumber(arg: number | string | BigNumber): BigNumber {
 export async function web3Sign(web3: any, msg: string, account: string): Promise<string> {
   try {
     let signatureRes
-    console.log('web3Sign',msg)
+    console.log('web3Sign', msg)
     if (web3.eth.defaultAccount.toLowerCase() == account.toLowerCase()) {
       if (typeof window !== 'undefined') {
         signatureRes = await web3.eth.personal.sign(msg, account)
@@ -38,7 +38,7 @@ export async function web3Sign(web3: any, msg: string, account: string): Promise
     }
     return signatureRes
   } catch (error) {
-    throw  error
+    throw error
   }
 }
 
@@ -52,17 +52,19 @@ export async function getAccountBalance(web3: any, account: string, erc20?: any)
   })
   let erc20Bal: number = 0
   if (erc20) {
-    erc20Bal = await erc20.methods.balanceOf(account).call().catch((error: any) => {
-      const stack = error.message || JSON.stringify(error)
-      throw new ElementError({
-        code: '2002',
-        context: { funcName: 'getAccountBalance.balanceOf ', stack }
+    erc20Bal = await erc20.methods
+      .balanceOf(account)
+      .call()
+      .catch((error: any) => {
+        const stack = error.message || JSON.stringify(error)
+        throw new ElementError({
+          code: '2002',
+          context: { funcName: 'getAccountBalance.balanceOf ', stack }
+        })
       })
-    })
   }
   return { ethBal: Number(ethBal), erc20Bal: Number(erc20Bal) }
 }
-
 
 export async function getTokenIDOwner(elementAssetContract: any, tokenId: any): Promise<string> {
   // token id 的 creator
@@ -173,18 +175,19 @@ export function orderSigEncode(order: ECSignature) {
   return orderSigValueArray
 }
 
-export function getTokenList(network: Network, { symbol, address }: { symbol?: string, address?: string }): Array<any> {
+export function getTokenList(network: Network, { symbol, address }: { symbol?: string; address?: string }): Array<any> {
   const payTokens = tokens[network]
   if (symbol) {
-    return [payTokens.canonicalWrappedEther, ...payTokens.otherTokens]
-      .filter((x: any) => x.symbol.toLowerCase() === symbol.toLowerCase())
+    return [payTokens.canonicalWrappedEther, ...payTokens.otherTokens].filter(
+      (x: any) => x.symbol.toLowerCase() === symbol.toLowerCase()
+    )
   }
 
   if (address) {
-    return [payTokens.canonicalWrappedEther, ...payTokens.otherTokens]
-      .filter((x: any) => x.address.toLowerCase() === address.toLowerCase())
+    return [payTokens.canonicalWrappedEther, ...payTokens.otherTokens].filter(
+      (x: any) => x.address.toLowerCase() === address.toLowerCase()
+    )
   }
 
   return [payTokens.canonicalWrappedEther, ...payTokens.otherTokens]
-
 }

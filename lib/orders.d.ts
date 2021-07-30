@@ -42,13 +42,13 @@ export declare class Orders extends Contracts {
     creatSignedOrder({ unHashOrder }: {
         unHashOrder: UnhashedOrder;
     }, callBack?: CallBack): Promise<OrderJSON>;
-    createBuyOrder({ asset, accountAddress, startAmount, quantity, expirationTime, paymentTokenObj, sellOrder, referrerAddress }: {
+    createBuyOrder({ asset, accountAddress, startAmount, paymentTokenObj, quantity, expirationTime, sellOrder, referrerAddress }: {
         asset: Asset;
         accountAddress: string;
         startAmount: number;
+        paymentTokenObj: Token;
         quantity?: number;
         expirationTime?: number;
-        paymentTokenObj: Token;
         sellOrder?: Order;
         referrerAddress?: string;
     }, callBack?: CallBack): Promise<OrderJSON>;

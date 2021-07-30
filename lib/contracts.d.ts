@@ -16,7 +16,8 @@ export declare class Contracts {
     exchangeHelper: any;
     elementSharedAsset: any;
     elementSharedAssetV1: any;
-    WETH: any;
+    WETHContract: any;
+    WETHToekn: Token;
     paymentTokenList: Array<Token>;
     ETH: Token;
     constructor(web3: any, apiConfig?: ElementAPIConfig);

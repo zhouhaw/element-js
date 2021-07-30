@@ -12,6 +12,7 @@ export declare function validateOrder(exchangeHelper: any, order: Order): Promis
 export declare function validateAndFormatWalletAddress(web3: any, address: string): string;
 export declare function _ordersCanMatch(buy: Order, sell: Order): boolean;
 export declare function ordersCanMatch(exchangeHelper: any, buy: Order, sell: Order): Promise<any>;
+export declare function getOrderCancelledOrFinalized(contract: any, order: Order): Promise<boolean>;
 export declare function checkOrderCancelledOrFinalized(contract: any, order: Order): Promise<void>;
 export declare function checkAssetMint(contract: any, metadata: ExchangeMetadata): Promise<boolean>;
 export declare function checkAssetApprove(contract: any, order: UnhashedOrder): Promise<any>;
