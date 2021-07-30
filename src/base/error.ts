@@ -56,6 +56,10 @@ export const ErrorCodes: ElementErrorCodes = [
     message: 'ERC721TransferProxy NFTs getApproved is false '
   },
   {
+    code: '1107',
+    message: 'Trading for this asset {{schemaName}} is not yet supported. Please contact us or check back later!'
+  },
+  {
     code: '1201',
     message: 'Order: buy.basePrice to be greater than sell.basePrice!'
   },
@@ -77,7 +81,7 @@ export const ErrorCodes: ElementErrorCodes = [
   },
   {
     code: '1206', // Erc721..
-    message: '{{assetType}} does not support '
+    message: '{{assetType}} asset does not support '
   },
   {
     code: '1207', // buy sell

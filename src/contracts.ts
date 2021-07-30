@@ -13,7 +13,7 @@ const ElementSharedAsset = require(`../abi/ElementSharedAsset.json`)
 const ElementixProxyRegistry = require(`../abi/ElementixProxyRegistry.json`)
 const ElementixExchange = require(`../abi/ElementixExchange.json`)
 const ExchangeHelper = require(`../abi/ExchangeHelper.json`)
-const WETH = require(`../abi/WETH9Mocked.json`)
+const WETHAbi = require(`../abi/WETH9Mocked.json`)
 import {
   CONTRACTS_ADDRESSES,
   NULL_ADDRESS
@@ -44,7 +44,9 @@ export class Contracts {
   public exchangeHelper: any
   public elementSharedAsset: any
   public elementSharedAssetV1: any
-  public WETH: any
+  public WETHContract: any
+
+  public WETHToekn: Token
 
   public paymentTokenList: Array<Token>
   public ETH: Token = {
@@ -74,6 +76,12 @@ export class Contracts {
 
     this.contractsAddr = contracts
     this.WETHAddr = wethAddr
+    this.WETHToekn ={
+      name: 'WETH9',
+      symbol: 'WETH',
+      address: wethAddr,
+      decimals: 18
+    }
     this.elementSharedAssetAddr = elementSharedAssetAddr
     this.elementixExchangeKeeperAddr = elementixExchangeKeeperAddr
     this.feeRecipientAddress = feeRecipientAddress
@@ -87,7 +95,7 @@ export class Contracts {
       this.exchange = new web3.eth.Contract(ElementixExchange.abi, exchangeAddr, options)
 
       // asset
-      this.WETH = new web3.eth.Contract(WETH.abi, wethAddr, options)
+      this.WETHContract = new web3.eth.Contract(WETHAbi.abi, wethAddr, options)
       this.elementSharedAsset = new web3.eth.Contract(ElementSharedAsset.abi, elementSharedAssetAddr, options)
       // abi
       this.erc20 = new web3.eth.Contract(ERC20.abi, options)

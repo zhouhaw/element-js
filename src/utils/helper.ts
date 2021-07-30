@@ -2,7 +2,8 @@ import { BigNumber, CHECK_ETH_BALANCE } from './constants'
 import { ElementError, Network, schemas } from '../index'
 import { tokens } from '../schema/tokens'
 import { Schema } from '../schema/types'
-import { ECSignature, UnhashedOrder } from '../types'
+import { ECSignature, UnhashedOrder, UnsignedOrder } from '../types'
+import { signOrderHash } from '@utils/orders/src/utils/makeOrder'
 
 export function toBaseUnitAmount(amount: BigNumber, decimals: number): BigNumber {
   const unit = new BigNumber(10).pow(decimals)
@@ -17,6 +18,28 @@ export function makeBigNumber(arg: number | string | BigNumber): BigNumber {
   // fix "new BigNumber() number type has more than 15 significant digits"
   arg = arg.toString()
   return new BigNumber(arg)
+}
+
+export async function web3Sign(web3: any, msg: string, account: string): Promise<string> {
+  try {
+    let signatureRes
+    console.log('web3Sign',msg)
+    if (web3.eth.defaultAccount.toLowerCase() == account.toLowerCase()) {
+      if (typeof window !== 'undefined') {
+        signatureRes = await web3.eth.personal.sign(msg, account)
+      } else {
+        signatureRes = await web3.eth.sign(msg, account)
+      }
+    } else {
+      throw new ElementError({
+        code: '1000',
+        message: 'web3.eth.defaultAccount and maker not equal'
+      })
+    }
+    return signatureRes
+  } catch (error) {
+    throw  error
+  }
 }
 
 export async function getAccountBalance(web3: any, account: string, erc20?: any): Promise<any> {
@@ -51,9 +74,10 @@ export function getSchemaList(network: Network, schemaName?: string): Array<Sche
   // @ts-ignore
   let schemaList = schemas[network]
   if (!schemaList) {
-    throw new Error(
-      `Trading for this Network (${network}) is not yet supported. Please contact us or check back later!`
-    )
+    // throw new Error(
+    //   `Trading for this Network (${network}) is not yet supported. Please contact us or check back later!`
+    // )
+    new ElementError({ code: '1206', context: { assetType: schemaName } })
   }
   if (schemaName) {
     schemaList = schemaList.filter((val: Schema<any>) => val.name === schemaName)

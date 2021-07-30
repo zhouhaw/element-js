@@ -329,12 +329,15 @@ export async function ordersCanMatch(exchangeHelper: any, buy: Order, sell: Orde
   return true
 }
 
-// 是否取消或者完成
-export async function checkOrderCancelledOrFinalized(contract: any, order: Order) {
+export async function getOrderCancelledOrFinalized(contract: any, order: Order): Promise<boolean> {
   const orderParamValueArray = orderParamsEncode(order as UnhashedOrder)
   const hash = await contract.exchangeHelper.methods.hashToSign(orderParamValueArray).call()
-  const iscancelledOrFinalized = await contract.exchange.methods.cancelledOrFinalized(hash).call()
+  return contract.exchange.methods.cancelledOrFinalized(hash).call()
+}
 
+// 是否取消或者完成
+export async function checkOrderCancelledOrFinalized(contract: any, order: Order) {
+  const iscancelledOrFinalized = await getOrderCancelledOrFinalized(contract, order)
   if (iscancelledOrFinalized) {
     if (order.side === OrderSide.Sell) {
       throw new ElementError({ code: '1207', context: { orderSide: 'Sell' } })

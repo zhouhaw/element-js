@@ -153,18 +153,18 @@ export class Orders extends Contracts {
       asset,
       accountAddress,
       startAmount,
+      paymentTokenObj,
       quantity = 1,
       expirationTime = 0,
-      paymentTokenObj,
       sellOrder,
       referrerAddress
     }: {
       asset: Asset
       accountAddress: string
       startAmount: number
+      paymentTokenObj: Token
       quantity?: number
       expirationTime?: number
-      paymentTokenObj: Token
       sellOrder?: Order
       referrerAddress?: string
     },
@@ -258,7 +258,7 @@ export class Orders extends Contracts {
       throw new ElementError({ code: '1000', message: 'CancelOrder order.maker not equle accountAddress' })
     }
 
-    await checkOrderCancelledOrFinalized(this, order)
+    // await checkOrderCancelledOrFinalized(this, order)
 
     const orderParamArray = orderParamsEncode(order)
     const orderSigArray = orderSigEncode(order as ECSignature)

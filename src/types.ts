@@ -22,7 +22,8 @@ export enum AbiType {
 export enum ElementSchemaName {
   ERC20 = 'ERC20',
   ERC721 = 'ERC721',
-  ERC1155 = 'ERC1155'
+  ERC1155 = 'ERC1155',
+  CryptoKitties="CryptoKitties"
   // LegacyEnjin = 'Enjin',
   // ENSShortNameAuction = 'ENSShortNameAuction',
   // ElementShardType = 'ElementShardType',

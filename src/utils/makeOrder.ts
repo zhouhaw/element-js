@@ -26,15 +26,14 @@ import {
   STATIC_EXTRADATA
 } from './constants'
 import { validateOrder } from './check'
-import { getSchemaList, hashOrder, makeBigNumber, orderParamsEncode, toBaseUnitAmount } from './helper'
+import { getSchemaList, hashOrder, makeBigNumber, orderParamsEncode, toBaseUnitAmount, web3Sign } from './helper'
 
 export function getSchema(network: Network, schemaName: ElementSchemaName): Schema<any> {
   const schemaName_ = schemaName
 
   const schemaInfo = getSchemaList(network, schemaName_) // scahmaList.find((val: Schema<any>) => val.name === schemaName_)
   if (schemaInfo.length == 0) {
-    let msg = `Trading for this asset (${schemaName_}) is not yet supported. Please contact us or check back later!`
-    throw new ElementError({ code: '1000', message: msg })
+    throw new ElementError({ code: '1107', context: { 'schemaName': schemaName_ } })
   }
   return schemaInfo[0]
 }
@@ -426,17 +425,9 @@ export async function hashAndValidateOrder(web3: any, exchangeHelper: any, order
     ...order,
     hash: orderHash
   }
-  let signature: ECSignature
-  if (web3.eth.defaultAccount.toLowerCase() == hashedOrder.maker.toLowerCase()) {
-    signature = await signOrderHash(web3, hashedOrder).catch((error) => {
-      throw error
-    })
-  } else {
-    throw new ElementError({
-      code: '1000',
-      message: 'web3.eth.defaultAccount and maker not equal'
-    })
-  }
+  const signature: ECSignature = await signOrderHash(web3, hashedOrder).catch((error) => {
+    throw error
+  })
 
   let orderWithSignature: Order = {
     ...hashedOrder,
@@ -449,13 +440,7 @@ export async function hashAndValidateOrder(web3: any, exchangeHelper: any, order
 export async function signOrderHash(web3: any, hashedOrder: UnsignedOrder): Promise<ECSignature> {
   let signature: ECSignature
   try {
-    let signatureRes
-    if (typeof window !== 'undefined') {
-      signatureRes = await web3.eth.personal.sign(hashedOrder.hash, hashedOrder.maker)
-    } else {
-      signatureRes = await web3.eth.sign(hashedOrder.hash, hashedOrder.maker)
-    }
-
+    const signatureRes = await web3Sign(web3, hashedOrder.hash, hashedOrder.maker)
     const signatureHex = signatureRes.slice(2)
     signature = {
       v: Number.parseInt(signatureHex.slice(128, 130), 16), // The signature is now comprised of r, s, and v.

@@ -7,6 +7,7 @@ export {
   checkOrder,
   checkMatchOrder,
   checkRegisterProxy,
+  getOrderCancelledOrFinalized,
   checkApproveTokenTransferProxy,
   checkApproveERC1155TransferProxy,
   checkSenderOfAuthenticatedProxy
@@ -31,6 +32,7 @@ export {
   CONTRACTS_ADDRESSES
 } from './utils/constants'
 export { orderFromJSON } from './utils'
+export { web3Sign } from './utils/helper'
 export { transferFromERC1155, transferFromERC721, transferFromERC20, transferFromWETH } from './utils/transfer'
 export {
   getTokenList,
