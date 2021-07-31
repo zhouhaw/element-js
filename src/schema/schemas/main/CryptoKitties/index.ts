@@ -60,12 +60,13 @@ export const CryptoKittiesSchema: Schema<CryptoKittiesType> = {
   functions: {
     transfer: (asset) => ({
       type: AbiType.Function,
-      name: 'transfer',
+      name: 'transferFrom',
       payable: false,
       constant: false,
       stateMutability: StateMutability.Nonpayable,
       target: assetAddress,
       inputs: [
+        { kind: FunctionInputKind.Owner, name: '_from', type: 'address' },
         { kind: FunctionInputKind.Replaceable, name: '_to', type: 'address' },
         { kind: FunctionInputKind.Asset, name: '_tokenId', type: 'uint256', value: asset.id }
       ],
