@@ -24,13 +24,12 @@ export function makeBigNumber(arg: number | string | BigNumber): BigNumber {
 export async function web3Sign(web3: any, msg: string, account: string): Promise<string> {
   try {
     let signatureRes
-    console.log('web3Sign', msg)
+    // console.log('web3Sign', msg)
+    if (typeof window === 'undefined') {
+      return web3.eth.sign(msg, account)
+    }
     if (web3.eth.defaultAccount.toLowerCase() == account.toLowerCase()) {
-      if (typeof window !== 'undefined') {
-        signatureRes = await web3.eth.personal.sign(msg, account)
-      } else {
-        signatureRes = await web3.eth.sign(msg, account)
-      }
+      signatureRes = await web3.eth.personal.sign(msg, account)
     } else {
       throw new ElementError({
         code: '1000',
