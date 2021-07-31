@@ -2,30 +2,20 @@ import fetch from 'isomorphic-unfetch'
 
 import { EventInputKind, FunctionInputKind, FunctionOutputKind, Schema, StateMutability, AbiType } from '../../../types'
 
-export interface CryptoKittiesType {
-  id: string
-  address: string
-}
-const assetAddress = '0x1530272ce6e4589f5c09151a7c9a118a58d70e09'
+export type CryptoKittiesType = string
+
 export const CryptoKittiesSchema: Schema<CryptoKittiesType> = {
-  address: assetAddress,
   version: 1,
   deploymentBlock: 4605167,
   name: 'CryptoKitties',
   description: 'The virtual kitties that started the craze.',
   thumbnail: 'https://www.cryptokitties.co/images/kitty-eth.svg',
   website: 'https://cryptokitties.co',
-  fields: [
-    { name: 'ID', type: 'uint256', description: 'CryptoKitty number.' },
-    { name: 'Address', type: 'address', description: 'Asset Contract Address' }
-  ],
-  assetFromFields: (fields: any) => ({ id: fields.ID, address: fields.Address }),
-  assetToFields: (asset) => ({
-    ID: asset.id,
-    Address: assetAddress
-  }),
+  fields: [{ name: 'ID', type: 'uint256', description: 'CryptoKitty number.' }],
+  assetFromFields: (fields: any) => fields.ID,
+  assetToFields: (asset) => ({ ID: asset }),
   formatter: async (asset) => {
-    const response: any = await fetch(`https://api.cryptokitties.co/kitties/${asset.id}`).catch((err) => {
+    const response: any = await fetch(`https://api.cryptokitties.co/kitties/${asset}`).catch((err) => {
       if (err.response && (err.response.status === 404 || err.response.status === 400)) {
         return null
       } else {
@@ -35,9 +25,9 @@ export const CryptoKittiesSchema: Schema<CryptoKittiesType> = {
     if (response === null) {
       return {
         thumbnail: 'https://www.cryptokitties.co/images/kitty-eth.svg',
-        title: 'CryptoKitty #' + asset.id,
+        title: 'CryptoKitty #' + asset,
         description: '',
-        url: 'https://www.cryptokitties.co/kitty/' + asset.id,
+        url: 'https://www.cryptokitties.co/kitty/' + asset,
         properties: []
       }
     } else {
@@ -45,9 +35,9 @@ export const CryptoKittiesSchema: Schema<CryptoKittiesType> = {
       const attrs = data.enhanced_cattributes || data.cattributes || []
       return {
         thumbnail: data.image_url_cdn,
-        title: 'CryptoKitty #' + asset.id,
+        title: 'CryptoKitty #' + asset,
         description: data.bio,
-        url: 'https://www.cryptokitties.co/kitty/' + asset.id,
+        url: 'https://www.cryptokitties.co/kitty/' + asset,
         properties: attrs.map((c: any) => ({
           key: c.type,
           kind: 'string',
@@ -63,10 +53,10 @@ export const CryptoKittiesSchema: Schema<CryptoKittiesType> = {
       payable: false,
       constant: false,
       stateMutability: StateMutability.Nonpayable,
-      target: assetAddress,
+      target: '0x06012c8cf97bead5deae237070f9587f8e7a266d',
       inputs: [
         { kind: FunctionInputKind.Replaceable, name: '_to', type: 'address' },
-        { kind: FunctionInputKind.Asset, name: '_tokenId', type: 'uint256', value: asset.id }
+        { kind: FunctionInputKind.Asset, name: '_tokenId', type: 'uint256', value: asset }
       ],
       outputs: []
     }),
@@ -76,32 +66,9 @@ export const CryptoKittiesSchema: Schema<CryptoKittiesType> = {
       payable: false,
       constant: true,
       stateMutability: StateMutability.View,
-      target: assetAddress,
-      inputs: [{ kind: FunctionInputKind.Asset, name: 'tokenId', type: 'uint256', value: asset.id }],
+      target: '0x06012c8cf97bead5deae237070f9587f8e7a266d',
+      inputs: [{ kind: FunctionInputKind.Asset, name: '_tokenId', type: 'uint256', value: asset }],
       outputs: [{ kind: FunctionOutputKind.Owner, name: 'owner', type: 'address' }]
-    }),
-    isApprove: (asset) => ({
-      type: AbiType.Function,
-      name: 'kittyIndexToApproved',
-      payable: false,
-      constant: true,
-      stateMutability: StateMutability.View,
-      target: assetAddress,
-      inputs: [{ kind: FunctionInputKind.Asset, name: '_tokenId', type: 'uint256', value: asset.id }],
-      outputs: [{ kind: FunctionOutputKind.Owner, name: 'owner', type: 'address' }]
-    }),
-    approve: (asset, to) => ({
-      type: AbiType.Function,
-      name: 'approve',
-      payable: false,
-      constant: false,
-      stateMutability: StateMutability.Nonpayable,
-      target: assetAddress,
-      inputs: [
-        { kind: FunctionInputKind.Owner, name: 'to', type: 'address', value: to },
-        { kind: FunctionInputKind.Asset, name: 'tokenId', type: 'uint256', value: asset.id }
-      ],
-      outputs: []
     }),
     assetsOfOwnerByIndex: []
   },
@@ -110,7 +77,7 @@ export const CryptoKittiesSchema: Schema<CryptoKittiesType> = {
       {
         type: AbiType.Event,
         name: 'Transfer',
-        target: assetAddress,
+        target: '0x06012c8cf97bead5deae237070f9587f8e7a266d',
         anonymous: false,
         inputs: [
           { kind: EventInputKind.Source, indexed: false, name: 'from', type: 'address' },

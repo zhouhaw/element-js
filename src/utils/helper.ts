@@ -3,6 +3,7 @@ import { ElementError, Network, schemas } from '../index'
 import { tokens } from '../schema/tokens'
 import { Schema } from '../schema/types'
 import { ECSignature, UnhashedOrder, UnsignedOrder } from '../types'
+
 // import { signOrderHash } from './makeOrder'
 
 export function toBaseUnitAmount(amount: BigNumber, decimals: number): BigNumber {
@@ -79,10 +80,13 @@ export function getSchemaList(network: Network, schemaName?: string): Array<Sche
     // throw new Error(
     //   `Trading for this Network (${network}) is not yet supported. Please contact us or check back later!`
     // )
-    new ElementError({ code: '1206', context: { assetType: schemaName } })
+    throw new ElementError({ code: '1206', context: { assetType: schemaName } })
   }
   if (schemaName) {
     schemaList = schemaList.filter((val: Schema<any>) => val.name === schemaName)
+  }
+  if (schemaList.length === 0) {
+    throw new ElementError({ code: '1206', context: { assetType: schemaName } })
   }
   return schemaList
 }

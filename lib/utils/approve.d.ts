@@ -1,4 +1,5 @@
 import { CallBack } from '..';
+import { ExchangeMetadata } from '../types';
 export declare function registerProxy({ proxyRegistryContract, account, callBack }: {
     proxyRegistryContract: any;
     account: string;
@@ -21,5 +22,10 @@ export declare function approveERC721TransferProxy({ proxyRegistryContract, erc7
     erc721Contract: any;
     account: string;
     tokenId: string;
+    callBack?: CallBack;
+}): Promise<boolean>;
+export declare function approveSchemaProxy({ contract, orderMetadata, callBack }: {
+    contract: any;
+    orderMetadata: ExchangeMetadata;
     callBack?: CallBack;
 }): Promise<boolean>;

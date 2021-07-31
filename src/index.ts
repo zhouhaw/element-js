@@ -15,6 +15,7 @@ export {
 
 export {
   registerProxy,
+  approveSchemaProxy,
   approveTokenTransferProxy,
   approveERC1155TransferProxy,
   approveERC721TransferProxy
@@ -47,7 +48,3 @@ export { Orders, OrderCheckStatus, Sleep } from './orders'
 export type { CallBack } from './orders'
 export { Contracts } from './contracts'
 export { ErrorCodes, ElementError } from './base/error'
-
-
-
-

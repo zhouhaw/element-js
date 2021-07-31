@@ -92,6 +92,10 @@ export const ErrorCodes: ElementErrorCodes = [
     message: 'CheckDataToCall {{part}} error '
   },
   {
+    code: '1209', // 和 schemas 地址不一致
+    message: '{{assetType}} asset address {{address}} not support  '
+  },
+  {
     code: '1211', // ElementShareAsset order uri 和 order version 中返回的 uri 不一致
     message: 'The ElementShareAsset Order URI does not match the URI returned in Order Version '
   },

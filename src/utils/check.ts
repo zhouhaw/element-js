@@ -1,4 +1,4 @@
-import { encodeBuy, encodeSell } from '../schema'
+import { encodeBuy, encodeCall, encodeSell } from '../schema'
 import { BigNumber, NULL_ADDRESS } from './constants'
 import {
   Asset,
@@ -14,6 +14,7 @@ import { ElementError } from '../base/error'
 
 import { getAccountBalance, getSchemaList, makeBigNumber, orderParamsEncode, orderSigEncode } from './helper'
 import { CallSpec } from '../schema/schemaFunctions'
+import { getElementAsset } from './makeOrder'
 
 const log = console.log
 
@@ -61,6 +62,7 @@ export async function checkSenderOfAuthenticatedProxy(
 
 //1. check register
 export async function checkRegisterProxy(proxyRegistryContract: any, account: string): Promise<boolean> {
+  //console.log(proxyRegistryContract.options.address, account)
   let proxy = await proxyRegistryContract.methods.proxies(account).call()
   if (proxy === NULL_ADDRESS) {
     throw new ElementError({ code: '1001' })
@@ -110,6 +112,39 @@ export async function checkApproveERC721TransferProxy(
   return true
 }
 
+export async function checkApproveSchemaProxy(
+  contract: any,
+  orderMetadata: ExchangeMetadata,
+  account: string
+): Promise<boolean> {
+  const operator = await contract.exchangeProxyRegistry.methods.proxies(account).call()
+
+  const schemas = getSchemaList(contract.networkName, orderMetadata.schema)
+  const schema = schemas[0]
+  const asset = {
+    tokenId: orderMetadata.asset.id,
+    tokenAddress: orderMetadata.asset.address,
+    schemaName: orderMetadata.schema
+  }
+  const elementAsset = getElementAsset(schema, asset)
+  //ElementSchemaName.CryptoKitties:
+  // @ts-ignore
+  const isApprove = schema?.functions?.isApprove(elementAsset)
+  const callData = encodeCall(isApprove, [asset.tokenId])
+  const res = await contract.web3.eth.call({
+    to: schema.address, // contract address
+    data: callData
+  })
+
+  let params = contract.web3.eth.abi.decodeParameters(isApprove.outputs, res)
+  console.log('checkApproveSchemaProxy', res, '\n', params)
+  // let approveAddr = await nftsContract.methods.kittyIndexToApproved(tokenID).call()
+  if (params[0] !== operator) {
+    throw new ElementError({ code: '1106', data: { nftAddress: asset.tokenAddress, tokenId: asset.tokenId } })
+  }
+  return true
+}
+
 export async function checkUnhashedOrder(contract: any, order: UnhashedOrder) {
   const equalPrice: boolean = BigNumber.isBigNumber(order.basePrice)
     ? order.basePrice.gt(0)
@@ -117,6 +152,8 @@ export async function checkUnhashedOrder(contract: any, order: UnhashedOrder) {
   if (!equalPrice) throw new ElementError({ code: '1201', data: { order } })
 
   try {
+    checkAssetAddress(contract.networkName, order)
+
     const erc20Contract = contract.erc20.clone()
     let metadata = order.metadata
     // 检查 Sell 买单
@@ -378,6 +415,22 @@ export async function checkAssetMint(contract: any, metadata: ExchangeMetadata) 
   return true
 }
 
+export async function checkAssetAddress(netWorkName: Network, order: UnhashedOrder) {
+  let schemas = getSchemaList(netWorkName, order.metadata.schema)
+  let metadata = order.metadata
+  const { assetAddress } = getAssetInfo(metadata)
+
+  if (schemas.length === 0) {
+    throw new ElementError({ code: '1206', context: { assetType: metadata.schema } })
+  }
+
+  if (schemas[0].name === ElementSchemaName.CryptoKitties) {
+    if (schemas[0].address !== assetAddress) {
+      throw new ElementError({ code: '1209', context: { assetType: metadata.schema, address: assetAddress } })
+    }
+  }
+}
+
 export async function checkAssetApprove(contract: any, order: UnhashedOrder) {
   let sell = order
   let checkAddr = sell.maker
@@ -405,7 +458,8 @@ export async function checkAssetApprove(contract: any, order: UnhashedOrder) {
       await checkApproveERC1155TransferProxy(contract.exchangeProxyRegistry, sellNFTs, checkAddr)
       break
     default:
-      throw new ElementError({ code: '1206', context: { assetType: metadata.schema } })
+      await checkApproveSchemaProxy(contract, metadata, checkAddr)
+      // throw new ElementError({code: '1206', context: {assetType: metadata.schema}})
       break
   }
   return sellNFTs
@@ -430,6 +484,14 @@ export async function checkAssetBalance(contract: any, order: UnhashedOrder) {
       sellNFTs.options.address = assetAddress
       let owner = await sellNFTs.methods.ownerOf(tokenId).call()
       if (owner.toLowerCase() !== checkAddr)
+        throw new ElementError({ code: '1103', context: { assetType: metadata.schema } })
+      balance = 1
+      break
+    case ElementSchemaName.CryptoKitties:
+      sellNFTs = contract.erc721.clone()
+      sellNFTs.options.address = assetAddress
+      let kittiyOwner = await sellNFTs.methods.ownerOf(tokenId).call()
+      if (kittiyOwner.toLowerCase() !== checkAddr)
         throw new ElementError({ code: '1103', context: { assetType: metadata.schema } })
       balance = 1
       break

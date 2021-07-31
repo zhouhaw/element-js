@@ -28,6 +28,20 @@ export const STATIC_EXTRADATA = '0x0c225aad' //succeedIfTxOriginMatchesHardcoded
 //
 export const CHECK_ETH_BALANCE = false
 
+export const CryptoKetties = [
+  {
+    address: '0x06012c8cf97bead5deae237070f9587f8e7a266d',
+    approve: ''
+  }
+]
+
+export const CryptoKettiesRinkeby = [
+  {
+    address: '0x06012c8cf97bead5deae237070f9587f8e7a266d',
+    approve: ''
+  }
+]
+
 export enum PRIVATE_CONTRACTS_ADDRESSES {
   ElementixProxyRegistry = '0x023CA02bFB85A3901316EdFE6BBA92B8cb54C9E3',
   // ElementixTokenTransferProxy = '0x20E1af184c5A40cFE63a377d8eE2A2029f1296FD',

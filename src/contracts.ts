@@ -14,17 +14,17 @@ const ElementixProxyRegistry = require(`../abi/ElementixProxyRegistry.json`)
 const ElementixExchange = require(`../abi/ElementixExchange.json`)
 const ExchangeHelper = require(`../abi/ExchangeHelper.json`)
 const WETHAbi = require(`../abi/WETH9Mocked.json`)
-import {
-  CONTRACTS_ADDRESSES,
-  NULL_ADDRESS
-} from './utils/constants'
+import { CONTRACTS_ADDRESSES, NULL_ADDRESS } from './utils/constants'
 
 import { tokens } from './schema/tokens'
+
+// import { schemas } from './schema/schemas'
 
 export class Contracts {
   public web3: any
 
   public networkName: Network
+  // public assetSchemas: any
   // address
   public contractsAddr: any
   public WETHAddr: string
@@ -63,6 +63,7 @@ export class Contracts {
     const gasLimit = 80e4
 
     this.networkName = networkName
+    // this.assetSchemas = schemas[networkName]
 
     const contracts = CONTRACTS_ADDRESSES[networkName]
     const exchangeHelperAddr = contracts.ExchangeHelper.toLowerCase()
@@ -73,10 +74,9 @@ export class Contracts {
     const feeRecipientAddress = contracts.FeeRecipientAddress.toLowerCase()
     const wethAddr = contracts.WETH.toLowerCase()
 
-
     this.contractsAddr = contracts
     this.WETHAddr = wethAddr
-    this.WETHToekn ={
+    this.WETHToekn = {
       name: 'WETH9',
       symbol: 'WETH',
       address: wethAddr,

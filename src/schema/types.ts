@@ -144,6 +144,8 @@ export interface SchemaFunctions<T> {
   transfer: (asset: T) => AnnotatedFunctionABI
   ownerOf?: (asset: T) => AnnotatedFunctionABI
   countOf?: (asset: T) => AnnotatedFunctionABIReturning<number>
+  isApprove?: (asset: T) => AnnotatedFunctionABI
+  approve?: (asset: T, to: string) => AnnotatedFunctionABI
   assetsOfOwnerByIndex: Array<AnnotatedFunctionABIReturning<T | null>>
   initializeProxy?: (owner: string) => AnnotatedFunctionABI
 }
@@ -164,4 +166,5 @@ export interface Schema<T> {
   events: SchemaEvents<T>
   formatter: (obj: T, web3: any) => Promise<FormatInfo>
   hash: (obj: T) => any
+  address?: string
 }
