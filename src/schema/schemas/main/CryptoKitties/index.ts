@@ -105,6 +105,19 @@ export const CryptoKittiesSchema: Schema<CryptoKittiesType> = {
       ],
       outputs: []
     }),
+    ownerTransfer:(asset,to)=>({
+      type: AbiType.Function,
+      name: 'transfer',
+      payable: false,
+      constant: false,
+      stateMutability: StateMutability.Nonpayable,
+      target: assetAddress,
+      inputs: [
+        { kind: FunctionInputKind.Owner, name: 'to', type: 'address', value: to },
+        { kind: FunctionInputKind.Asset, name: 'tokenId', type: 'uint256', value: asset.id }
+      ],
+      outputs: []
+    }),
     assetsOfOwnerByIndex: []
   },
   events: {

@@ -60,6 +60,10 @@ export const ErrorCodes: ElementErrorCodes = [
     message: 'Trading for this asset {{schemaName}} is not yet supported. Please contact us or check back later!'
   },
   {
+    code: '1108',
+    message: '{{schemaName}} NFTs isApproved is false {{tokenId}} '
+  },
+  {
     code: '1201',
     message: 'Order: buy.basePrice to be greater than sell.basePrice!'
   },

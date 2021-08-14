@@ -1,6 +1,6 @@
 const ethABI = require('ethereumjs-abi')
 
-import { AnnotatedFunctionABI, FunctionInputKind, Schema } from './types'
+import { AnnotatedFunctionABI, FunctionInput, FunctionInputKind, Schema } from './types'
 
 const failWith = (msg: string): any => {
   throw new Error(msg)
@@ -77,6 +77,17 @@ export const encodeCall = (abi: AnnotatedFunctionABI, parameters: any[]): string
   return (
     '0x' +
     Buffer.concat([ethABI.methodID(abi.name, inputTypes), ethABI.rawEncode(inputTypes, parameters)]).toString('hex')
+  )
+}
+
+export const encodeCallByMethod = (methodName: string, inputs: Array<FunctionInput>): string => {
+  // const inputTypes = abi.inputs.map((i) => i.type)
+  // [{type:"",value:1},{type:"",value:1}]
+  const inputTypes = inputs.map((val: any) => val.type)
+  const parameters = inputs.map((val: any) => val.value)
+  return (
+    '0x' +
+    Buffer.concat([ethABI.methodID(methodName, inputTypes), ethABI.rawEncode(inputTypes, parameters)]).toString('hex')
   )
 }
 

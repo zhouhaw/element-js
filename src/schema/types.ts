@@ -7,6 +7,12 @@ export enum FunctionInputKind {
   Count = 'count',
   Data = 'data'
 }
+
+export interface FunctionInput {
+  name: string
+  type: string
+  value?: any
+}
 export interface AnnotatedFunctionInput {
   name: string
   type: string
@@ -146,7 +152,8 @@ export interface SchemaFunctions<T> {
   countOf?: (asset: T) => AnnotatedFunctionABIReturning<number>
   isApprove?: (asset: T) => AnnotatedFunctionABI
   approve?: (asset: T, to: string) => AnnotatedFunctionABI
-  assetsOfOwnerByIndex: Array<AnnotatedFunctionABIReturning<T | null>>
+  ownerTransfer?:(asset: T, to: string,amount?:number) => AnnotatedFunctionABI
+  assetsOfOwnerByIndex?: Array<AnnotatedFunctionABIReturning<T | null>>
   initializeProxy?: (owner: string) => AnnotatedFunctionABI
 }
 

@@ -51,8 +51,7 @@ export async function web3Sign(web3: any, msg: string, account: string): Promise
 export async function elementSignInSign(
   walletProvider: any,
   nonce: number,
-  account: string,
-  chainId: string
+  account: string
 ): Promise<{ message: string; signature: string }> {
   const message = `Welcome to Element!
    \nClick "Sign" to sign in. No password needed!

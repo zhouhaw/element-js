@@ -5,6 +5,7 @@ import { Network, ElementAPIConfig, Order, OrderJSON, OrderType } from '../types
 import { orderFromJSON, Sleep } from '../utils'
 // @ts-ignore
 import { ORDERBOOK_PATH } from '../utils/constants'
+import { GraphAPI } from './graphApi'
 
 export interface OrderVersionParams {
   contractAddress: string
@@ -37,7 +38,7 @@ export interface OrderQueryParams {
   orderType: OrderType
 }
 
-export class OrdersAPI {
+export class OrdersAPI extends GraphAPI {
   /**
    * Base url for the API
    */
@@ -59,6 +60,7 @@ export class OrdersAPI {
    * @param logger Optional function for logging debug strings before and after requests are made
    */
   constructor(config: ElementAPIConfig, logger?: (arg: string) => void) {
+    super(config, logger)
     // this.apiKey = config.apiKey
     switch (config.networkName) {
       case Network.Rinkeby:
