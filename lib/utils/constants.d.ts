@@ -14,14 +14,10 @@ export declare const ELEMENT_SELLER_BOUNTY_BASIS_POINTS = 100;
 export declare const INVERSE_BASIS_POINT = 10000;
 export declare const STATIC_EXTRADATA = "0x0c225aad";
 export declare const CHECK_ETH_BALANCE = false;
-export declare const CryptoKetties: {
-    address: string;
-    approve: string;
-}[];
-export declare const CryptoKettiesRinkeby: {
-    address: string;
-    approve: string;
-}[];
+export declare const ORDERBOOK_PATH: {
+    main: string;
+    rinkeby: string;
+};
 export declare enum PRIVATE_CONTRACTS_ADDRESSES {
     ElementixProxyRegistry = "0x023CA02bFB85A3901316EdFE6BBA92B8cb54C9E3",
     ElementixExchange = "0xb328610a54A438C80EE6103F8679d75D6c0E20Ab",

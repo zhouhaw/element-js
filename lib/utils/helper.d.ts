@@ -5,6 +5,10 @@ import { ECSignature, UnhashedOrder } from '../types';
 export declare function toBaseUnitAmount(amount: BigNumber, decimals: number): BigNumber;
 export declare function makeBigNumber(arg: number | string | BigNumber): BigNumber;
 export declare function web3Sign(web3: any, msg: string, account: string): Promise<string>;
+export declare function elementSignInSign(walletProvider: any, nonce: number, account: string, chainId: string): Promise<{
+    message: string;
+    signature: string;
+}>;
 export declare function getAccountBalance(web3: any, account: string, erc20?: any): Promise<any>;
 export declare function getTokenIDOwner(elementAssetContract: any, tokenId: any): Promise<string>;
 export declare function getSchemaList(network: Network, schemaName?: string): Array<Schema<any>>;

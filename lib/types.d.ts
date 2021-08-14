@@ -7,6 +7,7 @@ export interface ElementAPIConfig {
     networkID?: number;
     account?: string;
     gasPrice?: number;
+    apiBaseUrl?: string;
 }
 export declare enum AbiType {
     Function = "function",
@@ -107,6 +108,7 @@ export interface OrderJSON extends Partial<ECSignature> {
     salt: string;
     metadata: ExchangeMetadata;
     hash: string;
+    orderHash?: string;
 }
 export interface ElementOrder {
     exchange: string;
@@ -138,6 +140,11 @@ export declare enum FeeMethod {
     SplitFee = 1
 }
 export declare enum OrderSide {
+    Buy = 0,
+    Sell = 1
+}
+export declare enum OrderType {
+    All = -1,
     Buy = 0,
     Sell = 1
 }

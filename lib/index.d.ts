@@ -5,11 +5,13 @@ export { ordersCanMatch, validateOrder, checkOrder, checkMatchOrder, checkRegist
 export { registerProxy, approveSchemaProxy, approveTokenTransferProxy, approveERC1155TransferProxy, approveERC721TransferProxy } from './utils/approve';
 export { orderToJSON, getPriceParameters, getCurrentPrice, computeOrderCallData } from './utils/makeOrder';
 export { BigNumber, NULL_ADDRESS, NULL_BLOCK_HASH, DEFAULT_SELLER_FEE_BASIS_POINTS, PRIVATE_CONTRACTS_ADDRESSES, MAIN_CONTRACTS_ADDRESSES, RINKEBY_CONTRACTS_ADDRESSES, CONTRACTS_ADDRESSES } from './utils/constants';
-export { orderFromJSON } from './utils';
+export { orderFromJSON, Sleep } from './utils';
 export { web3Sign } from './utils/helper';
 export { transferFromERC1155, transferFromERC721, transferFromERC20, transferFromWETH } from './utils/transfer';
-export { getTokenList, toBaseUnitAmount, getTokenIDOwner, getAccountBalance, getSchemaList, makeBigNumber } from './utils/helper';
-export { Orders, OrderCheckStatus, Sleep } from './orders';
+export { elementSignInSign, getTokenList, toBaseUnitAmount, getTokenIDOwner, getAccountBalance, getSchemaList, makeBigNumber } from './utils/helper';
+export { Orders, OrderCheckStatus } from './orders';
+export { OrdersAPI } from './api/orderApi';
+export { ElementOrders } from './api/index';
 export type { CallBack } from './orders';
 export { Contracts } from './contracts';
 export { ErrorCodes, ElementError } from './base/error';

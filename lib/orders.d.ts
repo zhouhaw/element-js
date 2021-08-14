@@ -23,7 +23,6 @@ export declare enum OrderCheckStatus {
 export interface CallBack {
     next<T>(arg: OrderCheckStatus, data?: any): OrderCheckStatus;
 }
-export declare function Sleep(ms: number): Promise<unknown>;
 export declare class Orders extends Contracts {
     makeMatchingOrder({ signedOrder, accountAddress, recipientAddress }: {
         signedOrder: Order;
