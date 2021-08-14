@@ -28,6 +28,11 @@ export async function web3Sign(web3: any, msg: string, account: string): Promise
     if (typeof window === 'undefined') {
       return web3.eth.sign(msg, account)
     }
+
+    if (web3.eth.accounts.wallet.length > 0) {
+      return web3.eth.sign(msg, account)
+    }
+
     if (web3.eth.defaultAccount.toLowerCase() == account.toLowerCase()) {
       signatureRes = await web3.eth.personal.sign(msg, account)
     } else {
@@ -40,6 +45,22 @@ export async function web3Sign(web3: any, msg: string, account: string): Promise
   } catch (error) {
     throw error
   }
+}
+
+// 登陆签名
+export async function elementSignInSign(
+  walletProvider: any,
+  nonce: number,
+  account: string,
+  chainId: string
+): Promise<{ message: string; signature: string }> {
+  const message = `Welcome to Element!
+   \nClick "Sign" to sign in. No password needed!
+   \nI accept the Element Terms of Service: \n https://element.market/tos
+   \nWallet address:\n${account}
+   \nNonce:\n${nonce}`
+  const signature = await web3Sign(walletProvider, message, account)
+  return { message, signature }
 }
 
 export async function getAccountBalance(web3: any, account: string, erc20?: any): Promise<any> {

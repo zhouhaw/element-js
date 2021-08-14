@@ -40,27 +40,17 @@ export interface CallBack {
   next<T>(arg: OrderCheckStatus, data?: any): OrderCheckStatus
 }
 
-export async function Sleep(ms: number) {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      resolve({ status: 'wakeUp' })
-    }, ms)
-  })
-}
-
 // 根据 DB签名过的订单 make一个对手单
 export class Orders extends Contracts {
-  public makeMatchingOrder(
-    {
-      signedOrder,
-      accountAddress,
-      recipientAddress
-    }: {
-      signedOrder: Order
-      accountAddress: string
-      recipientAddress?: string
-    }
-  ) {
+  public makeMatchingOrder({
+    signedOrder,
+    accountAddress,
+    recipientAddress
+  }: {
+    signedOrder: Order
+    accountAddress: string
+    recipientAddress?: string
+  }) {
     const networkName = this.networkName
     let assetRecipientAddress = recipientAddress
     if (!assetRecipientAddress || signedOrder.side == OrderSide.Buy) {
@@ -95,7 +85,6 @@ export class Orders extends Contracts {
     },
     callBack?: CallBack
   ): Promise<any> {
-
     await checkMatchOrder(this, buy, sell)
 
     const sellOrderParamArray = orderParamsEncode(sell as UnhashedOrder)
@@ -130,7 +119,6 @@ export class Orders extends Contracts {
     { unHashOrder }: { unHashOrder: UnhashedOrder },
     callBack?: CallBack
   ): Promise<OrderJSON> {
-
     await checkUnhashedOrder(this, unHashOrder)
 
     try {
@@ -172,7 +160,6 @@ export class Orders extends Contracts {
   ): Promise<OrderJSON> {
     let networkName = this.networkName
     let exchangeAddr = this.exchange.options.address
-
 
     const buyOrder = await _makeBuyOrder({
       networkName,
@@ -248,7 +235,6 @@ export class Orders extends Contracts {
 
     return this.creatSignedOrder({ unHashOrder: sellOrder }, callBack)
   }
-
 
   public async cancelOrder(
     { order, accountAddress }: { order: Order; accountAddress: string },

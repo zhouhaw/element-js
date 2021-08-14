@@ -32,10 +32,11 @@ export {
   RINKEBY_CONTRACTS_ADDRESSES,
   CONTRACTS_ADDRESSES
 } from './utils/constants'
-export { orderFromJSON } from './utils'
+export { orderFromJSON, Sleep } from './utils'
 export { web3Sign } from './utils/helper'
 export { transferFromERC1155, transferFromERC721, transferFromERC20, transferFromWETH } from './utils/transfer'
 export {
+  elementSignInSign,
   getTokenList,
   toBaseUnitAmount,
   getTokenIDOwner,
@@ -44,7 +45,9 @@ export {
   makeBigNumber
 } from './utils/helper'
 
-export { Orders, OrderCheckStatus, Sleep } from './orders'
+export { Orders, OrderCheckStatus } from './orders'
+export { OrdersAPI } from './api/orderApi'
+export { ElementOrders } from './api/index'
 export type { CallBack } from './orders'
 export { Contracts } from './contracts'
 export { ErrorCodes, ElementError } from './base/error'

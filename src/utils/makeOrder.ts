@@ -33,7 +33,7 @@ export function getSchema(network: Network, schemaName: ElementSchemaName): Sche
 
   const schemaInfo = getSchemaList(network, schemaName_) // scahmaList.find((val: Schema<any>) => val.name === schemaName_)
   if (schemaInfo.length == 0) {
-    throw new ElementError({ code: '1107', context: { 'schemaName': schemaName_ } })
+    throw new ElementError({ code: '1107', context: { schemaName: schemaName_ } })
   }
   return schemaInfo[0]
 }
@@ -183,19 +183,19 @@ export function getTimeParameters(
 }
 
 export async function _makeBuyOrder({
-                                      networkName,
-                                      exchangeAddr,
-                                      asset,
-                                      quantity,
-                                      accountAddress,
-                                      startAmount,
-                                      expirationTime = 0,
-                                      paymentTokenObj,
-                                      extraBountyBasisPoints = 0,
-                                      feeRecipientAddr,
-                                      sellOrder,
-                                      referrerAddress
-                                    }: {
+  networkName,
+  exchangeAddr,
+  asset,
+  quantity,
+  accountAddress,
+  startAmount,
+  expirationTime = 0,
+  paymentTokenObj,
+  extraBountyBasisPoints = 0,
+  feeRecipientAddr,
+  sellOrder,
+  referrerAddress
+}: {
   networkName: Network
   exchangeAddr: string
   asset: Asset
@@ -287,22 +287,22 @@ export async function _makeBuyOrder({
 }
 
 export async function _makeSellOrder({
-                                       networkName,
-                                       exchangeAddr,
-                                       asset,
-                                       quantity,
-                                       accountAddress,
-                                       startAmount,
-                                       endAmount,
-                                       listingTime,
-                                       expirationTime,
-                                       waitForHighestBid,
-                                       englishAuctionReservePrice = 0,
-                                       paymentTokenObj,
-                                       extraBountyBasisPoints,
-                                       feeRecipientAddr,
-                                       buyerAddress
-                                     }: {
+  networkName,
+  exchangeAddr,
+  asset,
+  quantity,
+  accountAddress,
+  startAmount,
+  endAmount,
+  listingTime,
+  expirationTime,
+  waitForHighestBid,
+  englishAuctionReservePrice = 0,
+  paymentTokenObj,
+  extraBountyBasisPoints,
+  feeRecipientAddr,
+  buyerAddress
+}: {
   networkName: Network
   exchangeAddr: string
   asset: Asset
@@ -448,7 +448,7 @@ export async function signOrderHash(web3: any, hashedOrder: UnsignedOrder): Prom
       s: `0x${signatureHex.slice(64, 128)}`
     }
   } catch (error) {
-    throw  error
+    throw error
     // throw new ElementError({ code: '1000', message: 'You declined to authorize your auction' })
   }
   return signature
@@ -547,10 +547,15 @@ export async function getCurrentPrice(exchangeHelper: any, order: Order): Promis
   return currentPrice
 }
 
-export async function _getStaticCallTargetAndExtraData(
-  { networkName, asset, useTxnOriginStaticCall }
-    : { networkName: Network; asset: Asset; useTxnOriginStaticCall: boolean })
-  : Promise<{
+export async function _getStaticCallTargetAndExtraData({
+  networkName,
+  asset,
+  useTxnOriginStaticCall
+}: {
+  networkName: Network
+  asset: Asset
+  useTxnOriginStaticCall: boolean
+}): Promise<{
   staticTarget: string
   staticExtradata: string
 }> {
@@ -595,19 +600,25 @@ export const computeOrderCallData = (order: UnsignedOrder, networkName: Network,
   }
 }
 
-export function _makeMatchingOrder(
-  { networkName, unSignedOrder, accountAddress, assetRecipientAddress, feeRecipientAddress }
-    : {
-    networkName: Network; unSignedOrder: UnsignedOrder; accountAddress: string;
-    assetRecipientAddress: string; feeRecipientAddress: string
-  }): UnhashedOrder {
+export function _makeMatchingOrder({
+  networkName,
+  unSignedOrder,
+  accountAddress,
+  assetRecipientAddress,
+  feeRecipientAddress
+}: {
+  networkName: Network
+  unSignedOrder: UnsignedOrder
+  accountAddress: string
+  assetRecipientAddress: string
+  feeRecipientAddress: string
+}): UnhashedOrder {
   const order = unSignedOrder
 
   const { target, dataToCall, replacementPattern } = computeOrderParams(order, networkName, assetRecipientAddress)
   const times = getTimeParameters(0)
   // Compat for matching buy orders that have fee recipient still on them
   const feeRecipient = order.feeRecipient == NULL_ADDRESS ? feeRecipientAddress : NULL_ADDRESS
-
 
   const matchingOrder: UnhashedOrder = {
     exchange: order.exchange,
@@ -647,7 +658,6 @@ export function _makeMatchingOrder(
  * @param matchingOrder The result of _makeMatchingOrder
  */
 export function assignOrdersToSides(order: Order, matchingOrder: UnsignedOrder): { buy: Order; sell: Order } {
-
   const isSellOrder = order.side == OrderSide.Sell
 
   let buy: Order

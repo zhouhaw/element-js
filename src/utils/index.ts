@@ -2,6 +2,14 @@ import { BigNumber, NULL_ADDRESS } from './constants'
 
 import { Order, OrderSide, SaleKind } from '../types'
 
+export async function Sleep(ms: number) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve({ status: 'wakeUp' })
+    }, ms)
+  })
+}
+
 export const orderFromJSON = (order: any): Order => {
   const createdDate = new Date() // `${order.created_date}Z`
   const fromJSON: Order = {

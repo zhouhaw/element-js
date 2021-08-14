@@ -21,10 +21,14 @@ export async function registerProxy({
         from: account
       })
       .on('transactionHash', (txHash: string) => {
+
         callBack?.next(OrderCheckStatus.RegisterTxHash, { txHash })
+        console.log("registerProxy tx hash",txHash)
       })
       .on('receipt', (receipt: string) => {
+
         callBack?.next(OrderCheckStatus.EndRegister, { receipt })
+        console.log("registerProxy tx receipt",receipt)
       })
       .catch((error: any) => {
         if (error.code == '4001') {
@@ -59,9 +63,11 @@ export async function approveTokenTransferProxy({
       })
       .on('transactionHash', (txHash: string) => {
         callBack?.next(OrderCheckStatus.ApproveErc20TxHash, { txHash })
+        console.log("approveTokenTransferProxy tx txHash",txHash)
       })
       .on('receipt', (receipt: string) => {
         callBack?.next(OrderCheckStatus.EndApproveErc20, { receipt })
+        console.log("approveTokenTransferProxy tx receipt",receipt)
       })
       .catch((error: any) => {
         if (error.code == '4001') {
@@ -94,9 +100,11 @@ export async function approveERC1155TransferProxy({
       .send({ from: account })
       .on('transactionHash', (txHash: string) => {
         callBack?.next(OrderCheckStatus.ApproveErc1155TxHash, { txHash })
+        console.log("approveERC1155TransferProxy tx txHash",txHash)
       })
       .on('receipt', (receipt: string) => {
         callBack?.next(OrderCheckStatus.EndApproveErc1155, { receipt })
+        console.log("approveERC1155TransferProxy tx receipt",receipt)
       })
       .catch((error: any) => {
         if (error.code == '4001') {
@@ -134,9 +142,11 @@ export async function approveERC721TransferProxy({
       .send({ from: account })
       .on('transactionHash', (txHash: string) => {
         callBack?.next(OrderCheckStatus.ApproveErc721TxHash, { txHash })
+        console.log("approveERC721TransferProxy tx txHash",txHash)
       })
       .on('receipt', (receipt: string) => {
         callBack?.next(OrderCheckStatus.EndApproveErc721, { receipt })
+        console.log("approveERC721TransferProxy tx receipt",receipt)
       })
       .catch((error: any) => {
         if (error.code == '4001') {
@@ -196,12 +206,13 @@ export async function approveSchemaProxy({
   await contract.web3.eth
     .sendTransaction(transactionObject)
     .on('transactionHash', (txHash: string) => {
-      console.log(txHash)
       callBack?.next(OrderCheckStatus.ApproveErc721TxHash, { txHash })
+      console.log("approveSchemaProxy tx txHash",txHash)
     })
     .on('receipt', (receipt: string) => {
       console.log(receipt)
       callBack?.next(OrderCheckStatus.EndApproveErc721, { receipt })
+      console.log("approveSchemaProxy tx receipt",receipt)
     })
     .catch((error: any) => {
       if (error.code == '4001') {

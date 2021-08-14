@@ -137,10 +137,10 @@ export async function checkApproveSchemaProxy(
   })
 
   let params = contract.web3.eth.abi.decodeParameters(isApprove.outputs, res)
-  console.log('checkApproveSchemaProxy', res, '\n', params)
+  // console.log('checkApproveSchemaProxy', res, '\n', params)
   // let approveAddr = await nftsContract.methods.kittyIndexToApproved(tokenID).call()
   if (params[0] !== operator) {
-    throw new ElementError({ code: '1106', data: { nftAddress: asset.tokenAddress, tokenId: asset.tokenId } })
+    throw new ElementError({ code: '1108', context: { schemaName: asset.schemaName, tokenId: asset.tokenId } })
   }
   return true
 }
@@ -204,7 +204,7 @@ export async function checkUnhashedOrder(contract: any, order: UnhashedOrder) {
 
 // 检查签名订单是否正确
 export async function checkOrder(contract: any, order: Order) {
-  // 简单订单授权，资产余额
+  // 检查订单授权，资产余额
   await checkUnhashedOrder(contract, order)
   // 检查订单是否被取消
   await checkOrderCancelledOrFinalized(contract, order)
@@ -232,6 +232,8 @@ export async function checkMatchOrder(contract: any, buy: Order, sell: Order) {
         message: `sell.takerRelayerFee ${sell.takerRelayerFee} <= buy.takerRelayerFee ${buy.takerRelayerFee}`
       })
     }
+    await checkUnhashedOrder(contract, buy) //检查 买单用户token的授权情况
+    // 检查数据库的卖单
     await checkOrder(contract, sell)
   } else {
     /* Assert taker fee is less than or equal to maximum fee specified by seller. */
@@ -242,6 +244,7 @@ export async function checkMatchOrder(contract: any, buy: Order, sell: Order) {
       })
     }
     await checkUnhashedOrder(contract, sell) // 检查 sell fee 是否授权
+    // 检查数据库的买单
     await checkOrder(contract, buy)
   }
 
@@ -438,7 +441,6 @@ export async function checkAssetApprove(contract: any, order: UnhashedOrder) {
   const { tokenId, assetAddress } = getAssetInfo(metadata)
 
   let sellNFTs = contract.erc20.clone()
-
   switch (metadata.schema) {
     case ElementSchemaName.ERC20:
       sellNFTs = contract.erc20.clone()
@@ -466,9 +468,8 @@ export async function checkAssetApprove(contract: any, order: UnhashedOrder) {
 }
 
 export async function checkAssetBalance(contract: any, order: UnhashedOrder) {
-  let sell = order
-  let checkAddr = sell.maker.toLowerCase()
-  let metadata = sell.metadata
+  let checkAddr = order.maker.toLowerCase()
+  let metadata = order.metadata
   const { tokenId, assetAddress } = getAssetInfo(metadata)
 
   let sellNFTs = contract.erc20.clone()
@@ -505,7 +506,7 @@ export async function checkAssetBalance(contract: any, order: UnhashedOrder) {
       break
   }
 
-  if (sell.quantity.gt(balance.toString())) {
+  if (order.quantity.gt(balance.toString())) {
     throw new ElementError({ code: '1103', context: { assetType: metadata.schema } })
   }
 

@@ -5,10 +5,11 @@ export { Network }
 
 export interface ElementAPIConfig {
   networkName: Network
-  paymentTokens?:Array<Token>
+  paymentTokens?: Array<Token>
   networkID?: number
   account?: string
   gasPrice?: number
+  apiBaseUrl?: string
 }
 
 export enum AbiType {
@@ -23,7 +24,7 @@ export enum ElementSchemaName {
   ERC20 = 'ERC20',
   ERC721 = 'ERC721',
   ERC1155 = 'ERC1155',
-  CryptoKitties="CryptoKitties"
+  CryptoKitties = 'CryptoKitties'
   // LegacyEnjin = 'Enjin',
   // ENSShortNameAuction = 'ENSShortNameAuction',
   // ElementShardType = 'ElementShardType',
@@ -33,7 +34,7 @@ export enum ElementSchemaName {
 interface ElementNFTAsset {
   id: string
   address: string
-  data?:string
+  data?: string
   collection?: ElementCollection
 }
 
@@ -41,7 +42,7 @@ interface ElementFTAsset {
   id?: string
   address: string
   quantity: string
-  data?:string
+  data?: string
   collection?: ElementCollection
 }
 
@@ -142,6 +143,7 @@ export interface OrderJSON extends Partial<ECSignature> {
   metadata: ExchangeMetadata
 
   hash: string
+  orderHash?: string
 }
 
 //---------- Orderbook-----------
@@ -178,6 +180,12 @@ export enum FeeMethod {
 }
 
 export enum OrderSide {
+  Buy = 0,
+  Sell = 1
+}
+
+export enum OrderType {
+  All = -1,
   Buy = 0,
   Sell = 1
 }
