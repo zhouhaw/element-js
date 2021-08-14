@@ -1,5 +1,6 @@
 import 'isomorphic-unfetch';
 import { ElementAPIConfig, Order, OrderJSON, OrderType } from '../types';
+import { GraphAPI } from './graphApi';
 export interface OrderVersionParams {
     contractAddress: string;
     tokenId: string | undefined;
@@ -26,7 +27,7 @@ export interface OrderQueryParams {
     tokenId: string;
     orderType: OrderType;
 }
-export declare class OrdersAPI {
+export declare class OrdersAPI extends GraphAPI {
     /**
      * Base url for the API
      */

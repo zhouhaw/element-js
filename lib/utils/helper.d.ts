@@ -5,7 +5,7 @@ import { ECSignature, UnhashedOrder } from '../types';
 export declare function toBaseUnitAmount(amount: BigNumber, decimals: number): BigNumber;
 export declare function makeBigNumber(arg: number | string | BigNumber): BigNumber;
 export declare function web3Sign(web3: any, msg: string, account: string): Promise<string>;
-export declare function elementSignInSign(walletProvider: any, nonce: number, account: string, chainId: string): Promise<{
+export declare function elementSignInSign(walletProvider: any, nonce: number, account: string): Promise<{
     message: string;
     signature: string;
 }>;
