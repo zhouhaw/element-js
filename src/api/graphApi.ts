@@ -85,10 +85,3 @@ export class GraphAPI {
     console.log(token)
   }
 }
-// ;(async () => {
-//   const endpoint = 'http://39.96.19.41:8000/graphql'
-//   const privateKey = '6b3d62de1c55740660693db23917efff49306f4d6616c145d98a4a2d7a740caa'
-//   const walletProvider = new Web3()
-//   const account = walletProvider.eth.accounts.wallet.add(privateKey)
-//
-// })()
