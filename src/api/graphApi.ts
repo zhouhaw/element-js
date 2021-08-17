@@ -1,5 +1,5 @@
 import { request, gql, GraphQLClient } from 'graphql-request'
-import { elementSignInSign, Network } from '../../src'
+import { elementSignInSign, Network } from '../index'
 import { ElementAPIConfig } from '../types'
 import { ORDERBOOK_PATH } from '../utils/constants'
 
