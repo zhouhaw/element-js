@@ -54,7 +54,12 @@ export declare class OrdersAPI extends GraphAPI {
      * @param order Order JSON to post to the orderbook
      * @param retries Number of times to retry if the service is unavailable for any reason
      */
-    ordersPost(order: OrderJSON, retries?: number): Promise<Order>;
+    ordersPost({ order, retries, LanguageType, Authorization }: {
+        order: OrderJSON;
+        retries?: number;
+        LanguageType?: string;
+        Authorization?: string;
+    }): Promise<Order>;
     ordersVersion(orderAsset: OrderVersionParams, retries?: number): Promise<OrderVersionData>;
     ordersConfData(retries?: number): Promise<OrderConfData>;
     ordersCancel(cancelParams: OrderCancelParams, retries?: number): Promise<any>;

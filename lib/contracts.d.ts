@@ -1,5 +1,7 @@
+/// <reference types="node" />
 import { ElementAPIConfig, Network, Token } from './types';
-export declare class Contracts {
+import { EventEmitter } from 'events';
+export declare class Contracts extends EventEmitter {
     web3: any;
     networkName: Network;
     contractsAddr: any;

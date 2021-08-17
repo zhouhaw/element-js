@@ -146,10 +146,11 @@ export async function checkApproveSchemaProxy(
 }
 
 export async function checkUnhashedOrder(contract: any, order: UnhashedOrder) {
-  const equalPrice: boolean = BigNumber.isBigNumber(order.basePrice)
-    ? order.basePrice.gt(0)
-    : new BigNumber(order.basePrice).gt(0)
-  if (!equalPrice) throw new ElementError({ code: '1201', data: { order } })
+  // 检查订单的价格是否大于0
+  // const equalPrice: boolean = BigNumber.isBigNumber(order.basePrice)
+  //   ? order.basePrice.gt(0)
+  //   : new BigNumber(order.basePrice).gt(0)
+  // if (!equalPrice) throw new ElementError({ code: '1201', data: { order } })
 
   try {
     checkAssetAddress(contract.networkName, order)

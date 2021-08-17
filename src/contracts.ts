@@ -1,5 +1,7 @@
 import { ElementAPIConfig, Network, Token } from './types'
 
+import { EventEmitter } from 'events'
+
 const abiPath = '../abi/'
 
 // auth proxy abi
@@ -20,7 +22,7 @@ import { tokens } from './schema/tokens'
 
 // import { schemas } from './schema/schemas'
 
-export class Contracts {
+export class Contracts extends EventEmitter {
   public web3: any
 
   public networkName: Network
@@ -57,6 +59,7 @@ export class Contracts {
   }
 
   constructor(web3: any, apiConfig: ElementAPIConfig = { networkName: Network.Rinkeby }) {
+    super()
     const { networkName, paymentTokens } = apiConfig
     this.paymentTokenList = paymentTokens || tokens[networkName].otherTokens
     const gasPrice = 10e9

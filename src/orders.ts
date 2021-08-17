@@ -96,8 +96,7 @@ export class Orders extends Contracts {
       .orderMatch(buyOrderParamArray, buyOrderSigArray, sellOrderParamArray, sellOrderSigArray, metadata)
       .send({
         value: buy.paymentToken !== NULL_ADDRESS ? 0 : buy.basePrice,
-        from: accountAddress,
-        gas: (80e4).toString()
+        from: accountAddress
       })
       .on('transactionHash', (txHash: string) => {
         callBack?.next(OrderCheckStatus.OrderMatchTxHash, { txHash, buy, sell, accountAddress })
@@ -248,18 +247,29 @@ export class Orders extends Contracts {
 
     const orderParamArray = orderParamsEncode(order)
     const orderSigArray = orderSigEncode(order as ECSignature)
-    callBack?.next(OrderCheckStatus.StartCancelOrder)
+    // callBack?.next(OrderCheckStatus.StartCancelOrder)
     return this.exchange.methods
       .cancelOrder(orderParamArray, orderSigArray)
       .send({
-        from: order.maker,
-        gas: (80e4).toString()
+        from: order.maker
       })
-      .on('receipt', (receipt: string) => {
+      .on('transactionHash', (txHash: string) => {
+        // callBack?.next(OrderCheckStatus.StartCancelOrder, { txHash, order, accountAddress })
+        console.log('transactionHash：', txHash)
+        this.emit('transactionHash', { txHash, order, accountAddress })
+      })
+      .on('confirmation', (receipt: any) => {
+        console.log('confirmation：', receipt)
+      })
+      .on('receipt', (receipt: any) => {
+        // callBack?.next(OrderCheckStatus.EndCancelOrder, { receipt, order })
         console.log('receipt：', receipt)
-        callBack?.next(OrderCheckStatus.EndCancelOrder, { receipt, order })
+        this.emit('transactionHash', { receipt, order })
       })
-      .on('error', console.error) // 如果是 out of gas 错误, 第二个参数为交易收据
+      .on('error', (error: any, receipt: any) => {
+        // 如果是 out of gas 错误, 第二个参数为交易收据
+        console.log(error)
+      })
       .catch((error: any) => {
         if (error.code == '4001') {
           throw new ElementError(error)

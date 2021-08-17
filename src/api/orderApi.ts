@@ -84,14 +84,25 @@ export class OrdersAPI extends GraphAPI {
    * @param order Order JSON to post to the orderbook
    * @param retries Number of times to retry if the service is unavailable for any reason
    */
-  public async ordersPost(order: OrderJSON, retries = 2): Promise<Order> {
+  public async ordersPost({
+    order,
+    retries = 2,
+    LanguageType,
+    Authorization
+  }: {
+    order: OrderJSON
+    retries?: number
+    LanguageType?: string
+    Authorization?: string
+  }): Promise<Order> {
     let json
     try {
+      //X-Viewer-Addr
       json = (await this.post(`/orders/post`, order)) as OrderJSON
     } catch (error) {
       _throwOrContinue(error, retries)
       await Sleep(3000)
-      return this.ordersPost(order, retries - 1)
+      return this.ordersPost({ order, retries: retries - 1 })
     }
     return orderFromJSON(json)
   }

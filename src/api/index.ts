@@ -156,7 +156,7 @@ export class ElementOrders extends OrdersAPI {
     const sellData = await this.orders.createSellOrder(sellParams)
     if (!sellData) return
     const order = { ...sellData, version: orderVersion.orderVersion } as OrderJSON
-    return this.ordersPost(order)
+    return this.ordersPost({ order })
   }
 }
 
