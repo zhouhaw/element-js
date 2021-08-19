@@ -4,7 +4,7 @@
  
 Order 数据结构
  
-tsc && git tag v2.5.1 && git push --tag
+tsc && git tag v2.5.2 && git push --tag
 fork 节点
 ```
 module.exports = {

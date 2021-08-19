@@ -506,7 +506,9 @@ export async function checkAssetBalance(contract: any, order: UnhashedOrder) {
       throw new ElementError({ code: '1206', context: { assetType: metadata.schema } })
       break
   }
-
+  if (!BigNumber.isBigNumber(order.quantity)) {
+    order.quantity = new BigNumber(order.quantity)
+  }
   if (order.quantity.gt(balance.toString())) {
     throw new ElementError({ code: '1103', context: { assetType: metadata.schema } })
   }
