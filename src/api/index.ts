@@ -123,15 +123,12 @@ export class ElementOrders extends OrdersAPI {
       chainId: this.walletChainId
     }
 
-    console.log('getAssetOrderVersion', orderAsset)
-
     const orderVersion = await this.ordersVersion(orderAsset)
-    console.log(orderVersion)
     if (!orderVersion.isTradable) {
       throw new ElementError({ code: '1212' })
     }
     let newAsset = { ...assetData }
-    console.log(newAsset)
+
     return { orderVersion, newAsset }
   }
 
@@ -162,7 +159,6 @@ export class ElementOrders extends OrdersAPI {
     const sellData = await this.orders.createSellOrder(sellParams)
     if (!sellData) return
     const order = { ...sellData, version: orderVersion.orderVersion } as OrderJSON
-    console.log(order)
     return this.ordersPost({ order })
   }
 }
