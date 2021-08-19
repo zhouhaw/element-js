@@ -33,6 +33,7 @@ export interface SellOrderParams extends CreateOrderParams {
     expirationTime?: number;
     startAmount: number;
     endAmount?: number;
+    buyerAddress?: string;
 }
 export declare class ElementOrders extends OrdersAPI {
     orders: any;
@@ -51,5 +52,5 @@ export declare class ElementOrders extends OrdersAPI {
         orderVersion: OrderVersionData;
         newAsset: Asset;
     }>;
-    createSellOrder({ asset, quantity, paymentToken, listingTime, expirationTime, startAmount, endAmount }: SellOrderParams): Promise<any>;
+    createSellOrder({ asset, quantity, paymentToken, listingTime, expirationTime, startAmount, endAmount, buyerAddress }: SellOrderParams): Promise<any>;
 }

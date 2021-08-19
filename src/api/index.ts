@@ -70,6 +70,7 @@ export interface SellOrderParams extends CreateOrderParams {
   expirationTime?: number
   startAmount: number
   endAmount?: number
+  buyerAddress?: string
 }
 
 export class ElementOrders extends OrdersAPI {
@@ -122,12 +123,15 @@ export class ElementOrders extends OrdersAPI {
       chainId: this.walletChainId
     }
 
+    console.log('getAssetOrderVersion', orderAsset)
+
     const orderVersion = await this.ordersVersion(orderAsset)
+    console.log(orderVersion)
     if (!orderVersion.isTradable) {
       throw new ElementError({ code: '1212' })
     }
     let newAsset = { ...assetData }
-
+    console.log(newAsset)
     return { orderVersion, newAsset }
   }
 
@@ -139,7 +143,8 @@ export class ElementOrders extends OrdersAPI {
     listingTime = 0,
     expirationTime = 0,
     startAmount,
-    endAmount
+    endAmount,
+    buyerAddress
   }: SellOrderParams): Promise<any> {
     const paymentTokenObj: Token = paymentToken
     const { orderVersion, newAsset } = await this.getAssetOrderVersion(asset)
@@ -151,11 +156,13 @@ export class ElementOrders extends OrdersAPI {
       startAmount,
       endAmount,
       listingTime,
-      expirationTime
+      expirationTime,
+      buyerAddress
     }
     const sellData = await this.orders.createSellOrder(sellParams)
     if (!sellData) return
     const order = { ...sellData, version: orderVersion.orderVersion } as OrderJSON
+    console.log(order)
     return this.ordersPost({ order })
   }
 }
