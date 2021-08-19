@@ -126,7 +126,7 @@ export async function approveERC721TransferProxy({
   proxyRegistryContract: any
   erc721Contract: any
   account: string
-  tokenId: string
+  tokenId?: string
   callBack?: CallBack
 }): Promise<boolean> {
   let operator = await proxyRegistryContract.methods.proxies(account).call()

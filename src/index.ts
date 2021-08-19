@@ -1,7 +1,8 @@
 export { ElementSchemaName, FeeMethod, HowToCall, Network, OrderSide, SaleKind } from './types'
-export type { Asset, Order, Token } from './types'
+export type { Asset, Order, Token, UnsignedOrder } from './types'
 export { schemas, encodeBuy, encodeSell, encodeCall } from './schema'
 export {
+  getElementAssetURI,
   ordersCanMatch,
   validateOrder,
   checkOrder,
@@ -34,7 +35,13 @@ export {
 } from './utils/constants'
 export { orderFromJSON, Sleep } from './utils'
 export { web3Sign } from './utils/helper'
-export { transferFromERC1155, transferFromERC721, transferFromERC20, transferFromWETH } from './utils/transfer'
+export {
+  transferFromERC1155,
+  transferFromERC721,
+  transferFromERC20,
+  transferFromWETH,
+  transferFromSchema
+} from './utils/transfer'
 export {
   elementSignInSign,
   getTokenList,

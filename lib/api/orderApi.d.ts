@@ -1,5 +1,5 @@
 import 'isomorphic-unfetch';
-import { ElementAPIConfig, Order, OrderJSON, OrderType } from '../types';
+import { ElementAPIConfig, OrderJSON, OrderType } from '../types';
 import { GraphAPI } from './graphApi';
 export interface OrderVersionParams {
     contractAddress: string;
@@ -59,7 +59,7 @@ export declare class OrdersAPI extends GraphAPI {
         retries?: number;
         LanguageType?: string;
         Authorization?: string;
-    }): Promise<Order>;
+    }): Promise<any>;
     ordersVersion(orderAsset: OrderVersionParams, retries?: number): Promise<OrderVersionData>;
     ordersConfData(retries?: number): Promise<OrderConfData>;
     ordersCancel(cancelParams: OrderCancelParams, retries?: number): Promise<any>;

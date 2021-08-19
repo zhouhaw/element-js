@@ -15,5 +15,6 @@ export declare const ErrorCodes: ElementErrorCodes;
 export declare class ElementError extends Error {
     code: string;
     data: any;
+    context: any;
     constructor(err: CustomError);
 }

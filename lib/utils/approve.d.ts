@@ -21,7 +21,7 @@ export declare function approveERC721TransferProxy({ proxyRegistryContract, erc7
     proxyRegistryContract: any;
     erc721Contract: any;
     account: string;
-    tokenId: string;
+    tokenId?: string;
     callBack?: CallBack;
 }): Promise<boolean>;
 export declare function approveSchemaProxy({ contract, orderMetadata, callBack }: {

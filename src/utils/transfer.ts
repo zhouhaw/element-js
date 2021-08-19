@@ -17,23 +17,25 @@ export async function transferFromERC1155(
     from,
     to,
     tokenId,
-    amount
+    amount,
+    data = '0x'
   }: {
     erc1155Contract: any
     from: string
     to: string
     tokenId: any
     amount: number
+    data?: string
   },
   callBack?: CallBack
 ): Promise<any> {
   return erc1155Contract.methods
-    .safeTransferFrom(from, to, tokenId, amount, '0x')
+    .safeTransferFrom(from, to, tokenId, amount, data)
     .send({ from: from })
     .on('transactionHash', (txHash: string) => {
       // console.log('Send success tx hash：', txHash)
       const assetAddress = erc1155Contract.options.address
-      callBack?.next(OrderCheckStatus.TransferErc1155, { txHash, from, to, tokenId, amount, assetAddress })
+      callBack?.next(OrderCheckStatus.TransferErc1155, { txHash, from, to, tokenId, amount, data })
     })
     .catch((error: any) => {
       transferFailure(error)
@@ -66,7 +68,6 @@ export async function transferFromERC721(
     })
 }
 
-
 export async function transferFromSchema(
   {
     contract,
@@ -77,16 +78,17 @@ export async function transferFromSchema(
   }: {
     contract: any
     asset: Asset
-    from: string,
+    from: string
     to: string
     amount: number
-  }, callBack?: CallBack): Promise<boolean> {
-
+  },
+  callBack?: CallBack
+): Promise<boolean> {
   const schemas = getSchemaList(contract.networkName, asset.schemaName)
   const schema = schemas[0]
   const elementAsset = schema.assetFromFields({ ID: asset.tokenId, Address: asset.tokenAddress })
   // @ts-ignore
-  const transferFunc = schema?.functions?.ownerTransfer(elementAsset,to)
+  const transferFunc = schema?.functions?.ownerTransfer(elementAsset, to)
 
   // 生成 Calldata
   const callData = encodeCall(transferFunc, [to, asset.tokenId])
@@ -117,7 +119,6 @@ export async function transferFromSchema(
 
   return true
 }
-
 
 export async function transferFromERC20(
   {

@@ -1,10 +1,11 @@
 import { Asset, CallBack } from '../index';
-export declare function transferFromERC1155({ erc1155Contract, from, to, tokenId, amount }: {
+export declare function transferFromERC1155({ erc1155Contract, from, to, tokenId, amount, data }: {
     erc1155Contract: any;
     from: string;
     to: string;
     tokenId: any;
     amount: number;
+    data?: string;
 }, callBack?: CallBack): Promise<any>;
 export declare function transferFromERC721({ erc721Contract, from, to, tokenId, amount }: {
     erc721Contract: any;

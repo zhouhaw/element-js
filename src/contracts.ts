@@ -62,8 +62,8 @@ export class Contracts extends EventEmitter {
     super()
     const { networkName, paymentTokens } = apiConfig
     this.paymentTokenList = paymentTokens || tokens[networkName].otherTokens
-    const gasPrice = 10e9
-    const gasLimit = 80e4
+    // const gasPrice = 10e9
+    // const gasLimit = 80e4
 
     this.networkName = networkName
     // this.assetSchemas = schemas[networkName]
@@ -90,7 +90,7 @@ export class Contracts extends EventEmitter {
     this.feeRecipientAddress = feeRecipientAddress
 
     let options = {
-      gas: gasLimit
+      // gas: gasLimit
     }
     if (exchangeHelperAddr && exchangeAddr && proxyRegistryAddr) {
       this.exchangeHelper = new web3.eth.Contract(ExchangeHelper.abi, exchangeHelperAddr, options)

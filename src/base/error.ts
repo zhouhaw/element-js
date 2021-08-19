@@ -24,10 +24,6 @@ export const ErrorCodes: ElementErrorCodes = [
     message: 'Smart contract error'
   },
   {
-    code: '0',
-    message: ''
-  },
-  {
     code: '1000',
     message: 'SDK'
   },
@@ -48,16 +44,17 @@ export const ErrorCodes: ElementErrorCodes = [
     message: 'ERC1155TransferProxy NFTs isApprovedForAll is false '
   },
   {
-    code: '1103',
+    code: '1103', // nft 余额不足
     message: '{{assetType}} balanceOf equal 0 !'
+  },
+  {
+    code: '1104', // ERC20，ETH 余额为0
+    message: 'Insufficient {{assetType}} balance'
+    // messageCN：'{{assetType}}币种余额为0'
   },
   {
     code: '1106',
     message: 'ERC721TransferProxy NFTs getApproved is false '
-  },
-  {
-    code: '1107',
-    message: 'Trading for this asset {{schemaName}} is not yet supported. Please contact us or check back later!'
   },
   {
     code: '1108',
@@ -137,6 +134,7 @@ function render(template: string, context: Object) {
 export class ElementError extends Error {
   public code: string
   public data: any
+  public context: any
 
   constructor(err: CustomError) {
     let _err: CustomError | undefined = ErrorCodes.find((val) => val.code == err.code)
@@ -154,6 +152,7 @@ export class ElementError extends Error {
     }
     this.code = err.code.toString()
     this.data = err.data
+    this.context = err.context
   }
 }
 

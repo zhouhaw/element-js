@@ -182,13 +182,13 @@ export async function checkUnhashedOrder(contract: any, order: UnhashedOrder) {
         erc20Contract.options.address = buy.paymentToken
         let { erc20Bal } = await getAccountBalance(contract.web3, buy.maker, erc20Contract)
         if (makeBigNumber(erc20Bal).lt(buy.basePrice))
-          throw new ElementError({ code: '1103', context: { assetType: 'ERC20' } })
+          throw new ElementError({ code: '1104', context: { assetType: 'ERC20' } })
 
         await checkApproveTokenTransferProxy(contract.exchange, erc20Contract, buy.maker)
       } else {
         let { ethBal } = await getAccountBalance(contract.web3, buy.maker)
         if (makeBigNumber(ethBal).lt(buy.basePrice))
-          throw new ElementError({ code: '1103', context: { assetType: 'ETH' } })
+          throw new ElementError({ code: '1104', context: { assetType: 'ETH' } })
       }
     }
     checkDataToCall(contract.networkName, order)
@@ -512,4 +512,11 @@ export async function checkAssetBalance(contract: any, order: UnhashedOrder) {
   }
 
   return Number(balance)
+}
+
+// 获得ElementAssetStore tokenid对应的URI
+export const getElementAssetURI = async (contract: any, tokenId: string) => {
+  const overURI = await contract.elementSharedAsset.methods._getOverrideURI(tokenId).call()
+  const URI = await contract.elementSharedAsset.methods.uri(tokenId).call()
+  return { overURI, URI }
 }

@@ -94,7 +94,7 @@ export class OrdersAPI extends GraphAPI {
     retries?: number
     LanguageType?: string
     Authorization?: string
-  }): Promise<Order> {
+  }): Promise<any> {
     let json
     try {
       //X-Viewer-Addr
@@ -104,7 +104,7 @@ export class OrdersAPI extends GraphAPI {
       await Sleep(3000)
       return this.ordersPost({ order, retries: retries - 1 })
     }
-    return orderFromJSON(json)
+    return json
   }
 
   public async ordersVersion(orderAsset: OrderVersionParams, retries = 2): Promise<OrderVersionData> {

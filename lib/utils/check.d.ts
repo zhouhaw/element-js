@@ -19,3 +19,7 @@ export declare function checkAssetMint(contract: any, metadata: ExchangeMetadata
 export declare function checkAssetAddress(netWorkName: Network, order: UnhashedOrder): Promise<void>;
 export declare function checkAssetApprove(contract: any, order: UnhashedOrder): Promise<any>;
 export declare function checkAssetBalance(contract: any, order: UnhashedOrder): Promise<number>;
+export declare const getElementAssetURI: (contract: any, tokenId: string) => Promise<{
+    overURI: any;
+    URI: any;
+}>;
