@@ -1,4 +1,4 @@
-const ethABI = require('ethereumjs-abi')
+const ethABI = require('@txdev/ethereumjs-abi')
 
 import { AnnotatedFunctionABI, FunctionInput, FunctionInputKind, Schema } from './types'
 

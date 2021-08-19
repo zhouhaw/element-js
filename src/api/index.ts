@@ -130,15 +130,20 @@ export class ElementOrders extends OrdersAPI {
     }
     let newAsset = { ...assetData }
     const sharedAsset = this.orders.elementSharedAssetAddr.toLowerCase()
-    console.log('getAssetOrderVersion', this.walletChainId, sharedAsset)
-    if (orderAsset.contractAddress === sharedAsset && orderVersion.uri && !assetData.data) {
+    // console.log('getAssetOrderVersion', this.walletChainId, orderVersion)
+    if (
+      orderVersion.orderVersion === 1 &&
+      orderAsset.contractAddress === sharedAsset &&
+      orderVersion.uri &&
+      !assetData.data
+    ) {
       newAsset = { ...assetData, data: orderVersion.uri }
     } else {
       if (assetData.schemaName === ElementSchemaName.ERC1155 && orderVersion.orderVersion === 0) {
         newAsset = { ...assetData, data: '' }
       }
     }
-
+    // console.log('newAsset', newAsset)
     return { orderVersion, newAsset }
   }
 
@@ -168,7 +173,7 @@ export class ElementOrders extends OrdersAPI {
     }
     const sellData = await this.orders.createSellOrder(sellParams)
     // const isCheckOrder = await checkOrder(this.orders, sellData)
-    //
+
     // console.log('isCheckOrder', isCheckOrder, sellData)
     if (!sellData) return
     const order = { ...sellData, version: orderVersion.orderVersion } as OrderJSON
