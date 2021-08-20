@@ -2,6 +2,7 @@ import { NULL_ADDRESS } from './constants'
 
 import { toBaseUnitAmount, makeBigNumber, getSchemaList } from './helper'
 import { Asset, CallBack, ElementError, encodeCall, OrderCheckStatus } from '../index'
+import Web3 from 'web3'
 
 function transferFailure(error: any) {
   const error_ =
@@ -172,7 +173,7 @@ export async function transferFromWETH(
  * formatted for Wyvern and OpenSea
  * @param address input address
  */
-export function validateAndFormatWalletAddress(web3: any, address: string): string {
+export function validateAndFormatWalletAddress(web3: Web3, address: string): string {
   if (!address) {
     throw new Error('No wallet address found')
   }
