@@ -1,4 +1,5 @@
 import { Asset, CallBack } from '../index';
+import Web3 from 'web3';
 export declare function transferFromERC1155({ erc1155Contract, from, to, tokenId, amount, data }: {
     erc1155Contract: any;
     from: string;
@@ -40,4 +41,4 @@ export declare function transferFromWETH({ WETHContract, from, to, tokenId, amou
  * formatted for Wyvern and OpenSea
  * @param address input address
  */
-export declare function validateAndFormatWalletAddress(web3: any, address: string): string;
+export declare function validateAndFormatWalletAddress(web3: Web3, address: string): string;

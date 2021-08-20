@@ -156,9 +156,9 @@ export class ElementError extends Error {
     this.context = err.context
   }
 }
-
-try {
-  throw new ElementError({ code: '2003', context: { funcName: 'funcName', stack: 'funcName stack' } })
-} catch (e) {
-  console.log('ll', e)
-}
+//
+// try {
+//   throw new ElementError({ code: '2003', context: { funcName: 'funcName', stack: 'funcName stack' } })
+// } catch (e) {
+//   console.log('ll', e)
+// }

@@ -1,4 +1,4 @@
-import { Asset, Network, Token } from '../index';
+import { Asset, Network, Token, CallBack } from '../index';
 import { OrderVersionData, OrdersAPI, OrderCancelParams } from './ordersApi';
 export declare enum MakeOrderType {
     FixPriceOrder = "FixPriceOrder",
@@ -53,4 +53,5 @@ export declare class ElementOrders extends OrdersAPI {
         newAsset: Asset;
     }>;
     createSellOrder({ asset, quantity, paymentToken, listingTime, expirationTime, startAmount, endAmount, buyerAddress }: SellOrderParams): Promise<any>;
+    async(bestAskOrder: any, callBack?: CallBack): Promise<any>;
 }

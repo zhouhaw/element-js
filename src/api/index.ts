@@ -1,5 +1,18 @@
 // 一口价购买
-import { web3Sign, Asset, ElementError, ElementSchemaName, Network, Orders, Token, OrderJSON } from '../index'
+import {
+  web3Sign,
+  Asset,
+  ElementError,
+  ElementSchemaName,
+  Network,
+  Orders,
+  Token,
+  OrderJSON,
+  OrderSide,
+  CallBack,
+  Order,
+  orderFromJSON
+} from '../index'
 import { OrderVersionData, OrderVersionParams, OrdersAPI, OrderCancelParams } from './ordersApi'
 
 export enum MakeOrderType {
@@ -39,6 +52,19 @@ export interface SellOrderParams extends CreateOrderParams {
   startAmount: number
   endAmount?: number
   buyerAddress?: string
+}
+
+const checkOrderHash = (order: any): Order => {
+  const hashOrder =
+    !order?.hash && order?.orderHash
+      ? {
+          ...order,
+          hash: order?.orderHash
+        }
+      : order
+  const signedOrder: Order = orderFromJSON(hashOrder)
+
+  return signedOrder
 }
 
 export class ElementOrders extends OrdersAPI {
@@ -140,12 +166,36 @@ export class ElementOrders extends OrdersAPI {
     }
     const sellData = await this.orders.createSellOrder(sellParams)
     // const isCheckOrder = await checkOrder(this.orders, sellData)
-
     // console.log('isCheckOrder', isCheckOrder, sellData)
     if (!sellData) return
     const order = { ...sellData, version: orderVersion.orderVersion } as OrderJSON
 
     return this.ordersPost({ order })
+  }
+
+  // // 接受买单/购买-----------------order match
+  public async async(bestAskOrder: any, callBack?: CallBack) {
+    const accountAddress = this.accountAddress
+    const signedOrder = checkOrderHash(bestAskOrder)
+
+    let recipientAddress = ''
+    if (bestAskOrder.side === OrderSide.Sell) {
+      recipientAddress = accountAddress
+    }
+    if (bestAskOrder.side === OrderSide.Buy) {
+      recipientAddress = bestAskOrder.maker
+    }
+    const { buy, sell } = this.orders.makeMatchingOrder({ signedOrder, accountAddress, recipientAddress })
+
+    const res = await this.orders.orderMatch(
+      {
+        buy,
+        sell,
+        accountAddress
+      },
+      callBack
+    )
+    return res
   }
 }
 
