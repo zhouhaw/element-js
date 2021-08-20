@@ -25,21 +25,21 @@ export async function checkSenderOfAuthenticatedProxy(
   proxyRegistryContract: any,
   account: string
 ): Promise<boolean> {
-  let proxy = await proxyRegistryContract.methods.proxies(account).call()
+  const proxy = await proxyRegistryContract.methods.proxies(account).call()
   if (proxy == NULL_ADDRESS) {
     throw new ElementError({ code: '1001' })
   }
-  let authProxyContract = authenticatedProxyContract.clone()
+  const authProxyContract = authenticatedProxyContract.clone()
   authProxyContract.options.address = proxy
 
-  let user = await authProxyContract.methods.user().call()
+  const user = await authProxyContract.methods.user().call()
   if (user.toLowerCase() != account) {
     throw new ElementError({ code: '1001' })
   }
   // 查询用户授权的 proxy 执行合约地址
-  let authproxyRegistryAddr = await authProxyContract.methods.registry().call()
+  const authproxyRegistryAddr = await authProxyContract.methods.registry().call()
   // 交易合约授权的 orderMatch 执行合约地址
-  let exchangeProxyRegistryAddr = await exchangeContract.methods.registry().call()
+  const exchangeProxyRegistryAddr = await exchangeContract.methods.registry().call()
 
   // 用户代理合约授权合约 和 和交易代理授权合约是否一致
   if (authproxyRegistryAddr.toLowerCase() != exchangeProxyRegistryAddr.toLowerCase()) {
@@ -52,7 +52,7 @@ export async function checkSenderOfAuthenticatedProxy(
   }
 
   // 验证交易合约是否为代理执行的合约地址
-  let isPass = await proxyRegistryContract.methods.contracts(exchangeContract.options.address).call()
+  const isPass = await proxyRegistryContract.methods.contracts(exchangeContract.options.address).call()
 
   if (!isPass) {
     throw new ElementError({ code: '1002' })
@@ -63,7 +63,7 @@ export async function checkSenderOfAuthenticatedProxy(
 //1. check register
 export async function checkRegisterProxy(proxyRegistryContract: any, account: string): Promise<boolean> {
   //console.log(proxyRegistryContract.options.address, account)
-  let proxy = await proxyRegistryContract.methods.proxies(account).call()
+  const proxy = await proxyRegistryContract.methods.proxies(account).call()
   if (proxy === NULL_ADDRESS) {
     throw new ElementError({ code: '1001' })
   }
@@ -76,7 +76,7 @@ export async function checkApproveTokenTransferProxy(
   erc20Contract: any,
   account: string
 ): Promise<boolean> {
-  let tokenTransferProxyAddr = await exchangeContract.methods.tokenTransferProxy().call()
+  const tokenTransferProxyAddr = await exchangeContract.methods.tokenTransferProxy().call()
   const allowAmount = await erc20Contract.methods.allowance(account, tokenTransferProxyAddr).call()
 
   if (new BigNumber(allowAmount).eq(0)) {
@@ -90,8 +90,8 @@ export async function checkApproveERC1155TransferProxy(
   nftsContract: any,
   account: string
 ): Promise<boolean> {
-  let operator = await proxyRegistryContract.methods.proxies(account).call()
-  let isApprove = await nftsContract.methods.isApprovedForAll(account, operator).call()
+  const operator = await proxyRegistryContract.methods.proxies(account).call()
+  const isApprove = await nftsContract.methods.isApprovedForAll(account, operator).call()
   if (!isApprove) {
     throw new ElementError({ code: '1102', data: { nftAddress: nftsContract.options.address } })
   }
@@ -104,8 +104,8 @@ export async function checkApproveERC721TransferProxy(
   account: string,
   tokenID: string
 ): Promise<boolean> {
-  let operator = await proxyRegistryContract.methods.proxies(account).call()
-  let isApprove = await nftsContract.methods.isApprovedForAll(account, operator).call()
+  const operator = await proxyRegistryContract.methods.proxies(account).call()
+  const isApprove = await nftsContract.methods.isApprovedForAll(account, operator).call()
   if (!isApprove) {
     throw new ElementError({ code: '1106', data: { nftAddress: nftsContract.options.address, tokenId: tokenID } })
   }
@@ -128,6 +128,7 @@ export async function checkApproveSchemaProxy(
   }
   const elementAsset = getElementAsset(schema, asset)
   //ElementSchemaName.CryptoKitties:
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   const isApprove = schema?.functions?.isApprove(elementAsset)
   const callData = encodeCall(isApprove, [asset.tokenId])
@@ -136,7 +137,7 @@ export async function checkApproveSchemaProxy(
     data: callData
   })
 
-  let params = contract.web3.eth.abi.decodeParameters(isApprove.outputs, res)
+  const params = contract.web3.eth.abi.decodeParameters(isApprove.outputs, res)
   // console.log('checkApproveSchemaProxy', res, '\n', params)
   // let approveAddr = await nftsContract.methods.kittyIndexToApproved(tokenID).call()
   if (params[0] !== operator) {
@@ -156,10 +157,10 @@ export async function checkUnhashedOrder(contract: any, order: UnhashedOrder) {
     checkAssetAddress(contract.networkName, order)
 
     const erc20Contract = contract.erc20.clone()
-    let metadata = order.metadata
+    const metadata = order.metadata
     // 检查 Sell 买单
     if (order.side == OrderSide.Sell) {
-      let sell = order
+      const sell = order
 
       await checkRegisterProxy(contract.exchangeProxyRegistry, order.maker)
       await checkAssetApprove(contract, sell)
@@ -172,7 +173,7 @@ export async function checkUnhashedOrder(contract: any, order: UnhashedOrder) {
     }
     // 检查 Buy 卖单
     if (order.side == OrderSide.Buy) {
-      let buy = order
+      const buy = order
 
       const { assetAddress } = getAssetInfo(metadata)
       if (assetAddress != contract.elementSharedAssetAddr) {
@@ -180,13 +181,13 @@ export async function checkUnhashedOrder(contract: any, order: UnhashedOrder) {
       }
       if (buy.paymentToken !== NULL_ADDRESS) {
         erc20Contract.options.address = buy.paymentToken
-        let { erc20Bal } = await getAccountBalance(contract.web3, buy.maker, erc20Contract)
+        const { erc20Bal } = await getAccountBalance(contract.web3, buy.maker, erc20Contract)
         if (makeBigNumber(erc20Bal).lt(buy.basePrice))
           throw new ElementError({ code: '1104', context: { assetType: 'ERC20' } })
 
         await checkApproveTokenTransferProxy(contract.exchange, erc20Contract, buy.maker)
       } else {
-        let { ethBal } = await getAccountBalance(contract.web3, buy.maker)
+        const { ethBal } = await getAccountBalance(contract.web3, buy.maker)
         if (makeBigNumber(ethBal).lt(buy.basePrice))
           throw new ElementError({ code: '1104', context: { assetType: 'ETH' } })
       }
@@ -196,6 +197,7 @@ export async function checkUnhashedOrder(contract: any, order: UnhashedOrder) {
     if (error.data) {
       error.data.order = order
     } else {
+      // eslint-disable-next-line no-ex-assign
       error = { ...error, message: error.message, data: { order } }
     }
     throw error
@@ -253,7 +255,7 @@ export async function checkMatchOrder(contract: any, buy: Order, sell: Order) {
 }
 
 export function checkDataToCall(netWorkName: Network, order: UnhashedOrder) {
-  let schemas = getSchemaList(netWorkName, order.metadata.schema)
+  const schemas = getSchemaList(netWorkName, order.metadata.schema)
   // TODO data sell.metadata.asset
   let asset: any = order.metadata.asset
   if (!asset.data && asset.schemaName === ElementSchemaName.ERC1155) {
@@ -285,7 +287,7 @@ export async function validateOrder(exchangeHelper: any, order: Order): Promise<
   const orderParamValueArray = orderParamsEncode(order as UnhashedOrder)
   const orderSigArray = orderSigEncode(order as ECSignature)
   try {
-    let isValidate = await exchangeHelper.methods.validateOrder(orderParamValueArray, orderSigArray).call()
+    const isValidate = await exchangeHelper.methods.validateOrder(orderParamValueArray, orderSigArray).call()
     if (!isValidate) {
       log('validateOrder', orderParamValueArray)
       throw new ElementError({ code: '1203' })
@@ -312,8 +314,8 @@ export function validateAndFormatWalletAddress(web3: any, address: string): stri
   return address.toLowerCase()
 }
 
-let canSettleOrder = (listingTime: any, expirationTime: any) => {
-  let now = Math.round(Date.now() / 1000)
+const canSettleOrder = (listingTime: any, expirationTime: any) => {
+  const now = Math.round(Date.now() / 1000)
 
   if (BigNumber.isBigNumber(listingTime)) {
     listingTime = listingTime.toNumber()
@@ -363,7 +365,7 @@ export function _ordersCanMatch(buy: Order, sell: Order) {
 export async function ordersCanMatch(exchangeHelper: any, buy: Order, sell: Order): Promise<any> {
   const buyOrderParamArray = orderParamsEncode(buy)
   const sellOrderParamArray = orderParamsEncode(sell)
-  let canMatch = exchangeHelper.methods.ordersCanMatch(buyOrderParamArray, sellOrderParamArray).call()
+  const canMatch = exchangeHelper.methods.ordersCanMatch(buyOrderParamArray, sellOrderParamArray).call()
   if (!canMatch) {
     throw new ElementError({ code: '1202' })
   }
@@ -408,7 +410,7 @@ export async function checkAssetMint(contract: any, metadata: ExchangeMetadata) 
 
   if (assetAddress == contract.elementSharedAssetV1?.options.address.toLowerCase()) {
     // 如对应token id 的资产未创建 未false
-    let exists = await contract.elementSharedAssetV1?.methods.exists(tokenId).call()
+    const exists = await contract.elementSharedAssetV1?.methods.exists(tokenId).call()
     if (!exists) {
       throw new ElementError({
         message: 'elementSharedAssetV1 asset not exists',
@@ -420,8 +422,8 @@ export async function checkAssetMint(contract: any, metadata: ExchangeMetadata) 
 }
 
 export async function checkAssetAddress(netWorkName: Network, order: UnhashedOrder) {
-  let schemas = getSchemaList(netWorkName, order.metadata.schema)
-  let metadata = order.metadata
+  const schemas = getSchemaList(netWorkName, order.metadata.schema)
+  const metadata = order.metadata
   const { assetAddress } = getAssetInfo(metadata)
 
   if (schemas.length === 0) {
@@ -436,9 +438,9 @@ export async function checkAssetAddress(netWorkName: Network, order: UnhashedOrd
 }
 
 export async function checkAssetApprove(contract: any, order: UnhashedOrder) {
-  let sell = order
-  let checkAddr = sell.maker
-  let metadata = sell.metadata
+  const sell = order
+  const checkAddr = sell.maker
+  const metadata = sell.metadata
   const { tokenId, assetAddress } = getAssetInfo(metadata)
 
   let sellNFTs = contract.erc20.clone()
@@ -469,8 +471,8 @@ export async function checkAssetApprove(contract: any, order: UnhashedOrder) {
 }
 
 export async function checkAssetBalance(contract: any, order: UnhashedOrder) {
-  let checkAddr = order.maker.toLowerCase()
-  let metadata = order.metadata
+  const checkAddr = order.maker.toLowerCase()
+  const metadata = order.metadata
   const { tokenId, assetAddress } = getAssetInfo(metadata)
 
   let sellNFTs = contract.erc20.clone()
@@ -484,7 +486,8 @@ export async function checkAssetBalance(contract: any, order: UnhashedOrder) {
     case ElementSchemaName.ERC721:
       sellNFTs = contract.erc721.clone()
       sellNFTs.options.address = assetAddress
-      let owner = await sellNFTs.methods.ownerOf(tokenId).call()
+      // eslint-disable-next-line no-case-declarations
+      const owner = await sellNFTs.methods.ownerOf(tokenId).call()
       if (owner.toLowerCase() !== checkAddr)
         throw new ElementError({ code: '1103', context: { assetType: metadata.schema } })
       balance = 1
@@ -492,7 +495,8 @@ export async function checkAssetBalance(contract: any, order: UnhashedOrder) {
     case ElementSchemaName.CryptoKitties:
       sellNFTs = contract.erc721.clone()
       sellNFTs.options.address = assetAddress
-      let kittiyOwner = await sellNFTs.methods.ownerOf(tokenId).call()
+      // eslint-disable-next-line no-case-declarations
+      const kittiyOwner = await sellNFTs.methods.ownerOf(tokenId).call()
       if (kittiyOwner.toLowerCase() !== checkAddr)
         throw new ElementError({ code: '1103', context: { assetType: metadata.schema } })
       balance = 1

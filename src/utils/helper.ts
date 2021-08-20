@@ -22,6 +22,7 @@ export function makeBigNumber(arg: number | string | BigNumber): BigNumber {
 }
 
 export async function web3Sign(web3: any, msg: string, account: string): Promise<string> {
+  // eslint-disable-next-line no-useless-catch
   try {
     let signatureRes
     // console.log('web3Sign', msg)
@@ -63,14 +64,14 @@ export async function elementSignInSign(
 }
 
 export async function getAccountBalance(web3: any, account: string, erc20?: any): Promise<any> {
-  let ethBal: number = await web3.eth.getBalance(account, 'latest').catch((error: any) => {
+  const ethBal: number = await web3.eth.getBalance(account, 'latest').catch((error: any) => {
     const stack = error.message || JSON.stringify(error)
     throw new ElementError({
       code: '2003',
       context: { funcName: 'getAccountBalance.getBalance ', stack }
     })
   })
-  let erc20Bal: number = 0
+  let erc20Bal = 0
   if (erc20) {
     erc20Bal = await erc20.methods
       .balanceOf(account)
@@ -93,6 +94,7 @@ export async function getTokenIDOwner(elementAssetContract: any, tokenId: any): 
 }
 
 export function getSchemaList(network: Network, schemaName?: string): Array<Schema<any>> {
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   let schemaList = schemas[network]
   if (!schemaList) {
@@ -168,6 +170,7 @@ export function orderParamsEncode(order: UnhashedOrder) {
   ]
   const orerParamValueArray = []
   for (const key of orderParamKeys) {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     let val = order[key]
     if (val === undefined) {
@@ -187,11 +190,13 @@ export function orderSigEncode(order: ECSignature) {
   const orderSigKeys = ['v', 'r', 's']
   const orderSigValueArray = []
   for (const key of orderSigKeys) {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     if (order[key] === undefined) {
       console.log('orderSigEncode key undefined', key)
       continue
     }
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     orderSigValueArray.push(order[key])
   }

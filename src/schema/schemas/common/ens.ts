@@ -13,6 +13,7 @@ export const namehash = (name: string) => {
   if (name !== '') {
     const labels = name.split('.')
     for (let i = labels.length - 1; i >= 0; i--) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       const { substr } = Web3.utils.sha3(labels[i])
       node = Web3.utils.sha3(node + substr(2))

@@ -8,7 +8,7 @@ export interface ElementAPIConfig {
   paymentTokens?: Array<Token>
   networkID?: number
   account?: string
-  gasPrice?: number
+  authToken?: string
   apiBaseUrl?: string
 }
 

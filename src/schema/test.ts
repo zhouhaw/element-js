@@ -2,7 +2,7 @@ import { ElementSchemaName, makeBigNumber, Network } from '..'
 import { getElementAsset, getSchema } from '../utils/makeOrder'
 import { encodeDefaultCall, encodeReplacementPattern } from './schemaFunctions'
 import { AnnotatedFunctionABI } from './types'
-const Web3 = require('web3')
+import Web3 from 'web3'
 const web3 = new Web3()
 
 try {
@@ -28,7 +28,7 @@ try {
 
 export const encodeCallNew = (abi: AnnotatedFunctionABI, parameters: any[]): string => {
   // let methodID = web3.eth.abi.encodeFunctionSignature(abi)
-  let callData = web3.eth.abi.encodeFunctionCall(abi, parameters)
+  const callData = web3.eth.abi.encodeFunctionCall(abi, parameters)
   // console.log("methodID",callData)
   return callData
 

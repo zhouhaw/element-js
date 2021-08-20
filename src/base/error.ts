@@ -122,7 +122,8 @@ export const ErrorCodes: ElementErrorCodes = [
   }
 ]
 
-function render(template: string, context: Object) {
+function render(template: string, context: Record<string, unknown>) {
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   return template.replace(/\{\{(.*?)\}\}/g, (match, key) => context[key.trim()])
 }
@@ -137,14 +138,14 @@ export class ElementError extends Error {
   public context: any
 
   constructor(err: CustomError) {
-    let _err: CustomError | undefined = ErrorCodes.find((val) => val.code == err.code)
+    const _err: CustomError | undefined = ErrorCodes.find((val) => val.code == err.code)
 
     if (Number(_err?.code) > 1000) {
-      let message = err.context && _err?.message ? render(_err.message, err.context) : _err?.message
+      const message = err.context && _err?.message ? render(_err.message, err.context) : _err?.message
       super(message)
     } else {
       if (_err?.code == '1000') {
-        let message = err.message || ''
+        const message = err.message || ''
         super(message + '-' + _err?.message)
       } else {
         super('undefined code!')
@@ -156,8 +157,8 @@ export class ElementError extends Error {
   }
 }
 
-// try {
-//   throw new ElementError({ code: '4001' })
-// } catch (e) {
-//   console.log('ll', e)
-// }
+try {
+  throw new ElementError({ code: '2003', context: { funcName: 'funcName', stack: 'funcName stack' } })
+} catch (e) {
+  console.log('ll', e)
+}

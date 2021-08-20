@@ -2,22 +2,22 @@ import { ElementAPIConfig, Network, Token } from './types'
 
 import { EventEmitter } from 'events'
 
-const abiPath = '../abi/'
+// const abiPath = '../abi/'
 
 // auth proxy abi
-const AuthenticatedProxy = require(`../abi/AuthenticatedProxy.json`)
+import AuthenticatedProxy from '../abi/AuthenticatedProxy.json'
 // asset abi
-const ERC20 = require(`../abi/ERC20.json`)
-const ERC721 = require(`../abi/ERC721v3.json`)
-const ERC1155 = require(`../abi/ERC1155.json`)
+import ERC20 from '../abi/ERC20.json'
+import ERC721 from '../abi/ERC721v3.json'
+import ERC1155 from '../abi/ERC1155.json'
 // contract abi
-const ElementSharedAsset = require(`../abi/ElementSharedAsset.json`)
-const ElementixProxyRegistry = require(`../abi/ElementixProxyRegistry.json`)
-const ElementixExchange = require(`../abi/ElementixExchange.json`)
-const ExchangeHelper = require(`../abi/ExchangeHelper.json`)
-const WETHAbi = require(`../abi/WETH9Mocked.json`)
+import ElementSharedAsset from '../abi/ElementSharedAsset.json'
+import ElementixProxyRegistry from '../abi/ElementixProxyRegistry.json'
+import ElementixExchange from '../abi/ElementixExchange.json'
+import ExchangeHelper from '../abi/ExchangeHelper.json'
+import WETHAbi from '../abi/WETH9Mocked.json'
+// const WETHAbi = import(`../abi/WETH9Mocked.json`)
 import { CONTRACTS_ADDRESSES, NULL_ADDRESS } from './utils/constants'
-
 import { tokens } from './schema/tokens'
 
 // import { schemas } from './schema/schemas'
@@ -89,7 +89,7 @@ export class Contracts extends EventEmitter {
     this.elementixExchangeKeeperAddr = elementixExchangeKeeperAddr
     this.feeRecipientAddress = feeRecipientAddress
 
-    let options = {
+    const options = {
       // gas: gasLimit
     }
     if (exchangeHelperAddr && exchangeAddr && proxyRegistryAddr) {
@@ -111,10 +111,12 @@ export class Contracts extends EventEmitter {
       throw new Error(`${this.networkName}  abi undefined`)
     }
 
-    // @ts-ignore
-    if (contracts.ElementSharedAssetV1) {
-      // @ts-ignore
-      this.elementSharedAssetV1 = new web3.eth.Contract(ElementSharedAsset.abi, contracts.ElementSharedAssetV1, options)
+    if ((contracts as any).ElementSharedAssetV1) {
+      this.elementSharedAssetV1 = new web3.eth.Contract(
+        ElementSharedAsset.abi,
+        (contracts as any).ElementSharedAssetV1,
+        options
+      )
     }
   }
 }

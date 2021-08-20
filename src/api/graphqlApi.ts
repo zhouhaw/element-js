@@ -1,43 +1,54 @@
-import { request, gql, GraphQLClient } from 'graphql-request'
+import { gql, GraphQLClient } from 'graphql-request'
 import { elementSignInSign, Network } from '../index'
 import { ElementAPIConfig } from '../types'
-import { ORDERBOOK_PATH } from '../utils/constants'
+import { API_BASE_URL, CHAIN_ID } from '../utils/constants'
 
-export class GraphAPI {
+export class GraphqlApi implements ElementAPIConfig {
+  public networkName: Network
+  public networkID: number
+  public authToken: string
+  public chain = 'eth'
+
   /**
    * Base url for the API
    */
-  public readonly graphqlUrl: string
+  public readonly apiBaseUrl: string
+
+  public gqlClient: GraphQLClient
   /**
    * Logger function to use when debugging
    */
   public logger: (arg: string) => void
 
   /**
-   * Create an instance of the OpenSea API
-   * @param config OpenSeaAPIConfig for setting up the API, including an optional API key, network name, and base URL
+   * Create an instance of the Element API
+   * @param config ElementAPIConfig for setting up the API, including an optional API key, network name, and base URL
    * @param logger Optional function for logging debug strings before and after requests are made
    */
   constructor(config: ElementAPIConfig, logger?: (arg: string) => void) {
-    // this.apiKey = config.apiKey
     switch (config.networkName) {
       case Network.Rinkeby:
-        this.graphqlUrl = config.apiBaseUrl || ORDERBOOK_PATH.rinkeby
+        this.apiBaseUrl = config.apiBaseUrl || API_BASE_URL.rinkeby
+        this.networkID = CHAIN_ID.rinkeby
         break
       case Network.Main:
-        this.graphqlUrl = config.apiBaseUrl || ORDERBOOK_PATH.main
+        this.apiBaseUrl = config.apiBaseUrl || API_BASE_URL.main
+        this.networkID = CHAIN_ID.main
         break
       default:
-        this.graphqlUrl = config.apiBaseUrl || ORDERBOOK_PATH.main
+        this.apiBaseUrl = config.apiBaseUrl || API_BASE_URL.main
+        this.networkID = CHAIN_ID.main
         break
     }
-    // Debugging: default to nothing
+    this.networkName = config.networkName
+    this.authToken = ''
+
+    this.gqlClient = new GraphQLClient(`${this.apiBaseUrl}/graphql`, { headers: {} })
     this.logger = logger || ((arg: string) => arg)
   }
 
   private async getNewNonce(walletProvider: any) {
     const accountAddress = walletProvider.eth.defaultAccount
-    const endpoint = this.graphqlUrl
     const getNonce = gql`
       query GetNonce($address: Address!, $chain: Chain!, $chainId: ChainId!) {
         user(identity: { address: $address, blockChain: { chain: $chain, chainId: $chainId } }) {
@@ -47,18 +58,17 @@ export class GraphAPI {
     `
     const variables = {
       address: accountAddress,
-      chain: 'eth',
-      chainId: '0x1'
+      chain: this.chain,
+      chainId: `0x${this.networkID.toString(16)}`
     }
-    let nonce = await request(endpoint, getNonce, variables)
-    console.log(nonce)
+    const nonce = await this.gqlClient.request(getNonce, variables)
     return nonce.user.nonce
   }
 
   public async getSignInToken(walletProvider: any) {
     const accountAddress = walletProvider.eth.defaultAccount
-    const endpoint = this.graphqlUrl
-    let nonce = await this.getNewNonce(walletProvider)
+    this.gqlClient = this.gqlClient.setHeader('X-Viewer-Addr', accountAddress)
+    const nonce = await this.getNewNonce(walletProvider)
     const { message, signature } = await elementSignInSign(walletProvider, nonce, accountAddress)
     const loginAuth = gql`
       mutation LoginAuth($identity: IdentityInput!, $message: String!, $signature: String!) {
@@ -73,15 +83,19 @@ export class GraphAPI {
       identity: {
         address: accountAddress,
         blockChain: {
-          chain: 'eth',
-          chainId: '0x1'
+          chain: this.chain,
+          chainId: `0x${this.networkID.toString(16)}`
         }
       },
       message,
       signature
     }
 
-    let token = await request(endpoint, loginAuth, loginVar)
-    console.log(token)
+    const token = await this.gqlClient.request(loginAuth, loginVar)
+    // console.log(token.auth.login.token)
+    const bearerToken = `Bearer ${token.auth.login.token}`
+    this.gqlClient = this.gqlClient.setHeader('Authorization', bearerToken)
+    this.authToken = bearerToken
+    return bearerToken
   }
 }

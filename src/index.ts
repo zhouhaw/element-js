@@ -1,5 +1,5 @@
 export { ElementSchemaName, FeeMethod, HowToCall, Network, OrderSide, SaleKind } from './types'
-export type { Asset, Order, Token, UnsignedOrder } from './types'
+export type { Asset, Order, OrderJSON, Token, UnsignedOrder } from './types'
 export { schemas, encodeBuy, encodeSell, encodeCall } from './schema'
 export {
   getElementAssetURI,
@@ -53,7 +53,7 @@ export {
 } from './utils/helper'
 
 export { Orders, OrderCheckStatus } from './orders'
-export { OrdersAPI } from './api/orderApi'
+export { OrdersAPI } from './api/ordersApi'
 export { ElementOrders } from './api/index'
 export type { CallBack } from './orders'
 export { Contracts } from './contracts'

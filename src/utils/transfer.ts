@@ -87,6 +87,7 @@ export async function transferFromSchema(
   const schemas = getSchemaList(contract.networkName, asset.schemaName)
   const schema = schemas[0]
   const elementAsset = schema.assetFromFields({ ID: asset.tokenId, Address: asset.tokenAddress })
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   const transferFunc = schema?.functions?.ownerTransfer(elementAsset, to)
 

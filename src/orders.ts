@@ -129,6 +129,7 @@ export class Orders extends Contracts {
       if (error.data) {
         error.data.order = unHashOrder
       } else {
+        // eslint-disable-next-line no-ex-assign
         error = { ...error, message: error.message, data: { order: unHashOrder } }
       }
       throw error
@@ -157,8 +158,8 @@ export class Orders extends Contracts {
     },
     callBack?: CallBack
   ): Promise<OrderJSON> {
-    let networkName = this.networkName
-    let exchangeAddr = this.exchange.options.address
+    const networkName = this.networkName
+    const exchangeAddr = this.exchange.options.address
 
     const buyOrder = await _makeBuyOrder({
       networkName,
@@ -212,8 +213,8 @@ export class Orders extends Contracts {
   ): Promise<OrderJSON> {
     expirationTime = expirationTime ? parseInt(String(expirationTime)) : expirationTime
 
-    let networkName = this.networkName
-    let exchangeAddr = this.exchange.options.address
+    const networkName = this.networkName
+    const exchangeAddr = this.exchange.options.address
     const sellOrder = await _makeSellOrder({
       networkName,
       exchangeAddr,

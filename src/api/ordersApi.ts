@@ -1,11 +1,8 @@
-import 'isomorphic-unfetch'
-// @ts-ignore
+import fetch from 'isomorphic-unfetch'
 import { Network, ElementAPIConfig, Order, OrderJSON, OrderType } from '../types'
-// @ts-ignore
 import { orderFromJSON, Sleep } from '../utils'
-// @ts-ignore
-import { ORDERBOOK_PATH } from '../utils/constants'
-import { GraphAPI } from './graphApi'
+import { API_BASE_URL } from '../utils/constants'
+import { GraphqlApi } from './graphqlApi'
 
 export interface OrderVersionParams {
   contractAddress: string
@@ -38,11 +35,7 @@ export interface OrderQueryParams {
   orderType: OrderType
 }
 
-export class OrdersAPI extends GraphAPI {
-  /**
-   * Base url for the API
-   */
-  public readonly apiBaseUrl: string
+export class OrdersAPI extends GraphqlApi {
   /**
    * Page size to use for fetching orders
    */
@@ -52,27 +45,8 @@ export class OrdersAPI extends GraphAPI {
    */
   public logger: (arg: string) => void
 
-  private apiKey: string | undefined
-
-  /**
-   * Create an instance of the OpenSea API
-   * @param config OpenSeaAPIConfig for setting up the API, including an optional API key, network name, and base URL
-   * @param logger Optional function for logging debug strings before and after requests are made
-   */
   constructor(config: ElementAPIConfig, logger?: (arg: string) => void) {
     super(config, logger)
-    // this.apiKey = config.apiKey
-    switch (config.networkName) {
-      case Network.Rinkeby:
-        this.apiBaseUrl = config.apiBaseUrl || ORDERBOOK_PATH.rinkeby
-        break
-      case Network.Main:
-        this.apiBaseUrl = config.apiBaseUrl || ORDERBOOK_PATH.main
-        break
-      default:
-        this.apiBaseUrl = config.apiBaseUrl || ORDERBOOK_PATH.main
-        break
-    }
     // Debugging: default to nothing
     this.logger = logger || ((arg: string) => arg)
   }
@@ -86,9 +60,7 @@ export class OrdersAPI extends GraphAPI {
    */
   public async ordersPost({
     order,
-    retries = 2,
-    LanguageType,
-    Authorization
+    retries = 2
   }: {
     order: OrderJSON
     retries?: number
@@ -98,7 +70,7 @@ export class OrdersAPI extends GraphAPI {
     let json
     try {
       //X-Viewer-Addr
-      json = (await this.post(`/orders/post`, order)) as OrderJSON
+      json = (await this.post(`/v1/orders/post`, order)) as OrderJSON
     } catch (error) {
       _throwOrContinue(error, retries)
       await Sleep(3000)
@@ -110,7 +82,7 @@ export class OrdersAPI extends GraphAPI {
   public async ordersVersion(orderAsset: OrderVersionParams, retries = 2): Promise<OrderVersionData> {
     let json: OrderVersionData
     try {
-      json = (await this.post(`/orders/orderVersionQuery`, orderAsset)) as OrderVersionData
+      json = (await this.post(`/v1/orders/orderVersionQuery`, orderAsset)) as OrderVersionData
     } catch (error) {
       _throwOrContinue(error, retries)
       await Sleep(3000)
@@ -122,7 +94,7 @@ export class OrdersAPI extends GraphAPI {
   public async ordersConfData(retries = 2): Promise<OrderConfData> {
     let json: OrderConfData
     try {
-      json = (await this.post(`/orders/confData`)) as OrderConfData
+      json = (await this.post(`/v1/orders/confData`)) as OrderConfData
     } catch (error) {
       _throwOrContinue(error, retries)
       await Sleep(3000)
@@ -134,7 +106,7 @@ export class OrdersAPI extends GraphAPI {
   public async ordersCancel(cancelParams: OrderCancelParams, retries = 2): Promise<any> {
     let json
     try {
-      json = await this.post(`/orders/cancel`, cancelParams)
+      json = await this.post(`/v1/orders/cancel`, cancelParams)
     } catch (error) {
       _throwOrContinue(error, retries)
       await Sleep(3000)
@@ -146,7 +118,7 @@ export class OrdersAPI extends GraphAPI {
   public async ordersQuery(queryParams: OrderQueryParams, retries = 2): Promise<Array<OrderJSON>> {
     let json
     try {
-      json = await this.post(`/orders/query`, queryParams)
+      json = await this.post(`/v1/orders/query`, queryParams)
     } catch (error) {
       _throwOrContinue(error, retries)
       await Sleep(3000)
@@ -162,7 +134,7 @@ export class OrdersAPI extends GraphAPI {
    * @param opts RequestInit opts, similar to Fetch API. If it contains
    *  a body, it won't be stringified.
    */
-  public async post(apiPath: string, body?: object, opts: RequestInit = {}): Promise<any> {
+  public async post(apiPath: string, body?: { [key: string]: any }, opts: RequestInit = {}): Promise<any> {
     const fetchOpts = {
       method: 'POST',
       body: body ? JSON.stringify(body) : undefined,
@@ -193,12 +165,12 @@ export class OrdersAPI extends GraphAPI {
    */
   private async _fetch(apiPath: string, opts: RequestInit = {}) {
     const apiBase = this.apiBaseUrl
-    const apiKey = this.apiKey
+    const token = this.authToken
     const finalUrl = apiBase + apiPath
     const finalOpts = {
       ...opts,
       headers: {
-        ...(apiKey ? { 'X-API-KEY': apiKey } : {}),
+        ...(token ? { Authorization: token } : {}),
         ...(opts.headers || {})
       }
     }

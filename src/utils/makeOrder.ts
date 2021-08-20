@@ -81,9 +81,10 @@ export function getPriceParameters(
   englishAuctionReservePrice?: number
 ) {
   const priceDiff = endAmount != undefined ? startAmount - endAmount : 0
-  let token = paymentTokenObj
+  const token = paymentTokenObj
 
   const paymentToken = token.address.toLowerCase()
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   const tokenDecimals = token.decimals || token.decimal
 
@@ -209,7 +210,7 @@ export async function _makeBuyOrder({
   sellOrder?: Order
   referrerAddress?: string
 }): Promise<UnhashedOrder> {
-  let { schema, elementAsset, quantityBN } = getSchemaAndAsset(networkName, asset, quantity)
+  const { schema, elementAsset, quantityBN } = getSchemaAndAsset(networkName, asset, quantity)
 
   const taker = sellOrder ? sellOrder.maker : NULL_ADDRESS
 
@@ -319,7 +320,7 @@ export async function _makeSellOrder({
   feeRecipientAddr: string
   buyerAddress: string
 }): Promise<UnhashedOrder> {
-  let { schema, elementAsset, quantityBN } = getSchemaAndAsset(networkName, asset, quantity)
+  const { schema, elementAsset, quantityBN } = getSchemaAndAsset(networkName, asset, quantity)
 
   const { target, dataToCall, replacementPattern } = encodeSell(schema, elementAsset, accountAddress)
 
@@ -411,7 +412,7 @@ export async function _makeSellOrder({
 export async function getOrderHash(web3: any, exchangeHelper: any, order: UnhashedOrder): Promise<string> {
   const orderParamValueArray = orderParamsEncode(order)
   try {
-    let orderHash = await exchangeHelper.methods.hashOrder(orderParamValueArray).call()
+    const orderHash = await exchangeHelper.methods.hashOrder(orderParamValueArray).call()
     return orderHash
   } catch (e) {
     throw new ElementError({ code: '1000', message: 'exchangeHelper.methods.hashOrder ' + e.message })
@@ -429,7 +430,7 @@ export async function hashAndValidateOrder(web3: any, exchangeHelper: any, order
     throw error
   })
 
-  let orderWithSignature: Order = {
+  const orderWithSignature: Order = {
     ...hashedOrder,
     ...signature
   }
@@ -439,6 +440,7 @@ export async function hashAndValidateOrder(web3: any, exchangeHelper: any, order
 
 export async function signOrderHash(web3: any, hashedOrder: UnsignedOrder): Promise<ECSignature> {
   let signature: ECSignature
+  // eslint-disable-next-line no-useless-catch
   try {
     const signatureRes = await web3Sign(web3, hashedOrder.hash, hashedOrder.maker)
     const signatureHex = signatureRes.slice(2)
@@ -495,11 +497,11 @@ export const orderToJSON = (order: Order): OrderJSON => {
 }
 
 export function schemaEncodeSell(network: Network, schema: ElementSchemaName, owner: string, data: any) {
-  let schemaDefine: any = getSchemaList(network, schema)
+  const schemaDefine: any = getSchemaList(network, schema)
   // schemaDefine = schemaDefine[0]
-  let assetFiled: any = {}
-  let fields = schemaDefine.fields
-  for (let field of fields) {
+  const assetFiled: any = {}
+  const fields = schemaDefine.fields
+  for (const field of fields) {
     let val = data[field.name]
     if (!val) {
       throw field.name + ' is require！'
@@ -516,24 +518,24 @@ export function schemaEncodeSell(network: Network, schema: ElementSchemaName, ow
     assetFiled[field.name] = val
   }
 
-  let asset = schemaDefine.assetFromFields(assetFiled)
+  const asset = schemaDefine.assetFromFields(assetFiled)
 
-  let abi = schemaDefine.functions.transfer(asset)
-  let kind = abi.inputs.some((val: any) => val.kind == 'owner')
+  const abi = schemaDefine.functions.transfer(asset)
+  const kind = abi.inputs.some((val: any) => val.kind == 'owner')
   if (kind) {
     if (!owner) {
       throw 'must have owner field!'
     }
   }
 
-  let { target, dataToCall, replacementPattern } = encodeSell(schemaDefine, asset, owner) //target,
+  const { target, dataToCall, replacementPattern } = encodeSell(schemaDefine, asset, owner) //target,
 
   return { target, dataToCall, replacementPattern }
 }
 
 //计算当前 订单的总价格
 export async function getCurrentPrice(exchangeHelper: any, order: Order): Promise<string> {
-  let currentPrice: string = await exchangeHelper.methods
+  const currentPrice: string = await exchangeHelper.methods
     .calculateFinalPrice(
       order.side?.toString(),
       order.saleKind?.toString(),
@@ -576,7 +578,7 @@ export const computeOrderParams = (order: UnsignedOrder, networkName: Network, a
   if ('asset' in order.metadata) {
     const schema = getSchema(networkName, order.metadata.schema)
     // TODO order.metadata.asset.data = ''
-    let asset: any = order.metadata.asset
+    const asset: any = order.metadata.asset
     // if (!asset.data) {
     //   asset = { ...asset, data: '' }
     // }
@@ -591,7 +593,7 @@ export const computeOrderParams = (order: UnsignedOrder, networkName: Network, a
 export const computeOrderCallData = (order: UnsignedOrder, networkName: Network, assetRecipientAddress: string) => {
   if ('asset' in order.metadata) {
     const schema = getSchema(networkName, order.metadata.schema)
-    let asset: any = order.metadata.asset
+    const asset: any = order.metadata.asset
     return order.side == OrderSide.Buy
       ? encodeBuy(schema, asset, assetRecipientAddress)
       : encodeSell(schema, asset, assetRecipientAddress)

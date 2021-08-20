@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const ethABI = require('@txdev/ethereumjs-abi')
 
 import { AnnotatedFunctionABI, FunctionInput, FunctionInputKind, Schema } from './types'

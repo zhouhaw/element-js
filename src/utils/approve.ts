@@ -13,7 +13,7 @@ export async function registerProxy({
   account: string
   callBack?: CallBack
 }): Promise<boolean> {
-  let proxy = await proxyRegistryContract.methods.proxies(account).call()
+  const proxy = await proxyRegistryContract.methods.proxies(account).call()
   if (proxy === NULL_ADDRESS) {
     const res = await proxyRegistryContract.methods
       .registerProxy()
@@ -51,10 +51,10 @@ export async function approveTokenTransferProxy({
   account: string
   callBack?: CallBack
 }): Promise<boolean> {
-  let tokenTransferProxyAddr = await exchangeContract.methods.tokenTransferProxy().call()
+  const tokenTransferProxyAddr = await exchangeContract.methods.tokenTransferProxy().call()
   const allowAmount = await erc20Contract.methods.allowance(account, tokenTransferProxyAddr).call()
   if (new BigNumber(allowAmount).eq(0)) {
-    let res = await erc20Contract.methods
+    const res = await erc20Contract.methods
       .approve(tokenTransferProxyAddr, MAX_UINT_256.toString())
       .send({
         from: account
@@ -90,10 +90,10 @@ export async function approveERC1155TransferProxy({
   account: string
   callBack?: CallBack
 }): Promise<boolean> {
-  let operator = await proxyRegistryContract.methods.proxies(account).call()
-  let isApprove = await erc1155Contract.methods.isApprovedForAll(account, operator).call()
+  const operator = await proxyRegistryContract.methods.proxies(account).call()
+  const isApprove = await erc1155Contract.methods.isApprovedForAll(account, operator).call()
   if (!isApprove) {
-    let res = await erc1155Contract.methods
+    const res = await erc1155Contract.methods
       .setApprovalForAll(operator, true)
       .send({ from: account })
       .on('transactionHash', (txHash: string) => {
@@ -129,13 +129,13 @@ export async function approveERC721TransferProxy({
   tokenId?: string
   callBack?: CallBack
 }): Promise<boolean> {
-  let operator = await proxyRegistryContract.methods.proxies(account).call()
+  const operator = await proxyRegistryContract.methods.proxies(account).call()
   //isApprovedForAll
-  let isApprove = await erc721Contract.methods.isApprovedForAll(account, operator).call()
+  const isApprove = await erc721Contract.methods.isApprovedForAll(account, operator).call()
   if (!isApprove) {
     //  function setApprovalForAll(address _operator, bool _approved) external;
     // let res = await nftsContract.methods.approve(operator, tokenId).send({ from: account })
-    let res = await erc721Contract.methods
+    const res = await erc721Contract.methods
       .setApprovalForAll(operator, true)
       .send({ from: account })
       .on('transactionHash', (txHash: string) => {
@@ -178,6 +178,7 @@ export async function approveSchemaProxy({
   }
   const elementAsset = getElementAsset(schema, asset)
   //ElementSchemaName.CryptoKitties:
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   const accountApprove = schema?.functions?.approve(elementAsset, operator)
   const callData = encodeCall(accountApprove, [operator, asset.tokenId])

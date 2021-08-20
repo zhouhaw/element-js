@@ -1,39 +1,6 @@
 // 一口价购买
-import {
-  web3Sign,
-  Asset,
-  CallBack,
-  computeOrderCallData,
-  CONTRACTS_ADDRESSES,
-  ElementError,
-  ElementSchemaName,
-  getAccountBalance,
-  getCurrentPrice,
-  makeBigNumber,
-  Network,
-  NULL_ADDRESS,
-  Order,
-  OrderCheckStatus,
-  orderFromJSON,
-  Orders,
-  OrderSide,
-  Sleep,
-  Token,
-  transferFromERC1155,
-  transferFromERC20,
-  transferFromERC721,
-  getOrderCancelledOrFinalized,
-  getSchemaList,
-  checkOrder
-} from '../index'
-// import { ordersVersion, postOrder } from './index'
-import { OrderVersionData, OrderVersionParams, OrdersAPI, OrderCancelParams } from './orderApi'
-// import { AssetsDetailPrice, AssetType, PaymentTokenType, TradeBestAskType } from '@graphql/types/assets'
-import { OrderJSON, UnsignedOrder } from '../types'
-// import { MakeOrderType, postAssetLogs, postOrderLogs, postOrderMatchLogs } from '@public/helper/orderLogs'
-// import { getSigneInToken, walletConnectInfo, WalletEventType } from '@public/helper/wallet'
-// import { chainValueConvert } from '@public/helper/index'
-import { transferFromSchema } from '../utils/transfer'
+import { web3Sign, Asset, ElementError, ElementSchemaName, Network, Orders, Token, OrderJSON } from '../index'
+import { OrderVersionData, OrderVersionParams, OrdersAPI, OrderCancelParams } from './ordersApi'
 
 export enum MakeOrderType {
   FixPriceOrder = 'FixPriceOrder',
@@ -76,10 +43,10 @@ export interface SellOrderParams extends CreateOrderParams {
 
 export class ElementOrders extends OrdersAPI {
   public orders: any
-  public accountAddress: string = ''
-  public walletChainId: string = '0x1'
+  public accountAddress = ''
+  public walletChainId = '0x1'
   public networkName = Network.Private
-  public chainName: string = 'eth'
+  public chainName = 'eth'
   public chainId = 1
 
   // 初始化SDK

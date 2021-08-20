@@ -28,9 +28,14 @@ export const STATIC_EXTRADATA = '0x0c225aad' //succeedIfTxOriginMatchesHardcoded
 //
 export const CHECK_ETH_BALANCE = false
 
-export const ORDERBOOK_PATH = {
-  main: 'http://order.element.market:8001/v1',
-  rinkeby: 'https://element-api-test.eossql.com/v1'
+export const CHAIN_ID = {
+  main: 1,
+  rinkeby: 4
+}
+
+export const API_BASE_URL = {
+  main: 'https://element-api.eossql.com',
+  rinkeby: 'https://element-api-test.eossql.com'
 }
 
 export enum PRIVATE_CONTRACTS_ADDRESSES {
