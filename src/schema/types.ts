@@ -40,14 +40,16 @@ export interface AnnotatedFunctionABI {
 export enum Network {
   Main = 'main',
   Rinkeby = 'rinkeby',
-  Private = 'private'
+  Private = 'private',
+  Polygon = 'polygon',
+  Mumbai = 'mumbai'
 }
 
-export enum NetworkID {
-  Main = '4',
-  Rinkeby = '7',
-  Private = '100'
-}
+// export enum NetworkID {
+//   Main = '4',
+//   Rinkeby = '7',
+//   Private = '100'
+// }
 
 export enum AbiType {
   Function = 'function',
@@ -152,7 +154,7 @@ export interface SchemaFunctions<T> {
   countOf?: (asset: T) => AnnotatedFunctionABIReturning<number>
   isApprove?: (asset: T) => AnnotatedFunctionABI
   approve?: (asset: T, to: string) => AnnotatedFunctionABI
-  ownerTransfer?:(asset: T, to: string,amount?:number) => AnnotatedFunctionABI
+  ownerTransfer?: (asset: T, to: string, amount?: number) => AnnotatedFunctionABI
   assetsOfOwnerByIndex?: Array<AnnotatedFunctionABIReturning<T | null>>
   initializeProxy?: (owner: string) => AnnotatedFunctionABI
 }

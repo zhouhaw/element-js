@@ -54,7 +54,9 @@ export {
 
 export { Orders, OrderCheckStatus } from './orders'
 export { OrdersAPI } from './api/ordersApi'
+export type { OrderQueryParams } from './api/ordersApi'
 export { ElementOrders } from './api/index'
+export type { SellOrderParams } from './api/index'
 export type { CallBack } from './orders'
 export { Contracts } from './contracts'
 export { ErrorCodes, ElementError } from './base/error'

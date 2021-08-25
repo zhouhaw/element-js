@@ -35,12 +35,9 @@ export interface AnnotatedFunctionABI {
 export declare enum Network {
     Main = "main",
     Rinkeby = "rinkeby",
-    Private = "private"
-}
-export declare enum NetworkID {
-    Main = "4",
-    Rinkeby = "7",
-    Private = "100"
+    Private = "private",
+    Polygon = "polygon",
+    Mumbai = "mumbai"
 }
 export declare enum AbiType {
     Function = "function",

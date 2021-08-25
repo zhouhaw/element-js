@@ -30,12 +30,36 @@ export const CHECK_ETH_BALANCE = false
 
 export const CHAIN_ID = {
   main: 1,
-  rinkeby: 4
+  rinkeby: 4,
+  polygon: 137,
+  mumbai: 80001
 }
 
 export const API_BASE_URL = {
   main: 'https://element-api.eossql.com',
   rinkeby: 'https://element-api-test.eossql.com'
+}
+
+export enum POLYGON_CONTRACTS_ADDRESSES {
+  ElementixProxyRegistry = '0x26aFE7885cdCFF35ADE8498Bd183577dC98E3fcc',
+  // ElementixTokenTransferProxy = '0x20E1af184c5A40cFE63a377d8eE2A2029f1296FD',
+  ElementixExchange = '0x2a3eCaeA2A31bb34e84835Bd6799614304AaFa5F',
+  ExchangeHelper = '0xA3Fb1289f86025Aff90be8d39239836e24b986BF',
+  ElementixExchangeKeeper = '',
+  ElementSharedAsset = '0xa2e6f7dD012B3de9384079461Da3467E7b5E1aca',
+  FeeRecipientAddress = '0x9F7A946d935c8Efc7A8329C0d894A69bA241345A',
+  WETH = '0xA6FA4fB5f76172d178d61B04b0ecd319C5d1C0aa'
+}
+
+export enum MUMBAI_CONTRACTS_ADDRESSES {
+  ElementixProxyRegistry = '0x26aFE7885cdCFF35ADE8498Bd183577dC98E3fcc',
+  // ElementixTokenTransferProxy = '0x20E1af184c5A40cFE63a377d8eE2A2029f1296FD',
+  ElementixExchange = '0x2a3eCaeA2A31bb34e84835Bd6799614304AaFa5F',
+  ExchangeHelper = '0xA3Fb1289f86025Aff90be8d39239836e24b986BF',
+  ElementixExchangeKeeper = '',
+  ElementSharedAsset = '0xa2e6f7dD012B3de9384079461Da3467E7b5E1aca',
+  FeeRecipientAddress = '0x9F7A946d935c8Efc7A8329C0d894A69bA241345A',
+  WETH = '0xA6FA4fB5f76172d178d61B04b0ecd319C5d1C0aa'
 }
 
 export enum PRIVATE_CONTRACTS_ADDRESSES {
@@ -75,5 +99,7 @@ export enum MAIN_CONTRACTS_ADDRESSES {
 export const CONTRACTS_ADDRESSES = {
   rinkeby: RINKEBY_CONTRACTS_ADDRESSES,
   private: PRIVATE_CONTRACTS_ADDRESSES,
-  main: MAIN_CONTRACTS_ADDRESSES
+  main: MAIN_CONTRACTS_ADDRESSES,
+  mumbai: MUMBAI_CONTRACTS_ADDRESSES,
+  polygon: POLYGON_CONTRACTS_ADDRESSES
 }

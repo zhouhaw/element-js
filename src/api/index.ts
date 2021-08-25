@@ -118,6 +118,7 @@ export class ElementOrders extends OrdersAPI {
     }
 
     const orderVersion = await this.ordersVersion(orderAsset)
+    // console.log(orderAsset, orderVersion)
     if (!orderVersion.isTradable) {
       throw new ElementError({ code: '1212' })
     }
@@ -174,7 +175,7 @@ export class ElementOrders extends OrdersAPI {
   }
 
   // // 接受买单/购买-----------------order match
-  public async async(bestAskOrder: any, callBack?: CallBack) {
+  public async acceptOrder(bestAskOrder: any, callBack?: CallBack) {
     const accountAddress = this.accountAddress
     const signedOrder = checkOrderHash(bestAskOrder)
 

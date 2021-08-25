@@ -10,11 +10,12 @@
     "build": "tsc"
   },
   "dependencies": {
-    "bignumber.js": "^9.0.1",
+    "@maticnetwork/maticjs": "^2.0.45",
     "@txdev/ethereumjs-abi": "^0.6.6",
-    "isomorphic-unfetch": "^3.1.0",
+    "bignumber.js": "^9.0.1",
     "graphql": "^15.5.1",
-    "graphql-request": "^3.5.0"
+    "graphql-request": "^3.5.0",
+    "isomorphic-unfetch": "^3.1.0"
   },
   "devDependencies": {
     "@types/chai": "^4.2.21",

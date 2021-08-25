@@ -17,11 +17,31 @@ export declare const CHECK_ETH_BALANCE = false;
 export declare const CHAIN_ID: {
     main: number;
     rinkeby: number;
+    polygon: number;
+    mumbai: number;
 };
 export declare const API_BASE_URL: {
     main: string;
     rinkeby: string;
 };
+export declare enum POLYGON_CONTRACTS_ADDRESSES {
+    ElementixProxyRegistry = "0x26aFE7885cdCFF35ADE8498Bd183577dC98E3fcc",
+    ElementixExchange = "0x2a3eCaeA2A31bb34e84835Bd6799614304AaFa5F",
+    ExchangeHelper = "0xA3Fb1289f86025Aff90be8d39239836e24b986BF",
+    ElementixExchangeKeeper = "",
+    ElementSharedAsset = "0xa2e6f7dD012B3de9384079461Da3467E7b5E1aca",
+    FeeRecipientAddress = "0x9F7A946d935c8Efc7A8329C0d894A69bA241345A",
+    WETH = "0xA6FA4fB5f76172d178d61B04b0ecd319C5d1C0aa"
+}
+export declare enum MUMBAI_CONTRACTS_ADDRESSES {
+    ElementixProxyRegistry = "0x26aFE7885cdCFF35ADE8498Bd183577dC98E3fcc",
+    ElementixExchange = "0x2a3eCaeA2A31bb34e84835Bd6799614304AaFa5F",
+    ExchangeHelper = "0xA3Fb1289f86025Aff90be8d39239836e24b986BF",
+    ElementixExchangeKeeper = "",
+    ElementSharedAsset = "0xa2e6f7dD012B3de9384079461Da3467E7b5E1aca",
+    FeeRecipientAddress = "0x9F7A946d935c8Efc7A8329C0d894A69bA241345A",
+    WETH = "0xA6FA4fB5f76172d178d61B04b0ecd319C5d1C0aa"
+}
 export declare enum PRIVATE_CONTRACTS_ADDRESSES {
     ElementixProxyRegistry = "0x023CA02bFB85A3901316EdFE6BBA92B8cb54C9E3",
     ElementixExchange = "0xb328610a54A438C80EE6103F8679d75D6c0E20Ab",
@@ -54,4 +74,6 @@ export declare const CONTRACTS_ADDRESSES: {
     rinkeby: typeof RINKEBY_CONTRACTS_ADDRESSES;
     private: typeof PRIVATE_CONTRACTS_ADDRESSES;
     main: typeof MAIN_CONTRACTS_ADDRESSES;
+    mumbai: typeof MUMBAI_CONTRACTS_ADDRESSES;
+    polygon: typeof POLYGON_CONTRACTS_ADDRESSES;
 };

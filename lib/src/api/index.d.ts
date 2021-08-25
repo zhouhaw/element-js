@@ -53,5 +53,5 @@ export declare class ElementOrders extends OrdersAPI {
         newAsset: Asset;
     }>;
     createSellOrder({ asset, quantity, paymentToken, listingTime, expirationTime, startAmount, endAmount, buyerAddress }: SellOrderParams): Promise<any>;
-    async(bestAskOrder: any, callBack?: CallBack): Promise<any>;
+    acceptOrder(bestAskOrder: any, callBack?: CallBack): Promise<any>;
 }
