@@ -1,4 +1,4 @@
-import { FunctionInputKind, FunctionOutputKind, Schema, StateMutability, AbiType } from '../../types'
+import { FunctionInputKind, FunctionOutputKind, Schema, StateMutability, AbiType } from '../../../types'
 
 export interface NonFungibleContractType {
   id: string

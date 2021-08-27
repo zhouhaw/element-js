@@ -92,10 +92,25 @@ export class Orders extends Contracts {
     const buyOrderParamArray = orderParamsEncode(buy as UnhashedOrder)
     const buyOrderSigArray = orderSigEncode(buy as ECSignature)
     callBack?.next(OrderCheckStatus.StartOrderMatch, { buy, sell })
+
+    const value = buy.paymentToken !== NULL_ADDRESS ? 0 : buy.basePrice
+    const data = await this.exchange.methods
+      .orderMatch(buyOrderParamArray, buyOrderSigArray, sellOrderParamArray, sellOrderSigArray, '0x')
+      .encodeABI()
+    console.log(data)
+    const gas = await this.web3.eth
+      .estimateGas({ to: this.exchange.options.address, data, value })
+      .catch((error: any) => {
+        throw new ElementError({ code: '1003', context: { msg: error.message } })
+      })
+
+    console.log(gas)
+
     return this.exchange.methods
       .orderMatch(buyOrderParamArray, buyOrderSigArray, sellOrderParamArray, sellOrderSigArray, metadata)
       .send({
-        value: buy.paymentToken !== NULL_ADDRESS ? 0 : buy.basePrice,
+        gas,
+        value,
         from: accountAddress
       })
       .on('transactionHash', (txHash: string) => {
@@ -109,7 +124,7 @@ export class Orders extends Contracts {
         if (error.code == '4001') {
           throw new ElementError(error)
         } else {
-          throw new ElementError({ code: '1000', message: 'OrderMatch failure' })
+          throw new ElementError({ code: '1004', context: { msg: error.message } })
         }
       })
   }

@@ -1,5 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const ethABI = require('@txdev/ethereumjs-abi')
+// const ethABI = require('@txdev/ethereumjs-abi')
+import { ABI as ethABI, elementaryName, encodeSingle, isDynamic } from './ethAbi'
 
 import { AnnotatedFunctionABI, FunctionInput, FunctionInputKind, Schema } from './types'
 
@@ -45,17 +46,17 @@ export const encodeReplacementPattern: ReplacementEncoder = (
   abi.inputs
     .map(({ kind, type, value }) => ({
       bitmask: kind === replaceKind ? 255 : 0,
-      type: ethABI.elementaryName(type),
+      type: elementaryName(type),
       value: value !== undefined ? value : generateDefaultValue(type)
     }))
     .reduce((offset, { bitmask, type, value }) => {
       // The 0xff bytes in the mask select the replacement bytes. All other bytes are 0x00.
-      const cur = new Buffer(ethABI.encodeSingle(type, value).length).fill(bitmask)
-      if (ethABI.isDynamic(type)) {
+      const cur = new Buffer(encodeSingle(type, value).length).fill(bitmask)
+      if (isDynamic(type)) {
         if (bitmask) {
           throw new Error('Replacement is not supported for dynamic parameters.')
         }
-        output.push(new Buffer(ethABI.encodeSingle('uint256', dynamicOffset).length))
+        output.push(new Buffer(encodeSingle('uint256', dynamicOffset).length))
         data.push(cur)
         return offset + cur.length
       }
@@ -73,6 +74,11 @@ export interface LimitedCallSpec {
   dataToCall: string
 }
 
+// export const decodeCall = (abi: AnnotatedFunctionABI, values: string): any => {
+//   const outputsTypes = abi.outputs.map((i) => i.type)
+//   return ethABI.rawDecode(outputsTypes, values)
+// }
+
 export const encodeCall = (abi: AnnotatedFunctionABI, parameters: any[]): string => {
   const inputTypes = abi.inputs.map((i) => i.type)
   return (
@@ -81,14 +87,12 @@ export const encodeCall = (abi: AnnotatedFunctionABI, parameters: any[]): string
   )
 }
 
-export const encodeCallByMethod = (methodName: string, inputs: Array<FunctionInput>): string => {
-  // const inputTypes = abi.inputs.map((i) => i.type)
-  // [{type:"",value:1},{type:"",value:1}]
-  const inputTypes = inputs.map((val: any) => val.type)
-  const parameters = inputs.map((val: any) => val.value)
+export const encodeParamsCall = (abi: AnnotatedFunctionABI): string => {
+  const inputTypes = abi.inputs.map((i) => i.type)
+  const parameters = abi.inputs.map((i) => i.value)
   return (
     '0x' +
-    Buffer.concat([ethABI.methodID(methodName, inputTypes), ethABI.rawEncode(inputTypes, parameters)]).toString('hex')
+    Buffer.concat([ethABI.methodID(abi.name, inputTypes), ethABI.rawEncode(inputTypes, parameters)]).toString('hex')
   )
 }
 

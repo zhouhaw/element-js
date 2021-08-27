@@ -1,6 +1,6 @@
 export { ElementSchemaName, FeeMethod, HowToCall, Network, OrderSide, SaleKind } from './types';
 export type { Asset, Order, OrderJSON, Token, UnsignedOrder } from './types';
-export { schemas, encodeBuy, encodeSell, encodeCall } from './schema';
+export { schemas, encodeBuy, encodeSell, encodeCall, encodeParamsCall } from './schema';
 export { getElementAssetURI, ordersCanMatch, validateOrder, checkOrder, checkMatchOrder, checkRegisterProxy, getOrderCancelledOrFinalized, checkApproveTokenTransferProxy, checkApproveERC1155TransferProxy, checkSenderOfAuthenticatedProxy } from './utils/check';
 export { registerProxy, approveSchemaProxy, approveTokenTransferProxy, approveERC1155TransferProxy, approveERC721TransferProxy } from './utils/approve';
 export { orderToJSON, getPriceParameters, getCurrentPrice, computeOrderCallData } from './utils/makeOrder';

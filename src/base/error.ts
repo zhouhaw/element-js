@@ -36,6 +36,14 @@ export const ErrorCodes: ElementErrorCodes = [
     message: 'Account authProxy without authorization exchangeProxyRegistryAddr '
   },
   {
+    code: '1003',
+    message: 'Order match estimateGas failure {{msg}}'
+  },
+  {
+    code: '1004',
+    message: 'Order match failure {{msg}}'
+  },
+  {
     code: '1101',
     message: 'TokenTransferProxy allowAmount equel 0 '
   },
@@ -106,7 +114,7 @@ export const ErrorCodes: ElementErrorCodes = [
   },
   {
     code: '2001',
-    message: '{{funcName}} RPC send request error {{stack}}'
+    message: '{{funcName}} RPC send request error {{stack}} {{msg}}'
   },
   {
     code: '2002',

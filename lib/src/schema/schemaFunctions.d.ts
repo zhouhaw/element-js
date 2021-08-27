@@ -1,11 +1,11 @@
-import { AnnotatedFunctionABI, FunctionInput, FunctionInputKind, Schema } from './types';
+import { AnnotatedFunctionABI, FunctionInputKind, Schema } from './types';
 export declare const encodeReplacementPattern: ReplacementEncoder;
 export interface LimitedCallSpec {
     target: string;
     dataToCall: string;
 }
 export declare const encodeCall: (abi: AnnotatedFunctionABI, parameters: any[]) => string;
-export declare const encodeCallByMethod: (methodName: string, inputs: Array<FunctionInput>) => string;
+export declare const encodeParamsCall: (abi: AnnotatedFunctionABI) => string;
 export interface CallSpec {
     target: string;
     dataToCall: string;

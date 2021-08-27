@@ -1,3 +1,3 @@
 import { Schema } from '../../../types';
-import { SemiFungibleTradeType } from '../../ERC1155';
+import { SemiFungibleTradeType } from '../../common/ERC1155';
 export declare const EnjinItemSchema: Schema<SemiFungibleTradeType>;

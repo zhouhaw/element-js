@@ -1,6 +1,6 @@
 export { ElementSchemaName, FeeMethod, HowToCall, Network, OrderSide, SaleKind } from './types'
 export type { Asset, Order, OrderJSON, Token, UnsignedOrder } from './types'
-export { schemas, encodeBuy, encodeSell, encodeCall } from './schema'
+export { schemas, encodeBuy, encodeSell, encodeCall, encodeParamsCall } from './schema'
 export {
   getElementAssetURI,
   ordersCanMatch,

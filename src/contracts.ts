@@ -90,7 +90,7 @@ export class Contracts extends EventEmitter {
     this.feeRecipientAddress = feeRecipientAddress
 
     const options = {
-      // gas: gasLimit
+      // gas: 80e4
     }
     if (exchangeHelperAddr && exchangeAddr && proxyRegistryAddr) {
       this.exchangeHelper = new web3.eth.Contract(ExchangeHelper.abi, exchangeHelperAddr, options)

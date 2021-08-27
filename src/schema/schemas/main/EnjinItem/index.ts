@@ -1,5 +1,5 @@
 import { FunctionInputKind, FunctionOutputKind, Schema, StateMutability, AbiType } from '../../../types'
-import { ERC1155Schema, SemiFungibleTradeType } from '../../ERC1155'
+import { ERC1155Schema, SemiFungibleTradeType } from '../../common/ERC1155'
 
 export const EnjinItemSchema: Schema<SemiFungibleTradeType> = {
   ...ERC1155Schema,

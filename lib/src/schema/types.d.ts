@@ -125,7 +125,7 @@ export interface SchemaFunctions<T> {
     transfer: (asset: T) => AnnotatedFunctionABI;
     ownerOf?: (asset: T) => AnnotatedFunctionABI;
     countOf?: (asset: T) => AnnotatedFunctionABIReturning<number>;
-    isApprove?: (asset: T) => AnnotatedFunctionABI;
+    isApprove?: (asset: T, to: string) => AnnotatedFunctionABI;
     approve?: (asset: T, to: string) => AnnotatedFunctionABI;
     ownerTransfer?: (asset: T, to: string, amount?: number) => AnnotatedFunctionABI;
     assetsOfOwnerByIndex?: Array<AnnotatedFunctionABIReturning<T | null>>;

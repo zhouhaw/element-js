@@ -32,7 +32,7 @@ export async function registerProxy({
         if (error.code == '4001') {
           throw new ElementError(error)
         } else {
-          throw new ElementError({ code: '2001', context: { funcName: 'registerProxy()' } })
+          throw new ElementError({ code: '2001', context: { funcName: 'registerProxy()', msg: error.message } })
         }
       })
   }

@@ -1,6 +1,4 @@
- 
-
-import { FunctionInputKind, FunctionOutputKind, Schema, StateMutability ,AbiType} from '../../types'
+import { FunctionInputKind, FunctionOutputKind, Schema, StateMutability, AbiType } from '../../../types'
 
 export interface SemiFungibleTradeType {
   id: string
@@ -20,21 +18,21 @@ export const ERC1155Schema: Schema<SemiFungibleTradeType> = {
     { name: 'ID', type: 'uint256', description: 'Asset Token ID' },
     { name: 'Address', type: 'address', description: 'Asset Contract Address' },
     { name: 'Quantity', type: 'uint256', description: 'Quantity to transfer' },
-    { name: 'Data', type: 'bytes', description: 'Data to transfer'}
+    { name: 'Data', type: 'bytes', description: 'Data to transfer' }
   ],
   assetFromFields: (fields: any) => ({
     id: fields.ID,
     address: fields.Address,
     quantity: fields.Quantity,
-    data: fields.Data,
+    data: fields.Data
   }),
-  assetToFields: (asset:any) => ({
+  assetToFields: (asset: any) => ({
     ID: asset.id,
     Address: asset.address,
     Quantity: asset.quantity,
-    Data: asset.data,
+    Data: asset.data
   }),
-  formatter: async (asset:any) => {
+  formatter: async (asset: any) => {
     return {
       title: 'ERC1155 Asset: Token ID ' + asset.id + ' at ' + asset.address,
       description: 'Trading ' + asset.quantity.toString(),
@@ -44,7 +42,7 @@ export const ERC1155Schema: Schema<SemiFungibleTradeType> = {
     }
   },
   functions: {
-    transfer: (asset:any) => ({
+    transfer: (asset: any) => ({
       type: AbiType.Function,
       name: 'safeTransferFrom',
       payable: false,
@@ -56,12 +54,12 @@ export const ERC1155Schema: Schema<SemiFungibleTradeType> = {
         { kind: FunctionInputKind.Replaceable, name: '_to', type: 'address' },
         { kind: FunctionInputKind.Asset, name: '_id', type: 'uint256', value: asset.id },
         { kind: FunctionInputKind.Count, name: '_value', type: 'uint256', value: asset.quantity },
-        { kind: FunctionInputKind.Data, name: '_data', type: 'bytes', value: asset.data}
+        { kind: FunctionInputKind.Data, name: '_data', type: 'bytes', value: asset.data }
       ],
       outputs: []
     }),
-    countOf: (asset:any) => ({
-      type:  AbiType.Function,
+    countOf: (asset: any) => ({
+      type: AbiType.Function,
       name: 'balanceOf',
       payable: false,
       constant: true,
@@ -79,5 +77,5 @@ export const ERC1155Schema: Schema<SemiFungibleTradeType> = {
   events: {
     transfer: []
   },
-  hash: (asset:any) => asset.address + '-' + asset.id
+  hash: (asset: any) => asset.address + '-' + asset.id
 }
