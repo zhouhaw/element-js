@@ -17,16 +17,62 @@ import { EthApi, Web3 } from './api/ethApi'
 import { encodeCall, encodeParamsCall, schemas } from './schema'
 import { MAX_UINT_256 } from './utils/constants'
 import { common } from './schema/schemas'
+import { LimitedCallSpec, AnnotatedFunctionOutput, SchemaFunctions } from './schema/types'
+import { OrderCheckStatus } from './orders'
 
 // 根据 DB签名过的订单 make一个对手单
 export class Account extends Contracts {
   public ethApi: EthApi
   public elementAccount: string
+  public Erc20Func
+  public ElementFunc
 
   constructor(web3: Web3, apiConfig: ElementAPIConfig = { networkName: Network.Rinkeby }) {
     super(web3, apiConfig)
     this.elementAccount = apiConfig.account || web3.eth.defaultAccount?.toLowerCase() || ''
-    this.ethApi = new EthApi(web3.givenProvider)
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    this.ethApi = new EthApi(web3.currentProvider.host)
+    this.Erc20Func = common.ERC20Schema.functions
+    this.ElementFunc = common.ElementSchemas.functions
+  }
+
+  public async ethCall(callData: LimitedCallSpec, outputs: AnnotatedFunctionOutput[]): Promise<any> {
+    const hexStr = await this.web3.eth.call(callData)
+    const params = this.web3.eth.abi.decodeParameters(outputs, hexStr)
+    if (params.__length__ == 1) {
+      return params[0]
+    }
+    return params
+  }
+
+  public async ethSend(callData: LimitedCallSpec): Promise<any> {
+    const from = this.elementAccount
+    const gas = await this.web3.eth.estimateGas(callData)
+    const gasPrice = await this.web3.eth.getGasPrice()
+    const nonce = await this.web3.eth.getTransactionCount(from)
+    const transactionObject = {
+      from,
+      to: callData.to,
+      value: callData.value || 0,
+      nonce,
+      gas,
+      gasPrice,
+      data: callData.data
+    }
+    return this.web3.eth
+      .sendTransaction(transactionObject)
+      .on('transactionHash', (txHash: string) => {
+        // console.log('approveTokenTransferProxy tx txHash', txHash)
+        this.emit('transactionHash', txHash)
+      })
+      .on('receipt', (receipt: string) => {
+        // console.log('approveTokenTransferProxy tx receipt', receipt)
+        this.emit('receipt', receipt)
+      })
+      .catch((error: any) => {
+        this.emit('error', error)
+      })
   }
 
   public async getProxy() {
@@ -34,106 +80,67 @@ export class Account extends Contracts {
     const to = this.contractsAddr.ElementixProxyRegistry
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    const accountApprove = common.ElementSchemas.functions.isApprove({ account })
+    const accountApprove = this.ElementFunc.isApprove({ account })
     const data = encodeCall(accountApprove, [this.elementAccount])
     // const proxy = await this.exchangeProxyRegistry.methods.proxies(account).encodeABI()
-    // console.log(data)
-    // console.log(proxy)
     const callData = { to, data }
-    return this.web3.eth.call(callData)
+    return this.ethCall(callData, accountApprove?.outputs)
   }
 
   public async registerProxy() {
-    const from = this.elementAccount
     const to = this.contractsAddr.ElementixProxyRegistry
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    const accountApprove = common.ElementSchemas.functions.approve()
+    const accountApprove = this.ElementFunc.approve()
     const data = encodeCall(accountApprove, [])
     // const proxy = await this.exchangeProxyRegistry.methods.registerProxy().encodeABI()
     // console.log(data)
     // console.log(proxy)
-    const gas = await this.web3.eth.estimateGas({ to, data })
-    const gasPrice = await this.web3.eth.getGasPrice()
-    const nonce = await this.web3.eth.getTransactionCount(from)
-    const transactionObject = {
-      from,
-      to,
-      value: 0,
-      nonce,
-      gas,
-      gasPrice,
-      data
-    }
-    return this.web3.eth.sendTransaction(transactionObject)
+    const callData = { to, data }
+    return this.ethSend(callData)
   }
 
-  public async checkTokenTransferProxy(tokenAddr: string) {
-    // const from = this.elementAccount
-    const account = await this.getProxy()
-    const to = await this.exchange.methods.tokenTransferProxy().call()
-    // const tokenTransferProxyAddr =
+  public async checkTokenTransferProxy(tokenAddr: string): Promise<string> {
+    const accountProxy = await this.getProxy()
+    const proxy = await this.exchange.methods.tokenTransferProxy().call()
+    const to = tokenAddr
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    const accountApprove = common.ERC20Schema.functions.isApprove({ account }, to)
+    const accountApprove = this.Erc20Func.isApprove({ account: accountProxy }, proxy)
     const data = encodeParamsCall(accountApprove)
-    const proxy = await this.erc20.methods.allowance(account, to).encodeABI()
-    console.log(data)
-    console.log(proxy)
     const callData = { to, data }
-    return this.web3.eth.call(callData)
+    return this.ethCall(callData, accountApprove?.outputs)
   }
 
   public async getTokenBalances(tokenAddr: string): Promise<string> {
     const account = this.elementAccount
     const to = tokenAddr
-    const erc20Contract = this.erc20.clone()
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    const accountBal = common.ERC20Schema.functions.countOf({ account })
+    const accountBal = this.Erc20Func.countOf({ account })
     const data = encodeParamsCall(accountBal)
-    const proxy = await this.erc20.methods.balanceOf(account).encodeABI()
-    console.log(data)
-    console.log(proxy)
     const callData = { to, data }
-    const res = await this.web3.eth.call(callData)
-
-    const params = this.web3.eth.abi.decodeParameters(accountBal?.outputs, res)
-    // const decode = decodeCall(accountBal, res).toNumber()
-    // erc20Contract.options.address = tokenAddr
-    // const decode = await erc20Contract.methods.balanceOf(account).call()
-    // console.log(params)
-    // console.log(decode)
-    // const balance = decodeCall(accountBal, res)[0]
-    console.log(params)
-    return params.balance
+    return this.ethCall(callData, accountBal?.outputs)
   }
 
-  public async approveTokenTransferProxy(tokenAddr: string) {
-    const from = this.elementAccount
-    const proxyAccount = await this.getProxy()
+  public async approveTokenTransferProxy(tokenAddr: string): Promise<any> {
+    // const accountProxy = await this.getProxy()
+    const proxy = await this.exchange.methods.tokenTransferProxy().call()
+    console.log(proxy)
     const to = tokenAddr
+    const quantity = MAX_UINT_256.toString()
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    const accountApprove = common.ERC20Schema.functions.approve()
-    const data = encodeCall(accountApprove, [proxyAccount, MAX_UINT_256.toString()])
+    const accountApprove = this.Erc20Func.approve({ quantity }, proxy)
+    const data = encodeCall(accountApprove, [proxy, quantity])
 
-    const proxy = await this.erc20.methods.approve(proxyAccount, MAX_UINT_256.toString()).encodeABI()
-    // console.log(data)
-    // console.log(proxy)
-    const gas = await this.web3.eth.estimateGas({ to, data })
-    const gasPrice = await this.web3.eth.getGasPrice()
-    const nonce = await this.web3.eth.getTransactionCount(from)
-    const transactionObject = {
-      from,
-      to,
-      value: 0,
-      nonce,
-      gas,
-      gasPrice,
-      data
-    }
-    return this.web3.eth.sendTransaction(transactionObject)
+    const erc20Contract = this.erc20.clone()
+    erc20Contract.options.address = tokenAddr
+    const proxyData = await erc20Contract.methods.approve(proxy, quantity).encodeABI()
+    console.log(data)
+    console.log(proxyData)
+    const callData = { to, data }
+    return this.ethSend(callData)
   }
 
   public async initApprove(error: ElementError) {

@@ -8,6 +8,12 @@ export enum FunctionInputKind {
   Data = 'data'
 }
 
+export interface LimitedCallSpec {
+  to: string
+  data: string
+  value?: string
+}
+
 export interface FunctionInput {
   name: string
   type: string

@@ -69,11 +69,6 @@ export const encodeReplacementPattern: ReplacementEncoder = (
   return encodeToBytes ? `0x${mask.toString('hex')}` : mask.map((b) => (b ? 1 : 0)).join('')
 }
 
-export interface LimitedCallSpec {
-  target: string
-  dataToCall: string
-}
-
 // export const decodeCall = (abi: AnnotatedFunctionABI, values: string): any => {
 //   const outputsTypes = abi.outputs.map((i) => i.type)
 //   return ethABI.rawDecode(outputsTypes, values)
