@@ -12,12 +12,12 @@ export interface ElementAPIConfig {
   apiBaseUrl?: string
 }
 
-export enum AbiType {
-  Function = 'function',
-  Constructor = 'constructor',
-  Event = 'event',
-  Fallback = 'fallback'
-}
+// export enum AbiType {
+//   Function = 'function',
+//   Constructor = 'constructor',
+//   Event = 'event',
+//   Fallback = 'fallback'
+// }
 
 // Element Schemas (see https://github.com/definancer/element-js)
 export enum ElementSchemaName {

@@ -48,6 +48,32 @@ export const ERC721Schema: Schema<NonFungibleContractType> = {
       ],
       outputs: []
     }),
+    isApprove: (asset, to) => ({
+      type: AbiType.Function,
+      name: 'isApprovedForAll',
+      payable: false,
+      constant: true,
+      stateMutability: StateMutability.View,
+      target: asset.address,
+      inputs: [
+        { kind: FunctionInputKind.Owner, name: '_owner', type: 'address' },
+        { kind: FunctionInputKind.Replaceable, name: '_operator', type: 'address' }
+      ],
+      outputs: [{ kind: FunctionOutputKind.Owner, name: 'owner', type: 'bool' }]
+    }),
+    approve: (asset, to) => ({
+      type: AbiType.Function,
+      name: 'setApprovalForAll',
+      payable: false,
+      constant: false,
+      stateMutability: StateMutability.Nonpayable,
+      target: asset.address,
+      inputs: [
+        { kind: FunctionInputKind.Owner, name: 'operator', type: 'address' },
+        { kind: FunctionInputKind.Replaceable, name: 'isoperator', type: 'bool' }
+      ],
+      outputs: []
+    }),
     ownerOf: (asset) => ({
       type: AbiType.Function,
       name: 'ownerOf',

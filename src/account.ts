@@ -1,31 +1,21 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
 import { ElementError } from './base/error'
-
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
 import { Contracts } from './contracts'
-import {
-  approveERC1155TransferProxy,
-  approveERC721TransferProxy,
-  approveSchemaProxy,
-  approveTokenTransferProxy,
-  registerProxy
-} from './utils/approve'
-import { ElementAPIConfig, Network } from './types'
+import { Asset, ElementAPIConfig, ElementSchemaName, ExchangeMetadata, Network, UnsignedOrder } from './types'
 import { EthApi, Web3 } from './api/ethApi'
-import { encodeCall, encodeParamsCall, schemas } from './schema'
+import { encodeParamsCall } from './schema'
 import { MAX_UINT_256 } from './utils/constants'
-import { common } from './schema/schemas'
-import { LimitedCallSpec, AnnotatedFunctionOutput, SchemaFunctions } from './schema/types'
-import { OrderCheckStatus } from './orders'
+import { common, getApproveSchemas, getIsApproveSchemas, getTransferSchemas } from './schema/schemas'
+import { AnnotatedFunctionOutput, LimitedCallSpec } from './schema/types'
 
 // 根据 DB签名过的订单 make一个对手单
 export class Account extends Contracts {
   public ethApi: EthApi
   public elementAccount: string
+  public accountProxy: ''
   public Erc20Func
-  public ElementFunc
+  public ElementRegistryFunc
+  public proxyRegistry
+  public tokenTransferProxy
 
   constructor(web3: Web3, apiConfig: ElementAPIConfig = { networkName: Network.Rinkeby }) {
     super(web3, apiConfig)
@@ -33,8 +23,13 @@ export class Account extends Contracts {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     this.ethApi = new EthApi(web3.currentProvider.host)
+    this.networkName = apiConfig.networkName
     this.Erc20Func = common.ERC20Schema.functions
-    this.ElementFunc = common.ElementSchemas.functions
+    this.ElementRegistryFunc = common.ElementSchemas.registry.functions
+    this.proxyRegistry = this.contractsAddr.ElementixProxyRegistry
+    // await this.exchange.methods.tokenTransferProxy().call()
+    this.tokenTransferProxy = this.contractsAddr.ElementixTokenTransferProxy
+    this.accountProxy = ''
   }
 
   public async ethCall(callData: LimitedCallSpec, outputs: AnnotatedFunctionOutput[]): Promise<any> {
@@ -75,114 +70,124 @@ export class Account extends Contracts {
       })
   }
 
-  public async getProxy() {
-    const account = this.elementAccount
-    const to = this.contractsAddr.ElementixProxyRegistry
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    const accountApprove = this.ElementFunc.isApprove({ account })
-    const data = encodeCall(accountApprove, [this.elementAccount])
-    // const proxy = await this.exchangeProxyRegistry.methods.proxies(account).encodeABI()
-    const callData = { to, data }
-    return this.ethCall(callData, accountApprove?.outputs)
+  public async getOrderApprove(order: UnsignedOrder): Promise<any> {
+    const maker = this.elementAccount
+    return {
+      isRegister: false,
+      isPayTokenApprove: false,
+      isSellAssetApprove: false,
+      isFeeTokenApprove: false,
+      transferProxy: this.tokenTransferProxy
+    }
+  }
+
+  public async getAccountProxy() {
+    const owner = this.elementAccount
+    const address = this.proxyRegistry
+    if (this.accountProxy === '') {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      const accountApprove = this.ElementRegistryFunc.isApprove({ address })
+      const data = encodeParamsCall(accountApprove, { owner })
+      const callData = { to: accountApprove.target, data }
+      this.accountProxy = await this.ethCall(callData, accountApprove?.outputs)
+    }
+    return this.accountProxy
   }
 
   public async registerProxy() {
-    const to = this.contractsAddr.ElementixProxyRegistry
+    const to = this.proxyRegistry
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    const accountApprove = this.ElementFunc.approve()
-    const data = encodeCall(accountApprove, [])
-    // const proxy = await this.exchangeProxyRegistry.methods.registerProxy().encodeABI()
-    // console.log(data)
-    // console.log(proxy)
+    const accountApprove = this.ElementRegistryFunc.transfer()
+    const data = encodeParamsCall(accountApprove, {})
     const callData = { to, data }
     return this.ethSend(callData)
   }
 
-  public async checkTokenTransferProxy(tokenAddr: string): Promise<string> {
-    const accountProxy = await this.getProxy()
-    const proxy = await this.exchange.methods.tokenTransferProxy().call()
-    const to = tokenAddr
+  public async checkTokenTransferProxy(to: string): Promise<string> {
+    const tokenProxy = this.tokenTransferProxy
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    const accountApprove = this.Erc20Func.isApprove({ account: accountProxy }, proxy)
-    const data = encodeParamsCall(accountApprove)
+    const accountApprove = this.Erc20Func.isApprove()
+    const data = encodeParamsCall(accountApprove, { owner: this.elementAccount, replace: tokenProxy })
     const callData = { to, data }
     return this.ethCall(callData, accountApprove?.outputs)
   }
 
-  public async getTokenBalances(tokenAddr: string): Promise<string> {
-    const account = this.elementAccount
-    const to = tokenAddr
+  public async getTokenBalances(to: string): Promise<string> {
+    const owner = this.elementAccount
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    const accountBal = this.Erc20Func.countOf({ account })
-    const data = encodeParamsCall(accountBal)
+    const accountBal = this.Erc20Func.countOf()
+    const data = encodeParamsCall(accountBal, { owner })
     const callData = { to, data }
     return this.ethCall(callData, accountBal?.outputs)
   }
 
-  public async approveTokenTransferProxy(tokenAddr: string): Promise<any> {
-    // const accountProxy = await this.getProxy()
-    const proxy = await this.exchange.methods.tokenTransferProxy().call()
-    console.log(proxy)
-    const to = tokenAddr
+  public async approveTokenTransferProxy(to: string): Promise<any> {
+    const tokenProxy = this.tokenTransferProxy
     const quantity = MAX_UINT_256.toString()
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    const accountApprove = this.Erc20Func.approve({ quantity }, proxy)
-    const data = encodeCall(accountApprove, [proxy, quantity])
-
-    const erc20Contract = this.erc20.clone()
-    erc20Contract.options.address = tokenAddr
-    const proxyData = await erc20Contract.methods.approve(proxy, quantity).encodeABI()
-    console.log(data)
-    console.log(proxyData)
+    const accountApprove = this.Erc20Func.approve({ quantity })
+    const data = encodeParamsCall(accountApprove, { replace: tokenProxy })
     const callData = { to, data }
+    return this.ethSend(callData)
+  }
+
+  public async checkAssetTransferProxy(metadata: ExchangeMetadata): Promise<boolean> {
+    const owner = this.elementAccount
+    const operator = this.tokenTransferProxy
+    const accountApprove = getIsApproveSchemas(metadata)
+    const data = encodeParamsCall(accountApprove, { owner, replace: operator })
+    const callData = { to: accountApprove.target, data }
+    const res = await this.ethCall(callData, accountApprove?.outputs)
+    const isAddr = accountApprove?.outputs.some((val) => val.type == 'address')
+    if (isAddr) {
+      // 授权地址是否和 proxy一致
+      return res.toLowerCase() === operator.toLowerCase()
+    }
+    return res
+  }
+
+  public async approveAssetTransferProxy(metadata: ExchangeMetadata): Promise<any> {
+    const operator = this.tokenTransferProxy
+    const accountApprove = getApproveSchemas(metadata)
+    const data = encodeParamsCall(accountApprove, { owner: operator, replace: true })
+    const callData = { to: accountApprove.target, data }
+    return this.ethSend(callData)
+  }
+
+  public async assetTransfer(asset: Asset, to: string): Promise<any> {
+    const owner = this.elementAccount
+    const accountApprove = getTransferSchemas(asset)
+    const data = encodeParamsCall(accountApprove, { owner, replace: to })
+    const callData = { to: accountApprove.target, data }
     return this.ethSend(callData)
   }
 
   public async initApprove(error: ElementError) {
     console.log('orderErrorHandler', error)
-    const erc20Contract = this.erc20.clone()
-    const erc1155Contract = this.erc1155.clone()
-    const erc721Contract = this.erc721.clone()
-    const account = this.web3.eth.defaultAccount
     switch (String(error.code)) {
       case '1001': // initialize
         await this.registerProxy()
         break
       case '1101': // 批准任何erc20 token
-        erc20Contract.options.address = error.data.erc20Address
-        await approveTokenTransferProxy({
-          exchangeContract: this.exchange,
-          erc20Contract,
-          account
-        })
+        await this.approveTokenTransferProxy(error.data.erc20Address)
         break
       case '1102': // checkApproveERC1155TransferProxy
-        erc1155Contract.options.address = error.data.nftAddress
-        await approveERC1155TransferProxy({
-          proxyRegistryContract: this.exchangeProxyRegistry,
-          erc1155Contract,
-          account
-        })
+        await this.approveAssetTransferProxy(error.data.order.metadata)
         break
-      case '1106':
-        erc721Contract.options.address = error.data.nftAddress
-        await approveERC721TransferProxy({
-          proxyRegistryContract: this.exchangeProxyRegistry,
-          erc721Contract,
-          account,
-          tokenId: error.data.tokenId
-        })
+      case '1106': // checkApproveERC721TransferProxy
+        await this.approveAssetTransferProxy(error.data.order.metadata)
         break
-      case '1108':
-        await approveSchemaProxy({
-          contract: this,
-          orderMetadata: error.data.order.metadata
-        })
+      case '1108': // CryptoKitties
+        await this.approveAssetTransferProxy(error.data.order.metadata)
+        // await approveSchemaProxy({
+        //   contract: this,
+        //   orderMetadata: error.data.order.metadata
+        // })
         break
       default:
         console.log('orderErrorHandler error', error)

@@ -104,6 +104,7 @@ export class Contracts extends EventEmitter {
       this.erc20 = new web3.eth.Contract(ERC20.abi, options)
       this.erc721 = new web3.eth.Contract(ERC721.abi, options)
       this.erc1155 = new web3.eth.Contract(ERC1155.abi, options)
+      // config
       this.authenticatedProxy = new web3.eth.Contract(AuthenticatedProxy.abi, options)
 
       this.web3 = web3

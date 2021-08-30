@@ -72,6 +72,32 @@ export const ERC1155Schema: Schema<SemiFungibleTradeType> = {
       outputs: [{ kind: FunctionOutputKind.Count, name: 'balance', type: 'uint' }],
       assetFromOutputs: (outputs: any) => outputs.balance
     }),
+    isApprove: (asset) => ({
+      type: AbiType.Function,
+      name: 'isApprovedForAll',
+      payable: false,
+      constant: true,
+      stateMutability: StateMutability.View,
+      target: asset.address,
+      inputs: [
+        { kind: FunctionInputKind.Owner, name: '_owner', type: 'address' },
+        { kind: FunctionInputKind.Replaceable, name: '_operator', type: 'address' }
+      ],
+      outputs: [{ kind: FunctionOutputKind.Owner, name: 'owner', type: 'bool' }]
+    }),
+    approve: (asset) => ({
+      type: AbiType.Function,
+      name: 'setApprovalForAll',
+      payable: false,
+      constant: false,
+      stateMutability: StateMutability.Nonpayable,
+      target: asset.address,
+      inputs: [
+        { kind: FunctionInputKind.Owner, name: '_operator', type: 'address' },
+        { kind: FunctionInputKind.Replaceable, name: 'isoperator', type: 'bool' }
+      ],
+      outputs: []
+    }),
     assetsOfOwnerByIndex: []
   },
   events: {

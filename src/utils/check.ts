@@ -301,18 +301,18 @@ export async function validateOrder(exchangeHelper: any, order: Order): Promise<
   }
 }
 
-export function validateAndFormatWalletAddress(web3: any, address: string): string {
-  if (!address) {
-    throw new Error('No wallet address found')
-  }
-  if (!web3.utils.isAddress(address)) {
-    throw new Error('Invalid wallet address')
-  }
-  if (address === NULL_ADDRESS) {
-    throw new Error('Wallet cannot be the null address')
-  }
-  return address.toLowerCase()
-}
+// export function validateAndFormatWalletAddress(web3: any, address: string): string {
+//   if (!address) {
+//     throw new Error('No wallet address found')
+//   }
+//   if (!web3.utils.isAddress(address)) {
+//     throw new Error('Invalid wallet address')
+//   }
+//   if (address === NULL_ADDRESS) {
+//     throw new Error('Wallet cannot be the null address')
+//   }
+//   return address.toLowerCase()
+// }
 
 const canSettleOrder = (listingTime: any, expirationTime: any) => {
   const now = Math.round(Date.now() / 1000)

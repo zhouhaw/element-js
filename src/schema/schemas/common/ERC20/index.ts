@@ -52,7 +52,7 @@ export const ERC20Schema: Schema<FungibleTradeType> = {
       ],
       outputs: []
     }),
-    isApprove: (asset, to) => ({
+    isApprove: (asset) => ({
       type: AbiType.Function,
       name: 'allowance',
       payable: false,
@@ -60,12 +60,12 @@ export const ERC20Schema: Schema<FungibleTradeType> = {
       stateMutability: StateMutability.Nonpayable,
       target: asset.address,
       inputs: [
-        { kind: FunctionInputKind.Owner, name: 'owner', type: 'address', value: asset.account },
-        { kind: FunctionInputKind.Owner, name: 'spender', type: 'address', value: to }
+        { kind: FunctionInputKind.Owner, name: 'owner', type: 'address' },
+        { kind: FunctionInputKind.Replaceable, name: 'spender', type: 'address' }
       ],
       outputs: [{ kind: FunctionOutputKind.Count, name: 'balance', type: 'uint256' }]
     }),
-    approve: (asset, to) => ({
+    approve: (asset) => ({
       type: AbiType.Function,
       name: 'approve',
       payable: false,
@@ -73,7 +73,7 @@ export const ERC20Schema: Schema<FungibleTradeType> = {
       stateMutability: StateMutability.Nonpayable,
       target: asset.address,
       inputs: [
-        { kind: FunctionInputKind.Owner, name: 'to', type: 'address', value: to },
+        { kind: FunctionInputKind.Replaceable, name: 'to', type: 'address' },
         { kind: FunctionInputKind.Asset, name: 'amount', type: 'uint256', value: asset.quantity }
       ],
       outputs: []
@@ -85,7 +85,7 @@ export const ERC20Schema: Schema<FungibleTradeType> = {
       constant: true,
       stateMutability: StateMutability.View,
       target: asset.address,
-      inputs: [{ kind: FunctionInputKind.Owner, name: 'owner', type: 'address', value: asset.account }],
+      inputs: [{ kind: FunctionInputKind.Owner, name: 'owner', type: 'address' }],
       outputs: [{ kind: FunctionOutputKind.Count, name: 'balance', type: 'uint256' }],
       assetFromOutputs: (outputs: any) => outputs.balance
     }),

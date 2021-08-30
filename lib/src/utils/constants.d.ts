@@ -26,6 +26,7 @@ export declare const API_BASE_URL: {
 };
 export declare enum POLYGON_CONTRACTS_ADDRESSES {
     ElementixProxyRegistry = "0x26aFE7885cdCFF35ADE8498Bd183577dC98E3fcc",
+    ElementixTokenTransferProxy = "?",
     ElementixExchange = "0x2a3eCaeA2A31bb34e84835Bd6799614304AaFa5F",
     ExchangeHelper = "0xA3Fb1289f86025Aff90be8d39239836e24b986BF",
     ElementixExchangeKeeper = "",
@@ -35,6 +36,7 @@ export declare enum POLYGON_CONTRACTS_ADDRESSES {
 }
 export declare enum MUMBAI_CONTRACTS_ADDRESSES {
     ElementixProxyRegistry = "0x26aFE7885cdCFF35ADE8498Bd183577dC98E3fcc",
+    ElementixTokenTransferProxy = "0x4669f20D83f81Ee728c3b99E94F25E5DbEe682D5",
     ElementixExchange = "0x2a3eCaeA2A31bb34e84835Bd6799614304AaFa5F",
     ExchangeHelper = "0xA3Fb1289f86025Aff90be8d39239836e24b986BF",
     ElementixExchangeKeeper = "",
@@ -44,6 +46,7 @@ export declare enum MUMBAI_CONTRACTS_ADDRESSES {
 }
 export declare enum PRIVATE_CONTRACTS_ADDRESSES {
     ElementixProxyRegistry = "0x023CA02bFB85A3901316EdFE6BBA92B8cb54C9E3",
+    ElementixTokenTransferProxy = "0x20E1af184c5A40cFE63a377d8eE2A2029f1296FD",
     ElementixExchange = "0xb328610a54A438C80EE6103F8679d75D6c0E20Ab",
     ExchangeHelper = "0x5A5E397CfEAfc27e54648DD2cF63AF7c8af0fDf2",
     ElementixExchangeKeeper = "0x2FB4580243D72fC1374262E9fe7a1003Dffd4c1d",
@@ -54,6 +57,7 @@ export declare enum PRIVATE_CONTRACTS_ADDRESSES {
 }
 export declare enum RINKEBY_CONTRACTS_ADDRESSES {
     ElementixProxyRegistry = "0x03C4C60555DEc99E1830449524aDe323fF508a62",
+    ElementixTokenTransferProxy = "0x48126f4a2894231Ba274429F98Fd62DfeD9056D9",
     ElementixExchange = "0x7ac5c8568122341f5D2c404eC8F9dE56456D60CA",
     ExchangeHelper = "0x11716B79a85B6FaA9BA469AA40050901a675E49c",
     ElementixExchangeKeeper = "0x8A5Bf74022fCe84947e92A05fAdD34730FeB4ca9",
@@ -63,6 +67,7 @@ export declare enum RINKEBY_CONTRACTS_ADDRESSES {
 }
 export declare enum MAIN_CONTRACTS_ADDRESSES {
     ElementixProxyRegistry = "0x87f8388195728e9497aA11715A352472984607a2",
+    ElementixTokenTransferProxy = "0x9B49Ee1B204F62Fc2AA1A88f267c2cf815c28755",
     ElementixExchange = "0x74d8e56924909731d0e65F954fc439Fa04634a61",
     ExchangeHelper = "0x467f748d7b7171533208a1D17c5b4c4a32eafb18",
     ElementixExchangeKeeper = "0xF35F8F0c3c2bE65Ef0aD554E1583743524b2a1d0",

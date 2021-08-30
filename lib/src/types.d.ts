@@ -9,12 +9,6 @@ export interface ElementAPIConfig {
     authToken?: string;
     apiBaseUrl?: string;
 }
-export declare enum AbiType {
-    Function = "function",
-    Constructor = "constructor",
-    Event = "event",
-    Fallback = "fallback"
-}
 export declare enum ElementSchemaName {
     ERC20 = "ERC20",
     ERC721 = "ERC721",

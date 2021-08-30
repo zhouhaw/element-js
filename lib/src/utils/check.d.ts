@@ -10,7 +10,6 @@ export declare function checkOrder(contract: any, order: Order): Promise<boolean
 export declare function checkMatchOrder(contract: any, buy: Order, sell: Order): Promise<boolean>;
 export declare function checkDataToCall(netWorkName: Network, order: UnhashedOrder): void;
 export declare function validateOrder(exchangeHelper: any, order: Order): Promise<any>;
-export declare function validateAndFormatWalletAddress(web3: any, address: string): string;
 export declare function _ordersCanMatch(buy: Order, sell: Order): boolean;
 export declare function ordersCanMatch(exchangeHelper: any, buy: Order, sell: Order): Promise<any>;
 export declare function getOrderCancelledOrFinalized(contract: any, order: Order): Promise<boolean>;

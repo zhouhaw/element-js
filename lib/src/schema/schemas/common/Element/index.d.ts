@@ -1,10 +1,4 @@
-import { Schema } from '../../../types';
-export interface Exchange {
-    account?: string;
-    accountProxy?: string;
-    sell?: string;
-    sellSig?: string;
-    buy?: string;
-    buySig?: string;
-}
-export declare const ElementSchemas: Required<Pick<Schema<Exchange>, 'functions'>>;
+export declare const ElementSchemas: {
+    registry: Required<Pick<import("../../../types").Schema<import("./registry").Registry>, "address" | "functions">>;
+    exchange: Required<Pick<import("../../../types").Schema<import("./exchange").Exchange>, "functions">>;
+};

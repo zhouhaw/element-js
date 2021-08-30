@@ -82,13 +82,24 @@ export const encodeCall = (abi: AnnotatedFunctionABI, parameters: any[]): string
   )
 }
 
-export const encodeParamsCall = (abi: AnnotatedFunctionABI): string => {
-  const inputTypes = abi.inputs.map((i) => i.type)
-  const parameters = abi.inputs.map((i) => i.value)
-  return (
-    '0x' +
-    Buffer.concat([ethABI.methodID(abi.name, inputTypes), ethABI.rawEncode(inputTypes, parameters)]).toString('hex')
-  )
+//替换 shmaces
+export const encodeParamsCall = (
+  abi: AnnotatedFunctionABI,
+  { owner, replace, count }: { owner?: string; replace?: string | boolean; count?: string }
+): string => {
+  const parameters = abi.inputs.map((input) => {
+    switch (input.kind) {
+      case FunctionInputKind.Replaceable:
+        return replace
+      case FunctionInputKind.Owner:
+        return owner
+      case FunctionInputKind.Asset:
+      case FunctionInputKind.Count:
+      default:
+        return input.value
+    }
+  })
+  return encodeCall(abi, parameters)
 }
 
 export interface CallSpec {
