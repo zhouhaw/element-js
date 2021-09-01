@@ -21,8 +21,16 @@ export declare const CHAIN_ID: {
     mumbai: number;
 };
 export declare const API_BASE_URL: {
-    main: string;
-    rinkeby: string;
+    main: {
+        api: string;
+        key: string;
+        secret: string;
+    };
+    rinkeby: {
+        api: string;
+        key: string;
+        secret: string;
+    };
 };
 export declare enum POLYGON_CONTRACTS_ADDRESSES {
     ElementixProxyRegistry = "0x26aFE7885cdCFF35ADE8498Bd183577dC98E3fcc",

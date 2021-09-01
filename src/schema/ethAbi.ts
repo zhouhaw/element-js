@@ -3,6 +3,7 @@
 // import BN from 'bn.js'
 
 import { zeros, setLengthRight, keccak256, isHexPrefixed, stripHexPrefix, BN } from 'ethereumjs-util'
+import { AnnotatedFunctionInput } from './types'
 
 // console.log(zeros, setLengthRight)
 
@@ -11,6 +12,7 @@ interface ABICoder {
   methodID: (name: string, types: Array<any>) => Buffer
   rawEncode: (types: Array<any>, values: Array<any>) => Buffer
   simpleEncode: (method: string) => Buffer
+  rawInputsEncode: (inputs: Array<any>) => Buffer
   // rawDecode: (types: Array<any>, values: string) => any
   // simpleDecode: (method: string, data: string) => any
 }
@@ -395,6 +397,22 @@ ABI.rawEncode = function (types, values): Buffer {
   }
 
   return Buffer.concat(output.concat(data))
+}
+
+ABI.rawInputsEncode = function (inputs: Array<AnnotatedFunctionInput>): Buffer {
+  let types: Array<any> = []
+  let values: Array<any> = []
+  for (let i = 0; i < inputs.length; i++) {
+    const input = inputs[i]
+    if (input.type === 'tuple') {
+      types = [...types, ...(input.components?.map((val) => val.type) as any)]
+      values = [...values, ...input.value]
+    } else {
+      types.push(input.type)
+      values.push(input.value)
+    }
+  }
+  return this.rawEncode(types, values)
 }
 
 // ABI.rawDecode = function (types, data): any {

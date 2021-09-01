@@ -3,6 +3,8 @@
 import { ABI as ethABI, elementaryName, encodeSingle, isDynamic } from './ethAbi'
 
 import { AnnotatedFunctionABI, FunctionInput, FunctionInputKind, Schema } from './types'
+import Web3 from 'web3'
+const web3 = new Web3()
 
 const failWith = (msg: string): any => {
   throw new Error(msg)
@@ -74,12 +76,17 @@ export const encodeReplacementPattern: ReplacementEncoder = (
 //   return ethABI.rawDecode(outputsTypes, values)
 // }
 
-export const encodeCall = (abi: AnnotatedFunctionABI, parameters: any[]): string => {
+export const encodeCall = (abi: AnnotatedFunctionABI, parameters: Array<any>): string => {
   const inputTypes = abi.inputs.map((i) => i.type)
   return (
     '0x' +
     Buffer.concat([ethABI.methodID(abi.name, inputTypes), ethABI.rawEncode(inputTypes, parameters)]).toString('hex')
   )
+  // return encodeWeb3Call(abi, parameters)
+}
+
+export const encodeWeb3Call = (abi: AnnotatedFunctionABI, parameters: Array<any>): string => {
+  return web3.eth.abi.encodeFunctionCall(abi, parameters)
 }
 
 //替换 shmaces
@@ -99,7 +106,7 @@ export const encodeParamsCall = (
         return input.value
     }
   })
-  return encodeCall(abi, parameters)
+  return encodeWeb3Call(abi, parameters)
 }
 
 export interface CallSpec {

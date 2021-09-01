@@ -142,7 +142,7 @@ export function hashOrder(web3: any, order: UnhashedOrder): string {
     .toString('hex')
 }
 
-export function orderParamsEncode(order: UnhashedOrder) {
+export function orderParamsEncode(order: UnhashedOrder): Array<any> {
   const orderParamKeys = [
     'exchange',
     'maker',
@@ -186,7 +186,7 @@ export function orderParamsEncode(order: UnhashedOrder) {
   return orerParamValueArray
 }
 
-export function orderSigEncode(order: ECSignature) {
+export function orderSigEncode(order: ECSignature): Array<any> {
   const orderSigKeys = ['v', 'r', 's']
   const orderSigValueArray = []
   for (const key of orderSigKeys) {

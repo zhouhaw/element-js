@@ -1,4 +1,4 @@
-import { AbiType, FunctionInputKind, FunctionOutputKind, Schema, StateMutability } from '../../../types'
+import { AbiType, ExchangeSchema, FunctionInputKind, FunctionOutputKind, Schema, StateMutability } from '../../../types'
 
 export interface Registry {
   address: string

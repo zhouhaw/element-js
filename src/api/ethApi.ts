@@ -57,19 +57,21 @@ export class EthApi extends Fetch {
     await this.web3SDK.eth.sendTransaction(transactionObject)
   }
 
-  // async contractCall(data) {
-  //     let contractAddress = this.contractAddress
-  //     let _body = {
-  //         method: "eth_call",
-  //         params: [{
-  //             "to": contractAddress,
-  //             "data": data
-  //         }, "latest"]
-  //     }
-  //     return fetch(rpcUrl,_body).catch(e => {
-  //         throw e
-  //     });
-  // }
+  public async contractCall(to: string, data: string) {
+    const _body = {
+      method: 'eth_call',
+      params: [
+        {
+          to,
+          data
+        },
+        'latest'
+      ]
+    }
+    return fetch(this.rpcUrl, _body).catch((e) => {
+      throw e
+    })
+  }
 }
 
 // public async getCallData({schemaName,networkName}:{schemaName:ElementSchemaName,networkName:Network}) {

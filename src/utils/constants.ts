@@ -36,8 +36,16 @@ export const CHAIN_ID = {
 }
 
 export const API_BASE_URL = {
-  main: 'https://element-api.eossql.com',
-  rinkeby: 'https://element-api-test.eossql.com'
+  main: {
+    api: 'https://element-api.eossql.com',
+    key: 'zQbYj7RhC1VHIBdWU63ki5AJKXloamDT',
+    secret: 'UqCMpfGn3VyQEdsjLkzJv9tNlgbKFD7O'
+  },
+  rinkeby: {
+    api: 'https://element-api-test.eossql.com',
+    key: 'ysBokbA3gKUzt61DmeHWjTFYZ07CGPQL',
+    secret: 'a2PAJXRBChdpGvoyKEz3lLS5Yf1bM0NO'
+  }
 }
 
 export enum POLYGON_CONTRACTS_ADDRESSES {

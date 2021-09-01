@@ -13,7 +13,7 @@ export declare function getTransferSchemas(asset: Asset): AnnotatedFunctionABI;
 export declare const common: {
     ElementSchemas: {
         registry: Required<Pick<import("../types").Schema<import("./common/Element/registry").Registry>, "address" | "functions">>;
-        exchange: Required<Pick<import("../types").Schema<import("./common/Element/exchange").Exchange>, "functions">>;
+        exchange: Required<Pick<import("../types").ExchangeSchema<import("./common/Element/exchange").Exchange>, "functions">>;
     };
     ERC20Schema: import("../types").Schema<import("./common/ERC20").FungibleTradeType>;
     ERC721Schema: import("../types").Schema<import("./common/ERC721").NonFungibleContractType>;

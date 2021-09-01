@@ -9,7 +9,7 @@ export declare enum FunctionInputKind {
 export interface LimitedCallSpec {
     to: string;
     data: string;
-    value?: string;
+    value?: string | number;
 }
 export interface FunctionInput {
     name: string;
@@ -20,6 +20,7 @@ export interface AnnotatedFunctionInput {
     name: string;
     type: string;
     kind: FunctionInputKind;
+    components?: Array<FunctionInput>;
     value?: any;
 }
 export interface AnnotatedFunctionOutput {
@@ -49,10 +50,6 @@ export declare enum AbiType {
     Constructor = "constructor",
     Event = "event",
     Fallback = "fallback"
-}
-export declare enum ABIType {
-    Function = "function",
-    Event = "event"
 }
 export interface Token {
     name: string;
@@ -135,6 +132,15 @@ export interface SchemaFunctions<T> {
     ownerTransfer?: (asset: T, to: string, amount?: number) => AnnotatedFunctionABI;
     assetsOfOwnerByIndex?: Array<AnnotatedFunctionABIReturning<T | null>>;
     initializeProxy?: (owner: string) => AnnotatedFunctionABI;
+}
+export interface ExchangeSchema<T> {
+    address?: string;
+    functions: {
+        orderMatch?: (asset: T) => AnnotatedFunctionABI;
+        orderCancel?: (asset: T) => AnnotatedFunctionABI;
+        registerProxy?: (asset: T) => AnnotatedFunctionABI;
+        accountProxy?: (asset: T) => AnnotatedFunctionABI;
+    };
 }
 export interface Schema<T> {
     version: number;

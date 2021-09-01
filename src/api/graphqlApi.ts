@@ -1,6 +1,7 @@
 import { gql, GraphQLClient } from 'graphql-request'
 import { elementSignInSign, Network } from '../index'
 import { ElementAPIConfig } from '../types'
+import hmacSHA256 from 'crypto-js/hmac-sha256'
 import { API_BASE_URL, CHAIN_ID } from '../utils/constants'
 
 export class GraphqlApi implements ElementAPIConfig {
@@ -19,6 +20,8 @@ export class GraphqlApi implements ElementAPIConfig {
    * Logger function to use when debugging
    */
   public logger: (arg: string) => void
+  private appKey
+  private appSecret
 
   /**
    * Create an instance of the Element API
@@ -28,23 +31,51 @@ export class GraphqlApi implements ElementAPIConfig {
   constructor(config: ElementAPIConfig, logger?: (arg: string) => void) {
     switch (config.networkName) {
       case Network.Rinkeby:
-        this.apiBaseUrl = config.apiBaseUrl || API_BASE_URL.rinkeby
+        this.apiBaseUrl = config.apiBaseUrl || API_BASE_URL.rinkeby.api
         this.networkID = CHAIN_ID.rinkeby
+        this.appKey = API_BASE_URL.rinkeby.key
+        this.appSecret = API_BASE_URL.rinkeby.secret
         break
       case Network.Main:
-        this.apiBaseUrl = config.apiBaseUrl || API_BASE_URL.main
+        this.apiBaseUrl = config.apiBaseUrl || API_BASE_URL.main.api
         this.networkID = CHAIN_ID.main
+        this.appKey = API_BASE_URL.main.key
+        this.appSecret = API_BASE_URL.main.secret
         break
       default:
-        this.apiBaseUrl = config.apiBaseUrl || API_BASE_URL.main
+        this.apiBaseUrl = config.apiBaseUrl || API_BASE_URL.main.api
         this.networkID = CHAIN_ID.main
+        this.appKey = API_BASE_URL.main.key
+        this.appSecret = API_BASE_URL.main.secret
         break
     }
     this.networkName = config.networkName
     this.authToken = ''
-
-    this.gqlClient = new GraphQLClient(`${this.apiBaseUrl}/graphql`, { headers: {} })
+    const getSign = this.getAPISign()
+    this.gqlClient = new GraphQLClient(`${this.apiBaseUrl}/graphql`, { headers: { ...getSign } })
     this.logger = logger || ((arg: string) => arg)
+  }
+
+  /**
+   * 访问限制
+   * 添加API签名
+   * X-Api-Key appKey
+   * X-Api-Sign	验证签名
+   */
+  private getAPISign(): { 'X-Api-Key': string; 'X-Api-Sign': string } {
+    // 随机数字字母，建议4位
+    const nonce = Number.parseInt((Math.random() * (9999 - 1000 + 1) + 1000).toString(), 10)
+    // 当前时间戳（秒）
+    const timestamp = Number.parseInt((Date.now() / 1000).toString(), 10)
+    // 使用appSecret进行HMacSha256加密函数
+    const hmac256 = hmacSHA256(`${this.appKey}${nonce}${timestamp}`, this.appSecret)
+
+    const headers = {
+      'X-Api-Key': this.appKey,
+      'X-Api-Sign': `${hmac256}.${nonce}.${timestamp}`
+    }
+
+    return headers
   }
 
   private async getNewNonce(walletProvider: any) {

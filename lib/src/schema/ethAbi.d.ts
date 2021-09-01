@@ -4,6 +4,7 @@ interface ABICoder {
     methodID: (name: string, types: Array<any>) => Buffer;
     rawEncode: (types: Array<any>, values: Array<any>) => Buffer;
     simpleEncode: (method: string) => Buffer;
+    rawInputsEncode: (inputs: Array<any>) => Buffer;
 }
 export declare function elementaryName(name: string): string;
 export declare function encodeSingle(type: any, arg: any): Buffer;

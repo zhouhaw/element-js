@@ -1,9 +1,10 @@
-import { Schema } from '../../../types';
+import { ExchangeSchema } from '../../../types';
 export interface Exchange {
     address: string;
-    sell?: string;
-    sellSig?: string;
-    buy?: string;
-    buySig?: string;
+    sell?: Array<any>;
+    sellSig?: Array<any>;
+    buy?: Array<any>;
+    buySig?: Array<any>;
+    metadata?: string;
 }
-export declare const ElementExchangeSchemas: Required<Pick<Schema<Exchange>, 'functions'>>;
+export declare const ElementExchangeSchemas: Required<Pick<ExchangeSchema<Exchange>, 'functions'>>;

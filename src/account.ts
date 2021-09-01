@@ -1,21 +1,33 @@
 import { ElementError } from './base/error'
-import { Contracts } from './contracts'
-import { Asset, ElementAPIConfig, ElementSchemaName, ExchangeMetadata, Network, UnsignedOrder } from './types'
+import { ContractSchemas } from './contracts/index'
+import {
+  Asset,
+  ECSignature,
+  ElementAPIConfig,
+  ExchangeMetadata,
+  Network,
+  Order,
+  UnhashedOrder,
+  UnsignedOrder
+} from './types'
 import { EthApi, Web3 } from './api/ethApi'
-import { encodeParamsCall } from './schema'
-import { MAX_UINT_256 } from './utils/constants'
-import { common, getApproveSchemas, getIsApproveSchemas, getTransferSchemas } from './schema/schemas'
-import { AnnotatedFunctionOutput, LimitedCallSpec } from './schema/types'
+import {
+  encodeParamsCall,
+  encodeWeb3Call,
+  getApproveSchemas,
+  getIsApproveSchemas,
+  getTransferSchemas,
+  LimitedCallSpec
+} from './schema'
+import { MAX_UINT_256, NULL_ADDRESS } from './utils/constants'
+
+import { orderParamsEncode, orderSigEncode } from './utils/helper'
 
 // 根据 DB签名过的订单 make一个对手单
-export class Account extends Contracts {
+export class Account extends ContractSchemas {
   public ethApi: EthApi
   public elementAccount: string
   public accountProxy: ''
-  public Erc20Func
-  public ElementRegistryFunc
-  public proxyRegistry
-  public tokenTransferProxy
 
   constructor(web3: Web3, apiConfig: ElementAPIConfig = { networkName: Network.Rinkeby }) {
     super(web3, apiConfig)
@@ -23,51 +35,7 @@ export class Account extends Contracts {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     this.ethApi = new EthApi(web3.currentProvider.host)
-    this.networkName = apiConfig.networkName
-    this.Erc20Func = common.ERC20Schema.functions
-    this.ElementRegistryFunc = common.ElementSchemas.registry.functions
-    this.proxyRegistry = this.contractsAddr.ElementixProxyRegistry
-    // await this.exchange.methods.tokenTransferProxy().call()
-    this.tokenTransferProxy = this.contractsAddr.ElementixTokenTransferProxy
     this.accountProxy = ''
-  }
-
-  public async ethCall(callData: LimitedCallSpec, outputs: AnnotatedFunctionOutput[]): Promise<any> {
-    const hexStr = await this.web3.eth.call(callData)
-    const params = this.web3.eth.abi.decodeParameters(outputs, hexStr)
-    if (params.__length__ == 1) {
-      return params[0]
-    }
-    return params
-  }
-
-  public async ethSend(callData: LimitedCallSpec): Promise<any> {
-    const from = this.elementAccount
-    const gas = await this.web3.eth.estimateGas(callData)
-    const gasPrice = await this.web3.eth.getGasPrice()
-    const nonce = await this.web3.eth.getTransactionCount(from)
-    const transactionObject = {
-      from,
-      to: callData.to,
-      value: callData.value || 0,
-      nonce,
-      gas,
-      gasPrice,
-      data: callData.data
-    }
-    return this.web3.eth
-      .sendTransaction(transactionObject)
-      .on('transactionHash', (txHash: string) => {
-        // console.log('approveTokenTransferProxy tx txHash', txHash)
-        this.emit('transactionHash', txHash)
-      })
-      .on('receipt', (receipt: string) => {
-        // console.log('approveTokenTransferProxy tx receipt', receipt)
-        this.emit('receipt', receipt)
-      })
-      .catch((error: any) => {
-        this.emit('error', error)
-      })
   }
 
   public async getOrderApprove(order: UnsignedOrder): Promise<any> {
@@ -77,13 +45,13 @@ export class Account extends Contracts {
       isPayTokenApprove: false,
       isSellAssetApprove: false,
       isFeeTokenApprove: false,
-      transferProxy: this.tokenTransferProxy
+      transferProxy: this.elementixTokenTransferProxy
     }
   }
 
   public async getAccountProxy() {
     const owner = this.elementAccount
-    const address = this.proxyRegistry
+    const address = this.elementixProxyRegistry
     if (this.accountProxy === '') {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
@@ -96,17 +64,17 @@ export class Account extends Contracts {
   }
 
   public async registerProxy() {
-    const to = this.proxyRegistry
+    const to = this.elementixProxyRegistry
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     const accountApprove = this.ElementRegistryFunc.transfer()
     const data = encodeParamsCall(accountApprove, {})
     const callData = { to, data }
-    return this.ethSend(callData)
+    return this.ethSend(callData, this.elementAccount)
   }
 
   public async checkTokenTransferProxy(to: string): Promise<string> {
-    const tokenProxy = this.tokenTransferProxy
+    const tokenProxy = this.elementixTokenTransferProxy
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     const accountApprove = this.Erc20Func.isApprove()
@@ -126,19 +94,19 @@ export class Account extends Contracts {
   }
 
   public async approveTokenTransferProxy(to: string): Promise<any> {
-    const tokenProxy = this.tokenTransferProxy
+    const tokenProxy = this.elementixTokenTransferProxy
     const quantity = MAX_UINT_256.toString()
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     const accountApprove = this.Erc20Func.approve({ quantity })
     const data = encodeParamsCall(accountApprove, { replace: tokenProxy })
     const callData = { to, data }
-    return this.ethSend(callData)
+    return this.ethSend(callData, this.elementAccount)
   }
 
   public async checkAssetTransferProxy(metadata: ExchangeMetadata): Promise<boolean> {
     const owner = this.elementAccount
-    const operator = this.tokenTransferProxy
+    const operator = this.elementixTokenTransferProxy
     const accountApprove = getIsApproveSchemas(metadata)
     const data = encodeParamsCall(accountApprove, { owner, replace: operator })
     const callData = { to: accountApprove.target, data }
@@ -152,11 +120,58 @@ export class Account extends Contracts {
   }
 
   public async approveAssetTransferProxy(metadata: ExchangeMetadata): Promise<any> {
-    const operator = this.tokenTransferProxy
+    const operator = this.elementixTokenTransferProxy
     const accountApprove = getApproveSchemas(metadata)
     const data = encodeParamsCall(accountApprove, { owner: operator, replace: true })
     const callData = { to: accountApprove.target, data }
-    return this.ethSend(callData)
+    return this.ethSend(callData, this.elementAccount)
+  }
+
+  // 撮合订单
+  public async orderMatch({
+    buy,
+    sell,
+    metadata = '0x'
+  }: {
+    buy: Order
+    sell: Order
+    metadata?: string
+  }): Promise<any> {
+    const to = this.elementixExchange
+    const sellOrderParamArray = orderParamsEncode(sell as UnhashedOrder)
+    const sellOrderSigArray = orderSigEncode(sell as ECSignature)
+    const buyOrderParamArray = orderParamsEncode(buy as UnhashedOrder)
+    const buyOrderSigArray = orderSigEncode(buy as ECSignature)
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    const accountApprove = this.ElementExchangeFunc.orderMatch({
+      address: to
+    })
+    const data = encodeWeb3Call(accountApprove, [
+      buyOrderParamArray,
+      buyOrderSigArray,
+      sellOrderParamArray,
+      sellOrderSigArray,
+      metadata
+    ])
+    const value = buy.paymentToken !== NULL_ADDRESS ? 0 : buy.basePrice
+    const callData = { to, data, value } as LimitedCallSpec
+    return this.ethSend(callData, this.elementAccount)
+  }
+
+  // 取消订单
+  public async orderCancel({ order }: { order: Order }): Promise<any> {
+    const to = this.elementixExchange
+    const orderParamArray = orderParamsEncode(order)
+    const orderSigArray = orderSigEncode(order as ECSignature)
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    const accountApprove = this.ElementExchangeFunc.orderCancel({
+      address: to
+    })
+    const data = encodeWeb3Call(accountApprove, [orderParamArray, orderSigArray])
+    const callData = { to, data }
+    return this.ethSend(callData, this.elementAccount)
   }
 
   public async assetTransfer(asset: Asset, to: string): Promise<any> {
@@ -164,10 +179,10 @@ export class Account extends Contracts {
     const accountApprove = getTransferSchemas(asset)
     const data = encodeParamsCall(accountApprove, { owner, replace: to })
     const callData = { to: accountApprove.target, data }
-    return this.ethSend(callData)
+    return this.ethSend(callData, owner)
   }
 
-  public async initApprove(error: ElementError) {
+  public async accountApprove(error: ElementError) {
     console.log('orderErrorHandler', error)
     switch (String(error.code)) {
       case '1001': // initialize
@@ -184,10 +199,6 @@ export class Account extends Contracts {
         break
       case '1108': // CryptoKitties
         await this.approveAssetTransferProxy(error.data.order.metadata)
-        // await approveSchemaProxy({
-        //   contract: this,
-        //   orderMetadata: error.data.order.metadata
-        // })
         break
       default:
         console.log('orderErrorHandler error', error)

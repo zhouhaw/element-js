@@ -28,4 +28,5 @@ export declare class EthApi extends Fetch {
         data: string;
         value?: number;
     }): Promise<void>;
+    contractCall(to: string, data: string): Promise<Response>;
 }

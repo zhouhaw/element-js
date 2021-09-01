@@ -76,7 +76,7 @@ export class Orders extends Contracts {
       buy,
       sell,
       accountAddress,
-      metadata = NULL_BLOCK_HASH
+      metadata = '0x'
     }: {
       buy: Order
       sell: Order
@@ -94,8 +94,11 @@ export class Orders extends Contracts {
     callBack?.next(OrderCheckStatus.StartOrderMatch, { buy, sell })
 
     const value = buy.paymentToken !== NULL_ADDRESS ? 0 : buy.basePrice
+
+    // metadata = '0x'
+
     const data = await this.exchange.methods
-      .orderMatch(buyOrderParamArray, buyOrderSigArray, sellOrderParamArray, sellOrderSigArray, '0x')
+      .orderMatch(buyOrderParamArray, buyOrderSigArray, sellOrderParamArray, sellOrderSigArray, metadata)
       .encodeABI()
     console.log(data)
     const gas = await this.web3.eth
