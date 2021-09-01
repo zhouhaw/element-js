@@ -15,18 +15,10 @@ export declare const INVERSE_BASIS_POINT = 10000;
 export declare const STATIC_EXTRADATA = "0x0c225aad";
 export declare const CHECK_ETH_BALANCE = false;
 export declare const CHAIN_ID: {
-    main: number;
-    rinkeby: number;
-    polygon: number;
-    mumbai: number;
+    [key: string]: number;
 };
 export declare const API_BASE_URL: {
-    main: {
-        api: string;
-        key: string;
-        secret: string;
-    };
-    rinkeby: {
+    [key: string]: {
         api: string;
         key: string;
         secret: string;
@@ -43,6 +35,16 @@ export declare enum POLYGON_CONTRACTS_ADDRESSES {
     WETH = "0xA6FA4fB5f76172d178d61B04b0ecd319C5d1C0aa"
 }
 export declare enum MUMBAI_CONTRACTS_ADDRESSES {
+    ElementixProxyRegistry = "0xd9E1b6171c1949cfE73974cdf4aCDa51950060Cb",
+    ElementixTokenTransferProxy = "0x1c26cEB523F7664e775929d274d1c7DB2C884866",
+    ElementixExchange = "0x88b6BdA30E7653E829668d8F022f7B2136838154",
+    ExchangeHelper = "0x16940578632EfE0e7E4F557a0C6a255C5c9D2A27",
+    ElementixExchangeKeeper = "",
+    ElementSharedAsset = "0xDf131408BBfA3c48d3B60041aE1cBAfc017CdfE1",
+    FeeRecipientAddress = "0x9F7A946d935c8Efc7A8329C0d894A69bA241345A",
+    WETH = "0xA6FA4fB5f76172d178d61B04b0ecd319C5d1C0aa"
+}
+export declare enum MUMBAI_CONTRACTS_ADDRESSES_V1 {
     ElementixProxyRegistry = "0x26aFE7885cdCFF35ADE8498Bd183577dC98E3fcc",
     ElementixTokenTransferProxy = "0x4669f20D83f81Ee728c3b99E94F25E5DbEe682D5",
     ElementixExchange = "0x2a3eCaeA2A31bb34e84835Bd6799614304AaFa5F",
@@ -84,9 +86,5 @@ export declare enum MAIN_CONTRACTS_ADDRESSES {
     WETH = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
 }
 export declare const CONTRACTS_ADDRESSES: {
-    rinkeby: typeof RINKEBY_CONTRACTS_ADDRESSES;
-    private: typeof PRIVATE_CONTRACTS_ADDRESSES;
-    main: typeof MAIN_CONTRACTS_ADDRESSES;
-    mumbai: typeof MUMBAI_CONTRACTS_ADDRESSES;
-    polygon: typeof POLYGON_CONTRACTS_ADDRESSES;
+    [key: string]: any;
 };

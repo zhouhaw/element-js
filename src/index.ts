@@ -24,6 +24,7 @@ export {
 
 export { orderToJSON, getPriceParameters, getCurrentPrice, computeOrderCallData } from './utils/makeOrder'
 export {
+  CHAIN_ID,
   BigNumber,
   NULL_ADDRESS,
   NULL_BLOCK_HASH,

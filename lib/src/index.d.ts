@@ -4,7 +4,7 @@ export { schemas, encodeBuy, encodeSell, encodeCall, encodeParamsCall } from './
 export { getElementAssetURI, ordersCanMatch, validateOrder, checkOrder, checkMatchOrder, checkRegisterProxy, getOrderCancelledOrFinalized, checkApproveTokenTransferProxy, checkApproveERC1155TransferProxy, checkSenderOfAuthenticatedProxy } from './utils/check';
 export { registerProxy, approveSchemaProxy, approveTokenTransferProxy, approveERC1155TransferProxy, approveERC721TransferProxy } from './utils/approve';
 export { orderToJSON, getPriceParameters, getCurrentPrice, computeOrderCallData } from './utils/makeOrder';
-export { BigNumber, NULL_ADDRESS, NULL_BLOCK_HASH, DEFAULT_SELLER_FEE_BASIS_POINTS, PRIVATE_CONTRACTS_ADDRESSES, MAIN_CONTRACTS_ADDRESSES, RINKEBY_CONTRACTS_ADDRESSES, CONTRACTS_ADDRESSES } from './utils/constants';
+export { CHAIN_ID, BigNumber, NULL_ADDRESS, NULL_BLOCK_HASH, DEFAULT_SELLER_FEE_BASIS_POINTS, PRIVATE_CONTRACTS_ADDRESSES, MAIN_CONTRACTS_ADDRESSES, RINKEBY_CONTRACTS_ADDRESSES, CONTRACTS_ADDRESSES } from './utils/constants';
 export { orderFromJSON, Sleep } from './utils';
 export { web3Sign } from './utils/helper';
 export { transferFromERC1155, transferFromERC721, transferFromERC20, transferFromWETH, transferFromSchema } from './utils/transfer';

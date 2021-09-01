@@ -6,6 +6,8 @@ export declare class GraphqlApi implements ElementAPIConfig {
     networkID: number;
     authToken: string;
     chain: string;
+    chainId: number;
+    walletChainId: string;
     /**
      * Base url for the API
      */

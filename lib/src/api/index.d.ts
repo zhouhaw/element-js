@@ -38,10 +38,7 @@ export interface SellOrderParams extends CreateOrderParams {
 export declare class ElementOrders extends OrdersAPI {
     orders: any;
     accountAddress: string;
-    walletChainId: string;
     networkName: Network;
-    chainName: string;
-    chainId: number;
     constructor({ walletProvider, networkName, privateKey }: {
         walletProvider: any;
         networkName: Network;

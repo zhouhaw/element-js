@@ -55,7 +55,7 @@ export class Account extends ContractSchemas {
     if (this.accountProxy === '') {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
-      const accountApprove = this.ElementRegistryFunc.isApprove({ address })
+      const accountApprove = this.ElementRegistryFunc.accountProxy({ address })
       const data = encodeParamsCall(accountApprove, { owner })
       const callData = { to: accountApprove.target, data }
       this.accountProxy = await this.ethCall(callData, accountApprove?.outputs)
@@ -64,12 +64,12 @@ export class Account extends ContractSchemas {
   }
 
   public async registerProxy() {
-    const to = this.elementixProxyRegistry
+    const address = this.elementixProxyRegistry
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    const accountApprove = this.ElementRegistryFunc.transfer()
+    const accountApprove = this.ElementRegistryFunc.registerProxy({ address })
     const data = encodeParamsCall(accountApprove, {})
-    const callData = { to, data }
+    const callData = { to: accountApprove.target, data }
     return this.ethSend(callData, this.elementAccount)
   }
 

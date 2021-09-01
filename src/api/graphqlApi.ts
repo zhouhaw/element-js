@@ -1,5 +1,5 @@
 import { gql, GraphQLClient } from 'graphql-request'
-import { elementSignInSign, Network } from '../index'
+import { elementSignInSign, Network, Orders } from '../index'
 import { ElementAPIConfig } from '../types'
 import hmacSHA256 from 'crypto-js/hmac-sha256'
 import { API_BASE_URL, CHAIN_ID } from '../utils/constants'
@@ -9,6 +9,8 @@ export class GraphqlApi implements ElementAPIConfig {
   public networkID: number
   public authToken: string
   public chain = 'eth'
+  public chainId: number
+  public walletChainId: string
 
   /**
    * Base url for the API
@@ -29,27 +31,35 @@ export class GraphqlApi implements ElementAPIConfig {
    * @param logger Optional function for logging debug strings before and after requests are made
    */
   constructor(config: ElementAPIConfig, logger?: (arg: string) => void) {
-    switch (config.networkName) {
-      case Network.Rinkeby:
-        this.apiBaseUrl = config.apiBaseUrl || API_BASE_URL.rinkeby.api
-        this.networkID = CHAIN_ID.rinkeby
-        this.appKey = API_BASE_URL.rinkeby.key
-        this.appSecret = API_BASE_URL.rinkeby.secret
-        break
-      case Network.Main:
-        this.apiBaseUrl = config.apiBaseUrl || API_BASE_URL.main.api
-        this.networkID = CHAIN_ID.main
-        this.appKey = API_BASE_URL.main.key
-        this.appSecret = API_BASE_URL.main.secret
-        break
-      default:
-        this.apiBaseUrl = config.apiBaseUrl || API_BASE_URL.main.api
-        this.networkID = CHAIN_ID.main
-        this.appKey = API_BASE_URL.main.key
-        this.appSecret = API_BASE_URL.main.secret
-        break
+    const _network: Network = config.networkName
+    this.apiBaseUrl = config.apiBaseUrl || API_BASE_URL[_network].api
+    this.networkID = CHAIN_ID[_network]
+    this.appKey = API_BASE_URL[_network].key
+    this.appSecret = API_BASE_URL[_network].secret
+
+    if (!this.apiBaseUrl) {
+      throw new Error(`${_network} undefined api`)
     }
-    this.networkName = config.networkName
+
+    if (_network === Network.Main) {
+      this.chain = 'eth'
+    }
+
+    if (_network === Network.Rinkeby) {
+      this.chain = 'eth'
+    }
+
+    if (_network === Network.Mumbai) {
+      this.chain = 'polygon'
+    }
+
+    if (_network === Network.Polygon) {
+      this.chain = 'polygon'
+    }
+    this.chainId = this.networkID
+    this.walletChainId = `0x${this.chainId.toString(16)}`
+
+    this.networkName = _network
     this.authToken = ''
     const getSign = this.getAPISign()
     this.gqlClient = new GraphQLClient(`${this.apiBaseUrl}/graphql`, { headers: { ...getSign } })
@@ -90,7 +100,7 @@ export class GraphqlApi implements ElementAPIConfig {
     const variables = {
       address: accountAddress,
       chain: this.chain,
-      chainId: `0x${this.networkID.toString(16)}`
+      chainId: this.walletChainId
     }
     const nonce = await this.gqlClient.request(getNonce, variables)
     return nonce.user.nonce
@@ -115,7 +125,7 @@ export class GraphqlApi implements ElementAPIConfig {
         address: accountAddress,
         blockChain: {
           chain: this.chain,
-          chainId: `0x${this.networkID.toString(16)}`
+          chainId: this.walletChainId
         }
       },
       message,

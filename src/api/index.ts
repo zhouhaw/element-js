@@ -70,10 +70,7 @@ const checkOrderHash = (order: any): Order => {
 export class ElementOrders extends OrdersAPI {
   public orders: any
   public accountAddress = ''
-  public walletChainId = '0x1'
   public networkName = Network.Private
-  public chainName = 'eth'
-  public chainId = 1
 
   // 初始化SDK
   constructor({
@@ -91,15 +88,9 @@ export class ElementOrders extends OrdersAPI {
       walletProvider.eth.defaultAccount = account.address
     }
     this.accountAddress = walletProvider.eth.defaultAccount.toLowerCase()
-    if (networkName === Network.Main) {
-      this.chainId = 1
-    }
 
-    if (networkName === Network.Rinkeby) {
-      this.chainId = 4
-    }
     this.orders = new Orders(walletProvider, { networkName })
-    this.walletChainId = `0x${this.chainId.toString(16)}`
+    // this.walletChainId = `0x${this.chainId.toString(16)}`
   }
 
   // 取消订单签名
@@ -113,7 +104,7 @@ export class ElementOrders extends OrdersAPI {
     const orderAsset: OrderVersionParams = {
       contractAddress: assetData.tokenAddress,
       tokenId: assetData.tokenId,
-      chain: this.chainName,
+      chain: this.chain,
       chainId: this.walletChainId
     }
 

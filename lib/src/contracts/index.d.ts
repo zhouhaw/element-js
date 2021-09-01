@@ -18,7 +18,12 @@ export declare class ContractSchemas extends EventEmitter {
     paymentTokenList: Array<Token>;
     ETH: Token;
     Erc20Func: import("../schema/types").SchemaFunctions<import("../schema/schemas/common/ERC20").FungibleTradeType>;
-    ElementRegistryFunc: import("../schema/types").SchemaFunctions<import("../schema/schemas/common/Element/registry").Registry>;
+    ElementRegistryFunc: {
+        orderMatch?: ((asset: import("../schema/schemas/common/Element/registry").Registry) => import("../schema/types").AnnotatedFunctionABI) | undefined;
+        orderCancel?: ((asset: import("../schema/schemas/common/Element/registry").Registry) => import("../schema/types").AnnotatedFunctionABI) | undefined;
+        registerProxy?: ((asset: import("../schema/schemas/common/Element/registry").Registry) => import("../schema/types").AnnotatedFunctionABI) | undefined;
+        accountProxy?: ((asset: import("../schema/schemas/common/Element/registry").Registry) => import("../schema/types").AnnotatedFunctionABI) | undefined;
+    };
     ElementExchangeFunc: {
         orderMatch?: ((asset: import("../schema/schemas/common/Element/exchange").Exchange) => import("../schema/types").AnnotatedFunctionABI) | undefined;
         orderCancel?: ((asset: import("../schema/schemas/common/Element/exchange").Exchange) => import("../schema/types").AnnotatedFunctionABI) | undefined;

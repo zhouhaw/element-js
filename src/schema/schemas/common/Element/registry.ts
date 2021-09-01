@@ -4,10 +4,10 @@ export interface Registry {
   address: string
 }
 
-export const ElementRegistrySchemas: Required<Pick<Schema<Registry>, 'address' | 'functions'>> = {
+export const ElementRegistrySchemas: Required<Pick<ExchangeSchema<Registry>, 'address' | 'functions'>> = {
   address: '',
   functions: {
-    transfer: (asset) => ({
+    registerProxy: (asset) => ({
       type: AbiType.Function,
       name: 'registerProxy',
       payable: false,
@@ -17,7 +17,7 @@ export const ElementRegistrySchemas: Required<Pick<Schema<Registry>, 'address' |
       inputs: [],
       outputs: []
     }),
-    isApprove: (asset) => ({
+    accountProxy: (asset) => ({
       type: AbiType.Function,
       name: 'proxies',
       payable: false,

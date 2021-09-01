@@ -1,4 +1,5 @@
 import BigNumber from 'bignumber.js'
+import { Network } from '..'
 
 BigNumber.config({ EXPONENTIAL_AT: 1e9 })
 
@@ -28,23 +29,39 @@ export const STATIC_EXTRADATA = '0x0c225aad' //succeedIfTxOriginMatchesHardcoded
 //
 export const CHECK_ETH_BALANCE = false
 
-export const CHAIN_ID = {
-  main: 1,
-  rinkeby: 4,
-  polygon: 137,
-  mumbai: 80001
+export const CHAIN_ID: { [key: string]: number } = {
+  [Network.Main]: 1,
+  [Network.Rinkeby]: 4,
+  [Network.Polygon]: 137,
+  [Network.Mumbai]: 80001
 }
 
-export const API_BASE_URL = {
-  main: {
+export const API_BASE_URL: {
+  [key: string]: {
+    api: string
+    key: string
+    secret: string
+  }
+} = {
+  [Network.Main]: {
     api: 'https://element-api.eossql.com',
     key: 'zQbYj7RhC1VHIBdWU63ki5AJKXloamDT',
     secret: 'UqCMpfGn3VyQEdsjLkzJv9tNlgbKFD7O'
   },
-  rinkeby: {
+  [Network.Rinkeby]: {
     api: 'https://element-api-test.eossql.com',
     key: 'ysBokbA3gKUzt61DmeHWjTFYZ07CGPQL',
     secret: 'a2PAJXRBChdpGvoyKEz3lLS5Yf1bM0NO'
+  },
+  [Network.Mumbai]: {
+    api: 'https://element-api-test.eossql.com',
+    key: 'ysBokbA3gKUzt61DmeHWjTFYZ07CGPQL',
+    secret: 'a2PAJXRBChdpGvoyKEz3lLS5Yf1bM0NO'
+  },
+  [Network.Polygon]: {
+    api: 'https://element-api.eossql.com',
+    key: 'zQbYj7RhC1VHIBdWU63ki5AJKXloamDT',
+    secret: 'UqCMpfGn3VyQEdsjLkzJv9tNlgbKFD7O'
   }
 }
 
@@ -60,6 +77,17 @@ export enum POLYGON_CONTRACTS_ADDRESSES {
 }
 
 export enum MUMBAI_CONTRACTS_ADDRESSES {
+  ElementixProxyRegistry = '0xd9E1b6171c1949cfE73974cdf4aCDa51950060Cb',
+  ElementixTokenTransferProxy = '0x1c26cEB523F7664e775929d274d1c7DB2C884866',
+  ElementixExchange = '0x88b6BdA30E7653E829668d8F022f7B2136838154',
+  ExchangeHelper = '0x16940578632EfE0e7E4F557a0C6a255C5c9D2A27',
+  ElementixExchangeKeeper = '',
+  ElementSharedAsset = '0xDf131408BBfA3c48d3B60041aE1cBAfc017CdfE1',
+  FeeRecipientAddress = '0x9F7A946d935c8Efc7A8329C0d894A69bA241345A',
+  WETH = '0xA6FA4fB5f76172d178d61B04b0ecd319C5d1C0aa'
+}
+
+export enum MUMBAI_CONTRACTS_ADDRESSES_V1 {
   ElementixProxyRegistry = '0x26aFE7885cdCFF35ADE8498Bd183577dC98E3fcc',
   ElementixTokenTransferProxy = '0x4669f20D83f81Ee728c3b99E94F25E5DbEe682D5',
   ElementixExchange = '0x2a3eCaeA2A31bb34e84835Bd6799614304AaFa5F',
@@ -104,10 +132,10 @@ export enum MAIN_CONTRACTS_ADDRESSES {
   WETH = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
 }
 
-export const CONTRACTS_ADDRESSES = {
-  rinkeby: RINKEBY_CONTRACTS_ADDRESSES,
-  private: PRIVATE_CONTRACTS_ADDRESSES,
-  main: MAIN_CONTRACTS_ADDRESSES,
-  mumbai: MUMBAI_CONTRACTS_ADDRESSES,
-  polygon: POLYGON_CONTRACTS_ADDRESSES
+export const CONTRACTS_ADDRESSES: { [key: string]: any } = {
+  [Network.Rinkeby]: RINKEBY_CONTRACTS_ADDRESSES,
+  [Network.Private]: PRIVATE_CONTRACTS_ADDRESSES,
+  [Network.Main]: MAIN_CONTRACTS_ADDRESSES,
+  [Network.Mumbai]: MUMBAI_CONTRACTS_ADDRESSES,
+  [Network.Polygon]: POLYGON_CONTRACTS_ADDRESSES
 }
