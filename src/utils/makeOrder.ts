@@ -22,9 +22,9 @@ import {
   MIN_EXPIRATION_SECONDS,
   NULL_ADDRESS,
   ORDER_MATCHING_LATENCY_SECONDS,
-  CONTRACTS_ADDRESSES,
   STATIC_EXTRADATA
 } from './constants'
+import { CONTRACTS_ADDRESSES } from '../contracts/config'
 import { validateOrder } from './check'
 import { getSchemaList, hashOrder, makeBigNumber, orderParamsEncode, toBaseUnitAmount, web3Sign } from './helper'
 

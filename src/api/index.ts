@@ -11,9 +11,13 @@ import {
   OrderSide,
   CallBack,
   Order,
-  orderFromJSON
+  orderFromJSON,
+  elementSignInSign
 } from '../index'
 import { OrderVersionData, OrderVersionParams, OrdersAPI, OrderCancelParams } from './ordersApi'
+import { Account } from '../account'
+import { GraphqlApi } from './graphqlApi'
+import Web3 from 'web3'
 
 export enum MakeOrderType {
   FixPriceOrder = 'FixPriceOrder',
@@ -69,33 +73,49 @@ const checkOrderHash = (order: any): Order => {
 
 export class ElementOrders extends OrdersAPI {
   public orders: any
+  public account: Account
+  public gqlApi: GraphqlApi
+  public walletProvider: Web3
   public accountAddress = ''
-  public networkName = Network.Private
 
   // 初始化SDK
   constructor({
     walletProvider,
     networkName,
-    privateKey
+    walletAccount,
+    privateKey,
+    authToken
   }: {
     walletProvider: any
     networkName: Network
+    walletAccount?: string
     privateKey?: string
+    authToken?: string
   }) {
-    super({ networkName })
+    super({ networkName, authToken })
     if (privateKey) {
       const account = walletProvider.eth.accounts.wallet.add(privateKey)
       walletProvider.eth.defaultAccount = account.address
     }
-    this.accountAddress = walletProvider.eth.defaultAccount.toLowerCase()
-
+    this.accountAddress = walletAccount || walletProvider.eth.defaultAccount.toLowerCase()
     this.orders = new Orders(walletProvider, { networkName })
-    // this.walletChainId = `0x${this.chainId.toString(16)}`
+    this.account = new Account(walletProvider, { networkName })
+    this.gqlApi = new GraphqlApi({ networkName, account: this.accountAddress })
+    this.walletProvider = walletProvider
+  }
+
+  // 接口登录Token
+  public async getLoginAuthToken(): Promise<string> {
+    const accountAddress = this.accountAddress
+    const nonce = await this.gqlApi.getNewNonce()
+    const { message, signature } = await elementSignInSign(this.walletProvider, nonce, accountAddress)
+    this.authToken = await this.gqlApi.getSignInToken({ message, signature })
+    return this.authToken
   }
 
   // 取消订单签名
   public async ordersCancelSign(hash: string): Promise<OrderCancelParams> {
-    const signature = await web3Sign(this.orders.web3, hash, this.accountAddress)
+    const signature = await web3Sign(this.account.web3, hash, this.accountAddress)
     return { hash, signature }
   }
 
@@ -162,7 +182,7 @@ export class ElementOrders extends OrdersAPI {
     if (!sellData) return
     const order = { ...sellData, version: orderVersion.orderVersion } as OrderJSON
 
-    return this.ordersPost({ order })
+    return this.ordersPost({ order: { ...order, chain: this.chain, chainId: this.walletChainId } })
   }
 
   // // 接受买单/购买-----------------order match

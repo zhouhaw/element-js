@@ -1,16 +1,12 @@
 import { gql, GraphQLClient } from 'graphql-request'
-import { elementSignInSign, Network, Orders } from '../index'
-import { ElementAPIConfig } from '../types'
+import { ElementAPIConfig, Network, Token } from '../types'
 import hmacSHA256 from 'crypto-js/hmac-sha256'
-import { API_BASE_URL, CHAIN_ID } from '../utils/constants'
+import { API_BASE_URL, CHAIN, CHAIN_ID } from './config'
 
 export class GraphqlApi implements ElementAPIConfig {
   public networkName: Network
-  public networkID: number
   public authToken: string
-  public chain = 'eth'
-  public chainId: number
-  public walletChainId: string
+  public account: string
 
   /**
    * Base url for the API
@@ -21,50 +17,40 @@ export class GraphqlApi implements ElementAPIConfig {
   /**
    * Logger function to use when debugging
    */
-  public logger: (arg: string) => void
-  private appKey
-  private appSecret
+  private appKey: string
+  private appSecret: string
+  private chain: string
+  private chainId: number
+  private walletChainId: string
 
   /**
    * Create an instance of the Element API
    * @param config ElementAPIConfig for setting up the API, including an optional API key, network name, and base URL
    * @param logger Optional function for logging debug strings before and after requests are made
    */
-  constructor(config: ElementAPIConfig, logger?: (arg: string) => void) {
+  constructor(config: ElementAPIConfig) {
     const _network: Network = config.networkName
     this.apiBaseUrl = config.apiBaseUrl || API_BASE_URL[_network].api
-    this.networkID = CHAIN_ID[_network]
+    this.chainId = CHAIN_ID[_network]
     this.appKey = API_BASE_URL[_network].key
     this.appSecret = API_BASE_URL[_network].secret
+    this.account = config.account || ''
 
     if (!this.apiBaseUrl) {
       throw new Error(`${_network} undefined api`)
     }
-
-    if (_network === Network.Main) {
-      this.chain = 'eth'
-    }
-
-    if (_network === Network.Rinkeby) {
-      this.chain = 'eth'
-    }
-
-    if (_network === Network.Mumbai) {
-      this.chain = 'polygon'
-    }
-
-    if (_network === Network.Polygon) {
-      this.chain = 'polygon'
-    }
-    this.chainId = this.networkID
+    this.chain = CHAIN[_network]
     this.walletChainId = `0x${this.chainId.toString(16)}`
 
     this.networkName = _network
     this.authToken = ''
     const getSign = this.getAPISign()
+
     this.gqlClient = new GraphQLClient(`${this.apiBaseUrl}/graphql`, { headers: { ...getSign } })
-    this.logger = logger || ((arg: string) => arg)
+    // this.gqlClient = this.gqlClient.setHeader('X-Viewer-Addr', this.account)
   }
+
+  paymentTokens?: Token[] | undefined
 
   /**
    * 访问限制
@@ -88,8 +74,8 @@ export class GraphqlApi implements ElementAPIConfig {
     return headers
   }
 
-  private async getNewNonce(walletProvider: any) {
-    const accountAddress = walletProvider.eth.defaultAccount
+  public async getNewNonce(): Promise<number> {
+    // const accountAddress = walletProvider.eth.defaultAccount
     const getNonce = gql`
       query GetNonce($address: Address!, $chain: Chain!, $chainId: ChainId!) {
         user(identity: { address: $address, blockChain: { chain: $chain, chainId: $chainId } }) {
@@ -98,7 +84,7 @@ export class GraphqlApi implements ElementAPIConfig {
       }
     `
     const variables = {
-      address: accountAddress,
+      address: this.account,
       chain: this.chain,
       chainId: this.walletChainId
     }
@@ -106,11 +92,7 @@ export class GraphqlApi implements ElementAPIConfig {
     return nonce.user.nonce
   }
 
-  public async getSignInToken(walletProvider: any) {
-    const accountAddress = walletProvider.eth.defaultAccount
-    this.gqlClient = this.gqlClient.setHeader('X-Viewer-Addr', accountAddress)
-    const nonce = await this.getNewNonce(walletProvider)
-    const { message, signature } = await elementSignInSign(walletProvider, nonce, accountAddress)
+  public async getSignInToken({ message, signature }: { message: string; signature: string }) {
     const loginAuth = gql`
       mutation LoginAuth($identity: IdentityInput!, $message: String!, $signature: String!) {
         auth {
@@ -122,7 +104,7 @@ export class GraphqlApi implements ElementAPIConfig {
     `
     const loginVar = {
       identity: {
-        address: accountAddress,
+        address: this.account,
         blockChain: {
           chain: this.chain,
           chainId: this.walletChainId

@@ -23,17 +23,15 @@ export {
 } from './utils/approve'
 
 export { orderToJSON, getPriceParameters, getCurrentPrice, computeOrderCallData } from './utils/makeOrder'
+export { BigNumber, NULL_ADDRESS, NULL_BLOCK_HASH, DEFAULT_SELLER_FEE_BASIS_POINTS } from './utils/constants'
+
 export {
-  CHAIN_ID,
-  BigNumber,
-  NULL_ADDRESS,
-  NULL_BLOCK_HASH,
-  DEFAULT_SELLER_FEE_BASIS_POINTS,
   PRIVATE_CONTRACTS_ADDRESSES,
   MAIN_CONTRACTS_ADDRESSES,
   RINKEBY_CONTRACTS_ADDRESSES,
   CONTRACTS_ADDRESSES
-} from './utils/constants'
+} from './contracts/config'
+
 export { orderFromJSON, Sleep } from './utils'
 export { web3Sign } from './utils/helper'
 export {

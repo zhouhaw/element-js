@@ -17,7 +17,7 @@ import ElementixExchange from '../abi/ElementixExchange.json'
 import ExchangeHelper from '../abi/ExchangeHelper.json'
 import WETHAbi from '../abi/WETH9Mocked.json'
 // const WETHAbi = import(`../abi/WETH9Mocked.json`)
-import { CONTRACTS_ADDRESSES, NULL_ADDRESS } from './utils/constants'
+import { CONTRACTS_ADDRESSES, NULL_ADDRESS } from './contracts/config'
 import { tokens } from './schema/tokens'
 
 // import { schemas } from './schema/schemas'

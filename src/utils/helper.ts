@@ -1,4 +1,4 @@
-import { BigNumber, CHECK_ETH_BALANCE } from './constants'
+import { BigNumber } from './constants'
 import { ElementError, Network, schemas } from '../index'
 import { tokens } from '../schema/tokens'
 import { Schema } from '../schema/types'

@@ -103,6 +103,8 @@ export interface OrderJSON extends Partial<ECSignature> {
     metadata: ExchangeMetadata;
     hash: string;
     orderHash?: string;
+    chain?: string;
+    chainId?: string;
 }
 export interface ElementOrder {
     exchange: string;

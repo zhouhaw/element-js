@@ -1,5 +1,8 @@
 import { Asset, Network, Token, CallBack } from '../index';
 import { OrderVersionData, OrdersAPI, OrderCancelParams } from './ordersApi';
+import { Account } from '../account';
+import { GraphqlApi } from './graphqlApi';
+import Web3 from 'web3';
 export declare enum MakeOrderType {
     FixPriceOrder = "FixPriceOrder",
     DutchAuctionOrder = "DutchAuctionOrder",
@@ -37,13 +40,18 @@ export interface SellOrderParams extends CreateOrderParams {
 }
 export declare class ElementOrders extends OrdersAPI {
     orders: any;
+    account: Account;
+    gqlApi: GraphqlApi;
+    walletProvider: Web3;
     accountAddress: string;
-    networkName: Network;
-    constructor({ walletProvider, networkName, privateKey }: {
+    constructor({ walletProvider, networkName, walletAccount, privateKey, authToken }: {
         walletProvider: any;
         networkName: Network;
+        walletAccount?: string;
         privateKey?: string;
+        authToken?: string;
     });
+    getLoginAuthToken(): Promise<string>;
     ordersCancelSign(hash: string): Promise<OrderCancelParams>;
     getAssetOrderVersion(assetData: Asset): Promise<{
         orderVersion: OrderVersionData;

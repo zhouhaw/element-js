@@ -1,5 +1,5 @@
 import { ElementAPIConfig, OrderJSON, OrderType } from '../types';
-import { GraphqlApi } from './graphqlApi';
+import { Fetch } from './base';
 export interface OrderVersionParams {
     contractAddress: string;
     tokenId: string | undefined;
@@ -26,7 +26,7 @@ export interface OrderQueryParams {
     tokenId: string;
     orderType: OrderType;
 }
-export declare class OrdersAPI extends GraphqlApi {
+export declare class OrdersAPI extends Fetch {
     /**
      * Page size to use for fetching orders
      */
@@ -35,6 +35,9 @@ export declare class OrdersAPI extends GraphqlApi {
      * Logger function to use when debugging
      */
     logger: (arg: string) => void;
+    chain: string;
+    chainId: number;
+    walletChainId: string;
     constructor(config: ElementAPIConfig, logger?: (arg: string) => void);
     /**
      * Send an order to the orderbook.
@@ -51,23 +54,6 @@ export declare class OrdersAPI extends GraphqlApi {
     }): Promise<any>;
     ordersVersion(orderAsset: OrderVersionParams, retries?: number): Promise<OrderVersionData>;
     ordersConfData(retries?: number): Promise<OrderConfData>;
-    ordersCancel(cancelParams: OrderCancelParams, retries?: number): Promise<any>;
+    ordersHidden(cancelParams: OrderCancelParams, retries?: number): Promise<any>;
     ordersQuery(queryParams: OrderQueryParams, retries?: number): Promise<Array<OrderJSON>>;
-    /**
-     * POST JSON data to API, sending auth token in headers
-     * @param apiPath Path to URL endpoint under API
-     * @param body Data to send. Will be JSON.stringified
-     * @param opts RequestInit opts, similar to Fetch API. If it contains
-     *  a body, it won't be stringified.
-     */
-    post(apiPath: string, body?: {
-        [key: string]: any;
-    }, opts?: RequestInit): Promise<any>;
-    /**
-     * Get from an API Endpoint, sending auth token in headers
-     * @param apiPath Path to URL endpoint under API
-     * @param opts RequestInit opts, similar to Fetch API
-     */
-    private _fetch;
-    private _handleApiResponse;
 }

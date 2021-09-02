@@ -1,11 +1,13 @@
 import fetch from 'isomorphic-unfetch'
+import { gql, GraphQLClient } from 'graphql-request'
+import hmacSHA256 from 'crypto-js/hmac-sha256'
 
 export class Fetch {
   /**
    * Page size to use for fetching orders
    */
   public apiBaseUrl: string
-  private authToken: string
+  public authToken: string
   /**
    * Logger function to use when debugging
    */
@@ -143,11 +145,11 @@ export class Fetch {
 
     throw new Error(`API Error ${response.status}: ${errorMessage}`)
   }
-}
 
-function _throwOrContinue(error: Error, retries: number) {
-  const isUnavailable = !!error.message && (error.message.includes('503') || error.message.includes('429'))
-  if (retries <= 0 || !isUnavailable) {
-    throw error
+  public throwOrContinue(error: Error, retries: number) {
+    const isUnavailable = !!error.message && (error.message.includes('503') || error.message.includes('429'))
+    if (retries <= 0 || !isUnavailable) {
+      throw error
+    }
   }
 }

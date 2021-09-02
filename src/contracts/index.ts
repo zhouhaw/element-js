@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events'
 import Web3 from 'web3'
-import { CONTRACTS_ADDRESSES, NULL_ADDRESS } from '../utils/constants'
+import { CONTRACTS_ADDRESSES, NULL_ADDRESS } from './config'
 import { ElementAPIConfig, Network, Token } from '../types'
 import { AnnotatedFunctionOutput, LimitedCallSpec } from '../schema/types'
 import { tokens } from '../schema/tokens'

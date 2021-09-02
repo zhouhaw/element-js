@@ -3,7 +3,7 @@ export declare class Fetch {
      * Page size to use for fetching orders
      */
     apiBaseUrl: string;
-    private authToken;
+    authToken: string;
     /**
      * Logger function to use when debugging
      */
@@ -40,4 +40,5 @@ export declare class Fetch {
      */
     private _fetch;
     private _handleApiResponse;
+    throwOrContinue(error: Error, retries: number): void;
 }

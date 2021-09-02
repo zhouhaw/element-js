@@ -144,6 +144,8 @@ export interface OrderJSON extends Partial<ECSignature> {
 
   hash: string
   orderHash?: string
+  chain?: string
+  chainId?: string
 }
 
 //---------- Orderbook-----------

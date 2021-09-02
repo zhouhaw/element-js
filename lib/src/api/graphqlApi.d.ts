@@ -1,13 +1,9 @@
 import { GraphQLClient } from 'graphql-request';
-import { Network } from '../index';
-import { ElementAPIConfig } from '../types';
+import { ElementAPIConfig, Network, Token } from '../types';
 export declare class GraphqlApi implements ElementAPIConfig {
     networkName: Network;
-    networkID: number;
     authToken: string;
-    chain: string;
-    chainId: number;
-    walletChainId: string;
+    account: string;
     /**
      * Base url for the API
      */
@@ -16,15 +12,18 @@ export declare class GraphqlApi implements ElementAPIConfig {
     /**
      * Logger function to use when debugging
      */
-    logger: (arg: string) => void;
     private appKey;
     private appSecret;
+    private chain;
+    private chainId;
+    private walletChainId;
     /**
      * Create an instance of the Element API
      * @param config ElementAPIConfig for setting up the API, including an optional API key, network name, and base URL
      * @param logger Optional function for logging debug strings before and after requests are made
      */
-    constructor(config: ElementAPIConfig, logger?: (arg: string) => void);
+    constructor(config: ElementAPIConfig);
+    paymentTokens?: Token[] | undefined;
     /**
      * 访问限制
      * 添加API签名
@@ -32,6 +31,9 @@ export declare class GraphqlApi implements ElementAPIConfig {
      * X-Api-Sign	验证签名
      */
     private getAPISign;
-    private getNewNonce;
-    getSignInToken(walletProvider: any): Promise<string>;
+    getNewNonce(): Promise<number>;
+    getSignInToken({ message, signature }: {
+        message: string;
+        signature: string;
+    }): Promise<string>;
 }
