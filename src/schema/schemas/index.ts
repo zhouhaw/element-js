@@ -19,6 +19,27 @@ export const schemas = {
   polygon: polygonSchemas
 }
 
+export function getBalanceSchemas(metadata: ExchangeMetadata): AnnotatedFunctionABI {
+  const address = metadata.asset.address
+  const tokneId = metadata.asset.id
+  const schema = metadata.schema
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  let accountApprove = ERC1155Schema.functions.countOf({ address, id: tokneId })
+  if (schema === ElementSchemaName.ERC721) {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    accountApprove = ERC721Schema.functions.ownerOf({ address })
+  }
+
+  if (schema === ElementSchemaName.CryptoKitties) {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    accountApprove = CryptoKittiesSchema.functions.ownerOf({ address, id: tokneId })
+  }
+  return accountApprove
+}
+
 export function getIsApproveSchemas(metadata: ExchangeMetadata): AnnotatedFunctionABI {
   const address = metadata.asset.address
   const tokneId = metadata.asset.id

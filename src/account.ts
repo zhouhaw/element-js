@@ -14,6 +14,7 @@ import { EthApi, Web3 } from './api/ethApi'
 import {
   encodeParamsCall,
   encodeWeb3Call,
+  getBalanceSchemas,
   getApproveSchemas,
   getIsApproveSchemas,
   getTransferSchemas,
@@ -25,7 +26,7 @@ import { orderParamsEncode, orderSigEncode } from './utils/helper'
 
 // 根据 DB签名过的订单 make一个对手单
 export class Account extends ContractSchemas {
-  public ethApi: EthApi
+  // public ethApi: EthApi
   public elementAccount: string
   public accountProxy: ''
 
@@ -34,7 +35,7 @@ export class Account extends ContractSchemas {
     this.elementAccount = apiConfig.account || web3.eth.defaultAccount?.toLowerCase() || ''
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    this.ethApi = new EthApi(web3.currentProvider.host)
+    // this.ethApi = new EthApi(web3.currentProvider.host)
     this.accountProxy = ''
   }
 
@@ -83,13 +84,21 @@ export class Account extends ContractSchemas {
     return this.ethCall(callData, accountApprove?.outputs)
   }
 
-  public async getTokenBalances(to: string): Promise<string> {
-    const owner = this.elementAccount
+  public async getTokenBalances(to: string, account?: string): Promise<string> {
+    const owner = account || this.elementAccount
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     const accountBal = this.Erc20Func.countOf()
     const data = encodeParamsCall(accountBal, { owner })
     const callData = { to, data }
+    return this.ethCall(callData, accountBal?.outputs)
+  }
+
+  public async getAssetBalances(metadata: ExchangeMetadata, account?: string): Promise<string> {
+    const owner = account || this.elementAccount
+    const accountBal = getBalanceSchemas(metadata)
+    const data = encodeParamsCall(accountBal, { owner })
+    const callData = { to: accountBal.target, data }
     return this.ethCall(callData, accountBal?.outputs)
   }
 

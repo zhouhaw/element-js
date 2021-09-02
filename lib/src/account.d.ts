@@ -1,9 +1,8 @@
 import { ElementError } from './base/error';
 import { ContractSchemas } from './contracts/index';
 import { Asset, ElementAPIConfig, ExchangeMetadata, Order, UnsignedOrder } from './types';
-import { EthApi, Web3 } from './api/ethApi';
+import { Web3 } from './api/ethApi';
 export declare class Account extends ContractSchemas {
-    ethApi: EthApi;
     elementAccount: string;
     accountProxy: '';
     constructor(web3: Web3, apiConfig?: ElementAPIConfig);
@@ -11,7 +10,8 @@ export declare class Account extends ContractSchemas {
     getAccountProxy(): Promise<"">;
     registerProxy(): Promise<any>;
     checkTokenTransferProxy(to: string): Promise<string>;
-    getTokenBalances(to: string): Promise<string>;
+    getTokenBalances(to: string, account?: string): Promise<string>;
+    getAssetBalances(metadata: ExchangeMetadata, account?: string): Promise<string>;
     approveTokenTransferProxy(to: string): Promise<any>;
     checkAssetTransferProxy(metadata: ExchangeMetadata): Promise<boolean>;
     approveAssetTransferProxy(metadata: ExchangeMetadata): Promise<any>;

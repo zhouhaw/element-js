@@ -7,6 +7,7 @@ export declare const schemas: {
     mumbai: import("../types").Schema<any>[];
     polygon: import("../types").Schema<any>[];
 };
+export declare function getBalanceSchemas(metadata: ExchangeMetadata): AnnotatedFunctionABI;
 export declare function getIsApproveSchemas(metadata: ExchangeMetadata): AnnotatedFunctionABI;
 export declare function getApproveSchemas(metadata: ExchangeMetadata): AnnotatedFunctionABI;
 export declare function getTransferSchemas(asset: Asset): AnnotatedFunctionABI;

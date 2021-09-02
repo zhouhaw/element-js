@@ -52,6 +52,7 @@ export declare class ElementOrders extends OrdersAPI {
         authToken?: string;
     });
     getLoginAuthToken(): Promise<string>;
+    login(): Promise<void>;
     ordersCancelSign(hash: string): Promise<OrderCancelParams>;
     getAssetOrderVersion(assetData: Asset): Promise<{
         orderVersion: OrderVersionData;

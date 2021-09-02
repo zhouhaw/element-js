@@ -113,6 +113,13 @@ export class ElementOrders extends OrdersAPI {
     return this.authToken
   }
 
+  public async login(): Promise<void> {
+    const accountAddress = this.accountAddress
+    const nonce = await this.gqlApi.getNewNonce()
+    const { message, signature } = await elementSignInSign(this.walletProvider, nonce, accountAddress)
+    this.authToken = await this.gqlApi.getSignInToken({ message, signature })
+  }
+
   // 取消订单签名
   public async ordersCancelSign(hash: string): Promise<OrderCancelParams> {
     const signature = await web3Sign(this.account.web3, hash, this.accountAddress)

@@ -36,4 +36,6 @@ export declare class GraphqlApi implements ElementAPIConfig {
         message: string;
         signature: string;
     }): Promise<string>;
+    getUserAssetsList(): Promise<any>;
+    getAccountOrders(): Promise<any>;
 }

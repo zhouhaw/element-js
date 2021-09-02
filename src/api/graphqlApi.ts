@@ -1,7 +1,8 @@
-import { gql, GraphQLClient } from 'graphql-request'
+import { GraphQLClient } from 'graphql-request'
 import { ElementAPIConfig, Network, Token } from '../types'
 import hmacSHA256 from 'crypto-js/hmac-sha256'
 import { API_BASE_URL, CHAIN, CHAIN_ID } from './config'
+import { getNonce, loginAuth, userAssetsList, accountOrders } from './gql/user'
 
 export class GraphqlApi implements ElementAPIConfig {
   public networkName: Network
@@ -47,7 +48,7 @@ export class GraphqlApi implements ElementAPIConfig {
     const getSign = this.getAPISign()
 
     this.gqlClient = new GraphQLClient(`${this.apiBaseUrl}/graphql`, { headers: { ...getSign } })
-    // this.gqlClient = this.gqlClient.setHeader('X-Viewer-Addr', this.account)
+    this.gqlClient = this.gqlClient.setHeader('X-Viewer-Addr', this.account)
   }
 
   paymentTokens?: Token[] | undefined
@@ -75,14 +76,6 @@ export class GraphqlApi implements ElementAPIConfig {
   }
 
   public async getNewNonce(): Promise<number> {
-    // const accountAddress = walletProvider.eth.defaultAccount
-    const getNonce = gql`
-      query GetNonce($address: Address!, $chain: Chain!, $chainId: ChainId!) {
-        user(identity: { address: $address, blockChain: { chain: $chain, chainId: $chainId } }) {
-          nonce
-        }
-      }
-    `
     const variables = {
       address: this.account,
       chain: this.chain,
@@ -93,15 +86,6 @@ export class GraphqlApi implements ElementAPIConfig {
   }
 
   public async getSignInToken({ message, signature }: { message: string; signature: string }) {
-    const loginAuth = gql`
-      mutation LoginAuth($identity: IdentityInput!, $message: String!, $signature: String!) {
-        auth {
-          login(input: { identity: $identity, message: $message, signature: $signature }) {
-            token
-          }
-        }
-      }
-    `
     const loginVar = {
       identity: {
         address: this.account,
@@ -120,5 +104,36 @@ export class GraphqlApi implements ElementAPIConfig {
     this.gqlClient = this.gqlClient.setHeader('Authorization', bearerToken)
     this.authToken = bearerToken
     return bearerToken
+  }
+
+  public async getUserAssetsList() {
+    const variables = {
+      first: 20,
+      identity: {
+        address: this.account,
+        blockChain: {
+          chain: this.chain,
+          chainId: this.walletChainId
+        }
+      }
+    }
+    this.gqlClient = this.gqlClient.setHeader('X-Query-Args', 'UserAssetsList')
+    return await this.gqlClient.request(userAssetsList, variables)
+  }
+
+  public async getAccountOrders() {
+    const variables = {
+      first: 20,
+      identity: {
+        address: this.account,
+        blockChain: {
+          chain: this.chain,
+          chainId: this.walletChainId
+        }
+      },
+      orderType: 0 //报价
+    }
+    this.gqlClient = this.gqlClient.setHeader('X-Query-Args', 'AccountOrders')
+    return await this.gqlClient.request(accountOrders, variables)
   }
 }
