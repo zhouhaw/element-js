@@ -51,22 +51,27 @@ export class Account extends ContractSchemas {
       const sell: SellOrderApprove = {
         paymentTokenApprove: {
           isApprove: false,
-          func: this.approveTokenTransferProxy
+          func: this.approveTokenTransferProxy,
+          balances: '0'
         },
         accountRegister: {
           isApprove: false,
-          func: this.registerProxy
+          func: this.registerProxy,
+          proxy: ''
         },
         sellAssetApprove: {
           isApprove: false,
-          func: this.approveAssetTransferProxy
+          func: this.approveAssetTransferProxy,
+          balances: '0'
         }
       }
       const proxy = await this.getAccountProxy()
       if (proxy !== NULL_ADDRESS) {
         sell.accountRegister.isApprove = true
+        sell.accountRegister.proxy = proxy
       }
       sell.sellAssetApprove.isApprove = await this.checkAssetTransferProxy(metadata)
+      sell.sellAssetApprove.balances = await this.getAssetBalances(metadata)
       if (order.paymentToken !== NULL_ADDRESS) {
         const allowance = await this.checkTokenTransferProxy(order.paymentToken)
         sell.paymentTokenApprove.isApprove = new BigNumber(allowance).gte(allowance)
@@ -78,12 +83,14 @@ export class Account extends ContractSchemas {
       const buy: BuyOrderApprove = {
         paymentTokenApprove: {
           isApprove: false,
+          balances: '',
           func: this.approveTokenTransferProxy
         }
       }
       if (order.paymentToken !== NULL_ADDRESS) {
         const allowance = await this.checkTokenTransferProxy(order.paymentToken)
         buy.paymentTokenApprove.isApprove = new BigNumber(allowance).gte(order.basePrice)
+        buy.paymentTokenApprove.balances = await this.getTokenBalances(order.paymentToken)
       } else {
         throw new ElementError({ code: '1204' })
       }

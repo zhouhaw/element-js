@@ -351,6 +351,7 @@ export interface BuyOrderApprove {
   paymentTokenApprove: {
     isApprove: boolean
     func: (tokenAddress: string) => Promise<ETHSending>
+    balances: string
   }
 }
 //  isFeeTokenApprove: false
@@ -358,9 +359,11 @@ export interface SellOrderApprove extends BuyOrderApprove {
   accountRegister: {
     isApprove: boolean
     func: () => Promise<ETHSending>
+    proxy: string
   }
   sellAssetApprove: {
     isApprove: boolean
     func: (metadata: ExchangeMetadata) => Promise<ETHSending>
+    balances: string
   }
 }
