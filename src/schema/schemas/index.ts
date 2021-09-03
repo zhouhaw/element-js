@@ -83,13 +83,28 @@ export function getApproveSchemas(metadata: ExchangeMetadata): AnnotatedFunction
   return accountApprove
 }
 
-export function getTransferSchemas(asset: Asset): AnnotatedFunctionABI {
-  const address = asset.tokenAddress
-  const tokneId = asset.tokenId
-  const schema = asset.schemaName
+export function getTransferSchemas(metadata: ExchangeMetadata): AnnotatedFunctionABI {
+  // const address = asset.tokenAddress
+  // const tokneId = asset.tokenId
+  // const schema = asset.schemaName
+
+  const address = metadata.asset.address
+  let data = '0x'
+  let quantity
+  if ('quantity' in metadata.asset) {
+    quantity = metadata.asset.quantity
+  }
+
+  if ('data' in metadata.asset) {
+    data = metadata.asset.data || data
+  }
+  const tokneId = metadata.asset.id
+  const schema = metadata.schema
+
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
-  let accountApprove = ERC1155Schema.functions.transfer({ address, id: tokneId })
+  let accountApprove = ERC1155Schema.functions.transfer({ address, id: tokneId, quantity, data })
+
   if (schema === ElementSchemaName.ERC721) {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
@@ -100,6 +115,12 @@ export function getTransferSchemas(asset: Asset): AnnotatedFunctionABI {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     accountApprove = CryptoKittiesSchema.functions.transfer({ address, id: tokneId })
+  }
+
+  if (schema === ElementSchemaName.ERC1155) {
+    if (!data) {
+      // accountApprove.inputs = accountApprove.inputs.filter((val) => val.name != '_data')
+    }
   }
   // accountApprove.target = to
   return accountApprove

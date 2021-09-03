@@ -1,6 +1,6 @@
 import { ElementError } from './base/error';
 import { ContractSchemas } from './contracts/index';
-import { Asset, ETHSending, PromiEvent, TransactionReceipt, BuyOrderApprove, ElementAPIConfig, ExchangeMetadata, Order, OrderJSON, SellOrderApprove, UnsignedOrder } from './types';
+import { ETHSending, PromiEvent, TransactionReceipt, BuyOrderApprove, ElementAPIConfig, ExchangeMetadata, Order, OrderJSON, SellOrderApprove, UnsignedOrder } from './types';
 import { Web3 } from './api/ethApi';
 export declare class Account extends ContractSchemas {
     elementAccount: string;
@@ -26,6 +26,6 @@ export declare class Account extends ContractSchemas {
     orderCancel({ order }: {
         order: Order;
     }): Promise<ETHSending>;
-    assetTransfer(asset: Asset, to: string): Promise<ETHSending>;
+    assetTransfer(metadata: ExchangeMetadata, to: string): Promise<ETHSending>;
     accountApprove(error: ElementError): Promise<void>;
 }

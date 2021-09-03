@@ -226,9 +226,9 @@ export class Account extends ContractSchemas {
     return this.ethSend(callData, this.elementAccount)
   }
 
-  public async assetTransfer(asset: Asset, to: string): Promise<ETHSending> {
+  public async assetTransfer(metadata: ExchangeMetadata, to: string): Promise<ETHSending> {
     const owner = this.elementAccount
-    const accountApprove = getTransferSchemas(asset)
+    const accountApprove = getTransferSchemas(metadata)
     const data = encodeParamsCall(accountApprove, { owner, replace: to })
     const callData = { to: accountApprove.target, data }
     return this.ethSend(callData, owner)

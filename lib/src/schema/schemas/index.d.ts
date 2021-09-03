@@ -1,4 +1,4 @@
-import { Asset, ExchangeMetadata } from '../../types';
+import { ExchangeMetadata } from '../../types';
 import { AnnotatedFunctionABI } from '../types';
 export declare const schemas: {
     rinkeby: import("../types").Schema<any>[];
@@ -10,7 +10,7 @@ export declare const schemas: {
 export declare function getBalanceSchemas(metadata: ExchangeMetadata): AnnotatedFunctionABI;
 export declare function getIsApproveSchemas(metadata: ExchangeMetadata): AnnotatedFunctionABI;
 export declare function getApproveSchemas(metadata: ExchangeMetadata): AnnotatedFunctionABI;
-export declare function getTransferSchemas(asset: Asset): AnnotatedFunctionABI;
+export declare function getTransferSchemas(metadata: ExchangeMetadata): AnnotatedFunctionABI;
 export declare const common: {
     ElementSchemas: {
         registry: Required<Pick<import("../types").ExchangeSchema<import("./common/Element/registry").Registry>, "address" | "functions">>;

@@ -270,6 +270,8 @@ export function checkDataToCall(netWorkName: Network, order: UnhashedOrder) {
 
   if (encodeData.dataToCall != order.dataToCall) {
     log('checkDataToCall.dataToCall error')
+    log(encodeData.dataToCall)
+    log(order.dataToCall)
     throw new ElementError({ code: '1208', context: { part: 'dataToCall' } })
   }
 

@@ -92,7 +92,7 @@ export const encodeWeb3Call = (abi: AnnotatedFunctionABI, parameters: Array<any>
 //替换 shmaces
 export const encodeParamsCall = (
   abi: AnnotatedFunctionABI,
-  { owner, replace, count }: { owner?: string; replace?: string | boolean; count?: string }
+  { owner, replace }: { owner?: string; replace?: string | boolean }
 ): string => {
   const parameters = abi.inputs.map((input) => {
     switch (input.kind) {
@@ -100,12 +100,16 @@ export const encodeParamsCall = (
         return replace
       case FunctionInputKind.Owner:
         return owner
-      case FunctionInputKind.Asset:
-      case FunctionInputKind.Count:
+      // case FunctionInputKind.Data:
+      // return web3.utils.utf8ToHex(input.value)
       default:
         return input.value
     }
   })
+  // const encodeCallData = encodeCall(abi, parameters)
+  // console.log('encodeCall', encodeCallData)
+  // const encodeWeb3CallData = encodeWeb3Call(abi, parameters)
+  // console.log('encodeWeb3CallData', encodeWeb3CallData)
   return encodeWeb3Call(abi, parameters)
 }
 

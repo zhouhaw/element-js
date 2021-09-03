@@ -100,14 +100,11 @@ export class Orders extends Contracts {
     const data = await this.exchange.methods
       .orderMatch(buyOrderParamArray, buyOrderSigArray, sellOrderParamArray, sellOrderSigArray, metadata)
       .encodeABI()
-    console.log(data)
     const gas = await this.web3.eth
       .estimateGas({ to: this.exchange.options.address, data, value })
       .catch((error: any) => {
         throw new ElementError({ code: '1003', context: { msg: error.message } })
       })
-
-    console.log(gas)
 
     return this.exchange.methods
       .orderMatch(buyOrderParamArray, buyOrderSigArray, sellOrderParamArray, sellOrderSigArray, metadata)
