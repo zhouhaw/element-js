@@ -1,6 +1,8 @@
 import { BigNumber } from './utils/constants';
 import { Network } from './schema/types';
+import { PromiEvent, TransactionReceipt, TransactionConfig } from 'web3-core';
 export { Network };
+export type { TransactionConfig, PromiEvent, TransactionReceipt };
 export interface ElementAPIConfig {
     networkName: Network;
     paymentTokens?: Array<Token>;
@@ -248,4 +250,24 @@ export interface ElementCollection extends ElementFees {
     imageUrl: string;
     transferFee: BigNumber | string | null;
     transferFeePaymentToken: ElemetnFungibleToken | null;
+}
+export interface ETHSending {
+    sendTx: PromiEvent<TransactionReceipt>;
+    txHash: string;
+}
+export interface BuyOrderApprove {
+    paymentTokenApprove: {
+        isApprove: boolean;
+        func: (tokenAddress: string) => Promise<ETHSending>;
+    };
+}
+export interface SellOrderApprove extends BuyOrderApprove {
+    accountRegister: {
+        isApprove: boolean;
+        func: () => Promise<ETHSending>;
+    };
+    sellAssetApprove: {
+        isApprove: boolean;
+        func: (metadata: ExchangeMetadata) => Promise<ETHSending>;
+    };
 }

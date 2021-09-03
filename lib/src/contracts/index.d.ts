@@ -1,7 +1,7 @@
 /// <reference types="node" />
 import { EventEmitter } from 'events';
 import Web3 from 'web3';
-import { ElementAPIConfig, Network, Token } from '../types';
+import { ElementAPIConfig, ETHSending, Network, Token } from '../types';
 import { AnnotatedFunctionOutput, LimitedCallSpec } from '../schema/types';
 export declare class ContractSchemas extends EventEmitter {
     web3: Web3;
@@ -32,5 +32,5 @@ export declare class ContractSchemas extends EventEmitter {
     };
     constructor(web3: any, apiConfig?: ElementAPIConfig);
     ethCall(callData: LimitedCallSpec, outputs: AnnotatedFunctionOutput[]): Promise<any>;
-    ethSend(callData: LimitedCallSpec, from: string): Promise<any>;
+    ethSend(callData: LimitedCallSpec, from: string): Promise<ETHSending>;
 }

@@ -2,11 +2,18 @@ import { ElementError } from './base/error'
 import { ContractSchemas } from './contracts/index'
 import {
   Asset,
+  ETHSending,
+  PromiEvent,
+  TransactionReceipt,
+  BuyOrderApprove,
   ECSignature,
   ElementAPIConfig,
   ExchangeMetadata,
   Network,
   Order,
+  OrderJSON,
+  OrderSide,
+  SellOrderApprove,
   UnhashedOrder,
   UnsignedOrder
 } from './types'
@@ -20,7 +27,7 @@ import {
   getTransferSchemas,
   LimitedCallSpec
 } from './schema'
-import { MAX_UINT_256, NULL_ADDRESS } from './utils/constants'
+import { BigNumber, MAX_UINT_256, NULL_ADDRESS } from './utils/constants'
 
 import { orderParamsEncode, orderSigEncode } from './utils/helper'
 
@@ -28,32 +35,66 @@ import { orderParamsEncode, orderSigEncode } from './utils/helper'
 export class Account extends ContractSchemas {
   // public ethApi: EthApi
   public elementAccount: string
-  public accountProxy: ''
+  public accountProxy = NULL_ADDRESS
 
   constructor(web3: Web3, apiConfig: ElementAPIConfig = { networkName: Network.Rinkeby }) {
     super(web3, apiConfig)
     this.elementAccount = apiConfig.account || web3.eth.defaultAccount?.toLowerCase() || ''
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
     // this.ethApi = new EthApi(web3.currentProvider.host)
-    this.accountProxy = ''
+    this.accountProxy = NULL_ADDRESS
   }
 
-  public async getOrderApprove(order: UnsignedOrder): Promise<any> {
-    const maker = this.elementAccount
-    return {
-      isRegister: false,
-      isPayTokenApprove: false,
-      isSellAssetApprove: false,
-      isFeeTokenApprove: false,
-      transferProxy: this.elementixTokenTransferProxy
+  public async getOrderApprove(order: UnsignedOrder | OrderJSON): Promise<SellOrderApprove | BuyOrderApprove> {
+    const metadata = order.metadata
+    // 检查 Sell 买单
+    if (order.side == OrderSide.Sell) {
+      const sell: SellOrderApprove = {
+        paymentTokenApprove: {
+          isApprove: false,
+          func: this.approveTokenTransferProxy
+        },
+        accountRegister: {
+          isApprove: false,
+          func: this.registerProxy
+        },
+        sellAssetApprove: {
+          isApprove: false,
+          func: this.approveAssetTransferProxy
+        }
+      }
+      const proxy = await this.getAccountProxy()
+      if (proxy !== NULL_ADDRESS) {
+        sell.accountRegister.isApprove = true
+      }
+      sell.sellAssetApprove.isApprove = await this.checkAssetTransferProxy(metadata)
+      if (order.paymentToken !== NULL_ADDRESS) {
+        const allowance = await this.checkTokenTransferProxy(order.paymentToken)
+        sell.paymentTokenApprove.isApprove = new BigNumber(allowance).gte(allowance)
+      } else {
+        sell.paymentTokenApprove.isApprove = true
+      }
+      return sell
+    } else {
+      const buy: BuyOrderApprove = {
+        paymentTokenApprove: {
+          isApprove: false,
+          func: this.approveTokenTransferProxy
+        }
+      }
+      if (order.paymentToken !== NULL_ADDRESS) {
+        const allowance = await this.checkTokenTransferProxy(order.paymentToken)
+        buy.paymentTokenApprove.isApprove = new BigNumber(allowance).gte(order.basePrice)
+      } else {
+        throw new ElementError({ code: '1204' })
+      }
+      return buy
     }
   }
 
   public async getAccountProxy() {
     const owner = this.elementAccount
     const address = this.elementixProxyRegistry
-    if (this.accountProxy === '') {
+    if (this.accountProxy === NULL_ADDRESS) {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       const accountApprove = this.ElementRegistryFunc.accountProxy({ address })
@@ -78,7 +119,7 @@ export class Account extends ContractSchemas {
     const tokenProxy = this.elementixTokenTransferProxy
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    const accountApprove = this.Erc20Func.isApprove()
+    const accountApprove = this.Erc20Func.isApprove({ address: to })
     const data = encodeParamsCall(accountApprove, { owner: this.elementAccount, replace: tokenProxy })
     const callData = { to, data }
     return this.ethCall(callData, accountApprove?.outputs)
@@ -88,7 +129,7 @@ export class Account extends ContractSchemas {
     const owner = account || this.elementAccount
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    const accountBal = this.Erc20Func.countOf()
+    const accountBal = this.Erc20Func.countOf({ address: to })
     const data = encodeParamsCall(accountBal, { owner })
     const callData = { to, data }
     return this.ethCall(callData, accountBal?.outputs)
@@ -102,7 +143,7 @@ export class Account extends ContractSchemas {
     return this.ethCall(callData, accountBal?.outputs)
   }
 
-  public async approveTokenTransferProxy(to: string): Promise<any> {
+  public async approveTokenTransferProxy(to: string): Promise<ETHSending> {
     const tokenProxy = this.elementixTokenTransferProxy
     const quantity = MAX_UINT_256.toString()
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -128,7 +169,9 @@ export class Account extends ContractSchemas {
     return res
   }
 
-  public async approveAssetTransferProxy(metadata: ExchangeMetadata): Promise<any> {
+  public async approveAssetTransferProxy(
+    metadata: ExchangeMetadata
+  ): Promise<{ sendTx: PromiEvent<TransactionReceipt>; txHash: string }> {
     const operator = this.elementixTokenTransferProxy
     const accountApprove = getApproveSchemas(metadata)
     const data = encodeParamsCall(accountApprove, { owner: operator, replace: true })
@@ -145,7 +188,7 @@ export class Account extends ContractSchemas {
     buy: Order
     sell: Order
     metadata?: string
-  }): Promise<any> {
+  }): Promise<ETHSending> {
     const to = this.elementixExchange
     const sellOrderParamArray = orderParamsEncode(sell as UnhashedOrder)
     const sellOrderSigArray = orderSigEncode(sell as ECSignature)
@@ -169,7 +212,7 @@ export class Account extends ContractSchemas {
   }
 
   // 取消订单
-  public async orderCancel({ order }: { order: Order }): Promise<any> {
+  public async orderCancel({ order }: { order: Order }): Promise<ETHSending> {
     const to = this.elementixExchange
     const orderParamArray = orderParamsEncode(order)
     const orderSigArray = orderSigEncode(order as ECSignature)
@@ -183,7 +226,7 @@ export class Account extends ContractSchemas {
     return this.ethSend(callData, this.elementAccount)
   }
 
-  public async assetTransfer(asset: Asset, to: string): Promise<any> {
+  public async assetTransfer(asset: Asset, to: string): Promise<ETHSending> {
     const owner = this.elementAccount
     const accountApprove = getTransferSchemas(asset)
     const data = encodeParamsCall(accountApprove, { owner, replace: to })

@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events'
 import Web3 from 'web3'
 import { CONTRACTS_ADDRESSES, NULL_ADDRESS } from './config'
-import { ElementAPIConfig, Network, Token } from '../types'
+import { ElementAPIConfig, ETHSending, Network, Token, TransactionConfig } from '../types'
 import { AnnotatedFunctionOutput, LimitedCallSpec } from '../schema/types'
 import { tokens } from '../schema/tokens'
 import { common } from '../schema/schemas'
@@ -86,7 +86,8 @@ export class ContractSchemas extends EventEmitter {
     return params
   }
 
-  public async ethSend(callData: LimitedCallSpec, from: string): Promise<any> {
+  //发送标准交易
+  public async ethSend(callData: LimitedCallSpec, from: string): Promise<ETHSending> {
     // const from = this.elementAccount
     const gas = await this.web3.eth.estimateGas(callData)
     const gasPrice = await this.web3.eth.getGasPrice()
@@ -99,19 +100,19 @@ export class ContractSchemas extends EventEmitter {
       gas,
       gasPrice,
       data: callData.data
-    }
-    return this.web3.eth
-      .sendTransaction(transactionObject)
-      .on('transactionHash', (txHash: string) => {
-        // console.log('approveTokenTransferProxy tx txHash', txHash)
-        this.emit('transactionHash', txHash)
+    } as TransactionConfig
+
+    return new Promise((resolve, reject) => {
+      const sendTx = this.web3.eth.sendTransaction(transactionObject).once('transactionHash', (txHash: string) => {
+        resolve({ sendTx, txHash })
       })
-      .on('receipt', (receipt: any) => {
-        // console.log('approveTokenTransferProxy tx receipt', receipt)
-        this.emit('receipt', receipt)
-      })
-      .catch((error: any) => {
-        this.emit('error', error)
-      })
+    })
+    // .on('receipt', (receipt: any) => {
+    //   // console.log('approveTokenTransferProxy tx receipt', receipt)
+    //   this.emit('receipt', receipt)
+    // })
+    // .catch((error: any) => {
+    //   this.emit('error', error)
+    // })
   }
 }

@@ -420,8 +420,8 @@ export async function getOrderHash(web3: any, exchangeHelper: any, order: Unhash
 }
 
 export async function hashAndValidateOrder(web3: any, exchangeHelper: any, order: UnhashedOrder): Promise<OrderJSON> {
-  const orderHash = await getOrderHash(web3, exchangeHelper, order)
-  // const orderHash = hashOrder(web3, order)
+  // const orderHash = await getOrderHash(web3, exchangeHelper, order)
+  const orderHash = hashOrder(web3, order)
   const hashedOrder = {
     ...order,
     hash: orderHash
