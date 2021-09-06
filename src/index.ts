@@ -52,8 +52,8 @@ export {
 } from './utils/helper'
 
 export { Orders, OrderCheckStatus } from './orders'
-export { OrdersAPI } from './api/ordersApi'
-export type { OrderQueryParams } from './api/ordersApi'
+export { OrdersAPI } from './api/restful/ordersApi'
+export type { OrderQueryParams } from './api/restful/ordersApi'
 export { ElementOrders } from './api/index'
 export type { SellOrderParams } from './api/index'
 export type { CallBack } from './orders'

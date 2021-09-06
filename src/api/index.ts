@@ -14,49 +14,14 @@ import {
   orderFromJSON,
   elementSignInSign
 } from '../index'
-import { OrderVersionData, OrderVersionParams, OrdersAPI, OrderCancelParams } from './ordersApi'
+import { OrderVersionData, OrderVersionParams, OrdersAPI, OrderCancelParams } from './restful/ordersApi'
 import { Account } from '../account'
-import { GraphqlApi } from './graphqlApi'
+import { UsersApi, GqlApi } from './graphql'
+
 import Web3 from 'web3'
+import { BuyOrderParams, SellOrderParams } from './types'
 
-export enum MakeOrderType {
-  FixPriceOrder = 'FixPriceOrder',
-  DutchAuctionOrder = 'DutchAuctionOrder',
-  EnglishAuctionOrder = 'EnglishAuctionOrder',
-  LowerPriceOrder = 'LowerPriceOrder',
-  MakeOfferOrder = 'MakeOfferOrder',
-  EnglishAuctionBiddingOrder = 'EnglishAuctionBiddingOrder'
-}
-
-export interface TradeBestAskType {
-  bestAskSaleKind: number
-  bestAskPrice: number
-  bestAskToken: string
-  bestAskPriceBase: number
-  bestAskPriceUSD: number
-  bestAskListingDate: string
-  bestAskExpirationDate: string
-  bestAskPriceCNY: number
-  bestAskCreatedDate: string
-  bestAskOrderString: string
-  bestAskOrderType: number
-  bestAskOrderQuantity: number
-  bestAskTokenContract: Token
-}
-
-export interface CreateOrderParams {
-  asset: Asset
-  quantity?: number
-  paymentToken?: Token
-}
-
-export interface SellOrderParams extends CreateOrderParams {
-  listingTime?: number
-  expirationTime?: number
-  startAmount: number
-  endAmount?: number
-  buyerAddress?: string
-}
+export type { SellOrderParams }
 
 const checkOrderHash = (order: any): Order => {
   const hashOrder =
@@ -74,7 +39,7 @@ const checkOrderHash = (order: any): Order => {
 export class ElementOrders extends OrdersAPI {
   public orders: any
   public account: Account
-  public gqlApi: GraphqlApi
+  public gqlApi: UsersApi
   public walletProvider: Web3
   public accountAddress = ''
 
@@ -100,7 +65,7 @@ export class ElementOrders extends OrdersAPI {
     this.accountAddress = walletAccount || walletProvider.eth.defaultAccount.toLowerCase()
     this.orders = new Orders(walletProvider, { networkName })
     this.account = new Account(walletProvider, { networkName })
-    this.gqlApi = new GraphqlApi({ networkName, account: this.accountAddress })
+    this.gqlApi = new GqlApi.usersApi({ networkName, account: this.accountAddress })
     this.walletProvider = walletProvider
   }
 
@@ -189,6 +154,32 @@ export class ElementOrders extends OrdersAPI {
     if (!sellData) return
     const order = { ...sellData, version: orderVersion.orderVersion } as OrderJSON
 
+    return this.ordersPost({ order: { ...order, chain: this.chain, chainId: this.walletChainId } })
+  }
+
+  // 创建报价订单
+  public async createBuyOrder({
+    asset,
+    quantity,
+    paymentToken,
+    expirationTime,
+    startAmount
+  }: BuyOrderParams): Promise<any> {
+    const paymentTokenObj: Token = { ...paymentToken, decimals: paymentToken?.decimals } as Token
+    const { orderVersion, newAsset } = await this.getAssetOrderVersion(asset)
+    const buyParams = {
+      asset: newAsset,
+      accountAddress: this.accountAddress,
+      startAmount, // 订单总价
+      paymentTokenObj,
+      expirationTime,
+      quantity
+    }
+
+    const buyData = await this.orders.createBuyOrder(buyParams)
+
+    if (!buyData) return
+    const order = { ...buyData, version: orderVersion.orderVersion } as OrderJSON
     return this.ordersPost({ order: { ...order, chain: this.chain, chainId: this.walletChainId } })
   }
 

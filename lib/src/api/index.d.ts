@@ -1,47 +1,14 @@
-import { Asset, Network, Token, CallBack } from '../index';
-import { OrderVersionData, OrdersAPI, OrderCancelParams } from './ordersApi';
+import { Asset, Network, CallBack } from '../index';
+import { OrderVersionData, OrdersAPI, OrderCancelParams } from './restful/ordersApi';
 import { Account } from '../account';
-import { GraphqlApi } from './graphqlApi';
+import { UsersApi } from './graphql';
 import Web3 from 'web3';
-export declare enum MakeOrderType {
-    FixPriceOrder = "FixPriceOrder",
-    DutchAuctionOrder = "DutchAuctionOrder",
-    EnglishAuctionOrder = "EnglishAuctionOrder",
-    LowerPriceOrder = "LowerPriceOrder",
-    MakeOfferOrder = "MakeOfferOrder",
-    EnglishAuctionBiddingOrder = "EnglishAuctionBiddingOrder"
-}
-export interface TradeBestAskType {
-    bestAskSaleKind: number;
-    bestAskPrice: number;
-    bestAskToken: string;
-    bestAskPriceBase: number;
-    bestAskPriceUSD: number;
-    bestAskListingDate: string;
-    bestAskExpirationDate: string;
-    bestAskPriceCNY: number;
-    bestAskCreatedDate: string;
-    bestAskOrderString: string;
-    bestAskOrderType: number;
-    bestAskOrderQuantity: number;
-    bestAskTokenContract: Token;
-}
-export interface CreateOrderParams {
-    asset: Asset;
-    quantity?: number;
-    paymentToken?: Token;
-}
-export interface SellOrderParams extends CreateOrderParams {
-    listingTime?: number;
-    expirationTime?: number;
-    startAmount: number;
-    endAmount?: number;
-    buyerAddress?: string;
-}
+import { BuyOrderParams, SellOrderParams } from './types';
+export type { SellOrderParams };
 export declare class ElementOrders extends OrdersAPI {
     orders: any;
     account: Account;
-    gqlApi: GraphqlApi;
+    gqlApi: UsersApi;
     walletProvider: Web3;
     accountAddress: string;
     constructor({ walletProvider, networkName, walletAccount, privateKey, authToken }: {
@@ -59,5 +26,6 @@ export declare class ElementOrders extends OrdersAPI {
         newAsset: Asset;
     }>;
     createSellOrder({ asset, quantity, paymentToken, listingTime, expirationTime, startAmount, endAmount, buyerAddress }: SellOrderParams): Promise<any>;
+    createBuyOrder({ asset, quantity, paymentToken, expirationTime, startAmount }: BuyOrderParams): Promise<any>;
     acceptOrder(bestAskOrder: any, callBack?: CallBack): Promise<any>;
 }

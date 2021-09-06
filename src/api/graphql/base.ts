@@ -1,8 +1,7 @@
 import { GraphQLClient } from 'graphql-request'
-import { ElementAPIConfig, Network, Token } from '../types'
+import { ElementAPIConfig, Network, Token } from '../../types'
 import hmacSHA256 from 'crypto-js/hmac-sha256'
-import { API_BASE_URL, CHAIN, CHAIN_ID } from './config'
-import { getNonce, loginAuth, userAssetsList, accountOrders } from './gql/user'
+import { API_BASE_URL, CHAIN, CHAIN_ID } from '../config'
 
 export class GraphqlApi implements ElementAPIConfig {
   public networkName: Network
@@ -20,9 +19,9 @@ export class GraphqlApi implements ElementAPIConfig {
    */
   private appKey: string
   private appSecret: string
-  private chain: string
+  public chain: string
   private chainId: number
-  private walletChainId: string
+  public walletChainId: string
 
   /**
    * Create an instance of the Element API
@@ -75,65 +74,29 @@ export class GraphqlApi implements ElementAPIConfig {
     return headers
   }
 
-  public async getNewNonce(): Promise<number> {
+  public identityRequest({ funcName, gql, params }: { funcName: string; gql: string; params: any }) {
     const variables = {
-      address: this.account,
-      chain: this.chain,
-      chainId: this.walletChainId
-    }
-    const nonce = await this.gqlClient.request(getNonce, variables)
-    return nonce.user.nonce
-  }
-
-  public async getSignInToken({ message, signature }: { message: string; signature: string }) {
-    const loginVar = {
+      ...params,
       identity: {
-        address: this.account,
-        blockChain: {
-          chain: this.chain,
-          chainId: this.walletChainId
-        }
-      },
-      message,
-      signature
-    }
-
-    const token = await this.gqlClient.request(loginAuth, loginVar)
-    // console.log(token.auth.login.token)
-    const bearerToken = `Bearer ${token.auth.login.token}`
-    this.gqlClient = this.gqlClient.setHeader('Authorization', bearerToken)
-    this.authToken = bearerToken
-    return bearerToken
-  }
-
-  public async getUserAssetsList() {
-    const variables = {
-      first: 20,
-      identity: {
-        address: this.account,
         blockChain: {
           chain: this.chain,
           chainId: this.walletChainId
         }
       }
     }
-    this.gqlClient = this.gqlClient.setHeader('X-Query-Args', 'UserAssetsList')
-    return await this.gqlClient.request(userAssetsList, variables)
+    this.gqlClient = this.gqlClient.setHeader('X-Query-Args', funcName)
+    return this.gqlClient.request(gql, variables)
   }
 
-  public async getAccountOrders() {
+  public blockChainRequest({ funcName, gql, params }: { funcName: string; gql: string; params: any }) {
     const variables = {
-      first: 20,
-      identity: {
-        address: this.account,
-        blockChain: {
-          chain: this.chain,
-          chainId: this.walletChainId
-        }
-      },
-      orderType: 0 //报价
+      ...params,
+      blockChain: {
+        chain: this.chain,
+        chainId: this.walletChainId
+      }
     }
-    this.gqlClient = this.gqlClient.setHeader('X-Query-Args', 'AccountOrders')
-    return await this.gqlClient.request(accountOrders, variables)
+    this.gqlClient = this.gqlClient.setHeader('X-Query-Args', funcName)
+    return this.gqlClient.request(gql, variables)
   }
 }

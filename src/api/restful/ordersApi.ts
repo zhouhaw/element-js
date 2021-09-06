@@ -1,6 +1,6 @@
-import { Network, ElementAPIConfig, Order, OrderJSON, OrderType } from '../types'
-import { orderFromJSON, Sleep } from '../utils'
-import { API_BASE_URL, CHAIN, CHAIN_ID } from './config'
+import { Network, ElementAPIConfig, Order, OrderJSON, OrderType } from '../../types'
+import { orderFromJSON, Sleep } from '../../utils'
+import { API_BASE_URL, CHAIN, CHAIN_ID } from '../config'
 import { Fetch } from './base'
 
 export interface OrderVersionParams {

@@ -17,7 +17,7 @@ import {
   UnhashedOrder,
   UnsignedOrder
 } from './types'
-import { EthApi, Web3 } from './api/ethApi'
+import { EthApi, Web3 } from './api/restful/ethApi'
 import {
   encodeParamsCall,
   encodeWeb3Call,

@@ -1,7 +1,7 @@
 import { ElementError } from './base/error';
 import { ContractSchemas } from './contracts/index';
 import { ETHSending, PromiEvent, TransactionReceipt, BuyOrderApprove, ElementAPIConfig, ExchangeMetadata, Order, OrderJSON, SellOrderApprove, UnsignedOrder } from './types';
-import { Web3 } from './api/ethApi';
+import { Web3 } from './api/restful/ethApi';
 export declare class Account extends ContractSchemas {
     elementAccount: string;
     accountProxy: string;
