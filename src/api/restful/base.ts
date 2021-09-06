@@ -1,6 +1,11 @@
-import fetch from 'isomorphic-unfetch'
-import { gql, GraphQLClient } from 'graphql-request'
-import hmacSHA256 from 'crypto-js/hmac-sha256'
+import unfetch from 'isomorphic-unfetch'
+
+let fetch: any
+if (typeof window === 'undefined') {
+  fetch = unfetch
+} else {
+  fetch = window.fetch.bind(window)
+}
 
 export class Fetch {
   /**
@@ -97,7 +102,7 @@ export class Fetch {
 
     this.logger(`Sending request: ${finalUrl} ${JSON.stringify(finalOpts).substr(0, 100)}...`)
 
-    return fetch(finalUrl, finalOpts).then(async (res) => this._handleApiResponse(res))
+    return fetch(finalUrl, finalOpts).then(async (res: any) => this._handleApiResponse(res))
   }
 
   private async _handleApiResponse(response: Response) {

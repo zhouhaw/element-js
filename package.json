@@ -1,6 +1,6 @@
 {
   "name": "@txdev/element-js",
-  "version": "3.0.2",
+  "version": "3.0.3",
   "description": "Javascript SDK for the Element ",
   "main": "lib/index.js",
   "author": "Project Element Developers",
