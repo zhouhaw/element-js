@@ -5,6 +5,7 @@ import { ElementAPIConfig, ETHSending, Network, Token, TransactionConfig } from 
 import { AnnotatedFunctionOutput, LimitedCallSpec } from '../schema/types'
 import { tokens } from '../schema/tokens'
 import { common } from '../schema/schemas'
+import { ElementRegistrySchemas } from '../schema/schemas/common/Element/registry'
 
 export class ContractSchemas extends EventEmitter {
   public web3: Web3
@@ -70,8 +71,8 @@ export class ContractSchemas extends EventEmitter {
       this.elementixTokenTransferProxy = tokenTransferProxyAddr
 
       this.Erc20Func = common.ERC20Schema.functions
-      this.ElementRegistryFunc = common.ElementSchemas.registry.functions
-      this.ElementExchangeFunc = common.ElementSchemas.exchange.functions
+      this.ElementRegistryFunc = common.ElementRegistrySchemas.functions
+      this.ElementExchangeFunc = common.ElementRegistrySchemas.functions
     } else {
       throw new Error(`${this.networkName}  abi undefined`)
     }

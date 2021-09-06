@@ -3,7 +3,9 @@ import { privateSchemas } from './private'
 import { mainSchemas } from './main'
 import { mumbaiSchemas } from './mumbai'
 import { polygonSchemas } from './polygon'
-import { ElementSchemas } from './common/Element'
+import { ElementSchemas } from './common/Element/index'
+import { ElementRegistrySchemas } from './common/Element/registry'
+import { ElementExchangeSchemas } from './common/Element/exchange'
 import { ERC20Schema } from './common/ERC20'
 import { ERC721Schema } from './common/ERC721'
 import { ERC1155Schema } from './common/ERC1155'
@@ -17,6 +19,14 @@ export const schemas = {
   main: mainSchemas,
   mumbai: mumbaiSchemas,
   polygon: polygonSchemas
+}
+
+export const common = {
+  ElementRegistrySchemas,
+  ElementExchangeSchemas,
+  ERC20Schema,
+  ERC721Schema,
+  ERC1155Schema
 }
 
 export function getBalanceSchemas(metadata: ExchangeMetadata): AnnotatedFunctionABI {
@@ -124,11 +134,4 @@ export function getTransferSchemas(metadata: ExchangeMetadata): AnnotatedFunctio
   }
   // accountApprove.target = to
   return accountApprove
-}
-
-export const common = {
-  ElementSchemas,
-  ERC20Schema,
-  ERC721Schema,
-  ERC1155Schema
 }

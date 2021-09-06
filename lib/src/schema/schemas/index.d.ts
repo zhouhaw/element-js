@@ -7,16 +7,14 @@ export declare const schemas: {
     mumbai: import("../types").Schema<any>[];
     polygon: import("../types").Schema<any>[];
 };
-export declare function getBalanceSchemas(metadata: ExchangeMetadata): AnnotatedFunctionABI;
-export declare function getIsApproveSchemas(metadata: ExchangeMetadata): AnnotatedFunctionABI;
-export declare function getApproveSchemas(metadata: ExchangeMetadata): AnnotatedFunctionABI;
-export declare function getTransferSchemas(metadata: ExchangeMetadata): AnnotatedFunctionABI;
 export declare const common: {
-    ElementSchemas: {
-        registry: Required<Pick<import("../types").ExchangeSchema<import("./common/Element/registry").Registry>, "address" | "functions">>;
-        exchange: Required<Pick<import("../types").ExchangeSchema<import("./common/Element/exchange").Exchange>, "functions">>;
-    };
+    ElementRegistrySchemas: Required<Pick<import("../types").ExchangeSchema<import("./common/Element/registry").Registry>, "address" | "functions">>;
+    ElementExchangeSchemas: Required<Pick<import("../types").ExchangeSchema<import("./common/Element/exchange").Exchange>, "functions">>;
     ERC20Schema: import("../types").Schema<import("./common/ERC20").FungibleTradeType>;
     ERC721Schema: import("../types").Schema<import("./common/ERC721").NonFungibleContractType>;
     ERC1155Schema: import("../types").Schema<import("./common/ERC1155").SemiFungibleTradeType>;
 };
+export declare function getBalanceSchemas(metadata: ExchangeMetadata): AnnotatedFunctionABI;
+export declare function getIsApproveSchemas(metadata: ExchangeMetadata): AnnotatedFunctionABI;
+export declare function getApproveSchemas(metadata: ExchangeMetadata): AnnotatedFunctionABI;
+export declare function getTransferSchemas(metadata: ExchangeMetadata): AnnotatedFunctionABI;

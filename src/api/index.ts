@@ -165,13 +165,13 @@ export class ElementOrders extends OrdersAPI {
     expirationTime,
     startAmount
   }: BuyOrderParams): Promise<any> {
-    const paymentTokenObj: Token = { ...paymentToken, decimals: paymentToken?.decimals } as Token
+    // const paymentTokenObj: Token = { ...paymentToken, decimals: paymentToken?.decimal } as Token
     const { orderVersion, newAsset } = await this.getAssetOrderVersion(asset)
     const buyParams = {
       asset: newAsset,
       accountAddress: this.accountAddress,
       startAmount, // 订单总价
-      paymentTokenObj,
+      paymentTokenObj: paymentToken,
       expirationTime,
       quantity
     }

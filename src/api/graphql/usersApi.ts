@@ -32,6 +32,7 @@ export class UsersApi extends GraphqlApi {
     const token = await this.gqlClient.request(loginAuth, loginVar)
     // console.log(token.auth.login.token)
     const bearerToken = `Bearer ${token.auth.login.token}`
+    // console.log(bearerToken)
     this.gqlClient = this.gqlClient.setHeader('Authorization', bearerToken)
     this.authToken = bearerToken
     return bearerToken
