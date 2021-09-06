@@ -13,7 +13,7 @@ import {
   Order,
   orderFromJSON,
   elementSignInSign
-} from '../index'
+} from '../../index'
 import { OrderVersionData, OrderVersionParams, OrdersAPI, OrderCancelParams } from './restful/ordersApi'
 import { Account } from '../account'
 import { UsersApi, GqlApi } from './graphql'

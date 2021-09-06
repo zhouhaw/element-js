@@ -1,4 +1,4 @@
-import { ElementSchemaName, makeBigNumber, Network } from '..'
+import { ElementSchemaName, makeBigNumber, Network } from '../../index'
 import { getElementAsset, getSchema } from '../utils/makeOrder'
 import { encodeDefaultCall, encodeReplacementPattern } from './schemaFunctions'
 import { AnnotatedFunctionABI } from './types'

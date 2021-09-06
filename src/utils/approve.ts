@@ -1,4 +1,4 @@
-import { CallBack, ElementError, encodeCall, getSchemaList, NULL_ADDRESS, OrderCheckStatus } from '..'
+import { CallBack, ElementError, encodeCall, getSchemaList, NULL_ADDRESS, OrderCheckStatus } from '../../index'
 import { BigNumber, MAX_UINT_256 } from './constants'
 import { ExchangeMetadata } from '../types'
 import { getElementAsset } from './makeOrder'

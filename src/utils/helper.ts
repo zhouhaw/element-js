@@ -1,5 +1,5 @@
 import { BigNumber } from './constants'
-import { ElementError, Network, schemas } from '../index'
+import { ElementError, Network, schemas } from '../../index'
 import { tokens } from '../schema/tokens'
 import { Schema } from '../schema/types'
 import { ECSignature, UnhashedOrder, UnsignedOrder } from '../types'

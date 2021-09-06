@@ -1,5 +1,5 @@
 import { BigNumber } from './constants';
-import { Network } from '../index';
+import { Network } from '../../index';
 import { Schema } from '../schema/types';
 import { ECSignature, UnhashedOrder } from '../types';
 export declare function toBaseUnitAmount(amount: BigNumber, decimals: number): BigNumber;

@@ -1,4 +1,4 @@
-import { Asset, Network, CallBack } from '../index';
+import { Asset, Network, CallBack } from '../../index';
 import { OrderVersionData, OrdersAPI, OrderCancelParams } from './restful/ordersApi';
 import { Account } from '../account';
 import { UsersApi } from './graphql';

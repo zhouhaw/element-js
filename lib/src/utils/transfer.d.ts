@@ -1,4 +1,4 @@
-import { Asset, CallBack } from '../index';
+import { Asset, CallBack } from '../../index';
 import Web3 from 'web3';
 export declare function transferFromERC1155({ erc1155Contract, from, to, tokenId, amount, data }: {
     erc1155Contract: any;

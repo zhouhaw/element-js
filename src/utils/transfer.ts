@@ -1,7 +1,7 @@
 import { NULL_ADDRESS } from './constants'
 
 import { toBaseUnitAmount, makeBigNumber, getSchemaList } from './helper'
-import { Asset, CallBack, ElementError, encodeCall, OrderCheckStatus } from '../index'
+import { Asset, CallBack, ElementError, encodeCall, OrderCheckStatus } from '../../index'
 import Web3 from 'web3'
 
 function transferFailure(error: any) {

@@ -1,4 +1,4 @@
-import { Network } from '..'
+import { Network } from '../../index'
 
 export const NULL_ADDRESS = '0x0000000000000000000000000000000000000000'
 export enum POLYGON_CONTRACTS_ADDRESSES {

@@ -1,4 +1,4 @@
-import { CallBack } from '..';
+import { CallBack } from '../../index';
 import { ExchangeMetadata } from '../types';
 export declare function registerProxy({ proxyRegistryContract, account, callBack }: {
     proxyRegistryContract: any;

@@ -1,7 +1,7 @@
 //
 // export const CHECK_ETH_BALANCE = false
 
-import { Network } from '..'
+import { Network } from '../../index'
 
 export const CHAIN_ID: { [key: string]: number } = {
   [Network.Private]: 100,
