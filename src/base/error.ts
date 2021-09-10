@@ -125,6 +125,10 @@ export const ErrorCodes: ElementErrorCodes = [
     message: '{{funcName}} RPC web3 request error {{stack}}'
   },
   {
+    code: '2004',
+    message: '{{funcName}} RPC execution error {{stack}}'
+  },
+  {
     code: '4001',
     message: 'MetaMask Error '
   }

@@ -1,22 +1,26 @@
-import { Asset, Network, CallBack } from '../../index';
+import { Asset, Network, OrderJSON, Order } from '../../index';
 import { OrderVersionData, OrdersAPI, OrderCancelParams } from './restful/ordersApi';
 import { Account } from '../account';
-import { UsersApi } from './graphql';
+import { UsersApi, AssetsApi } from './graphql';
 import Web3 from 'web3';
-import { BuyOrderParams, SellOrderParams } from './types';
-export type { SellOrderParams };
+import { BuyOrderParams, SellOrderParams, EnglishAuctionOrderParams, BiddingOrderParams } from './types';
+export type { BuyOrderParams, SellOrderParams, EnglishAuctionOrderParams, BiddingOrderParams };
 export declare class ElementOrders extends OrdersAPI {
     orders: any;
     account: Account;
-    gqlApi: UsersApi;
+    gqlApi: {
+        usersApi: UsersApi;
+        assetsApi: AssetsApi;
+    };
     walletProvider: Web3;
     accountAddress: string;
-    constructor({ walletProvider, networkName, walletAccount, privateKey, authToken }: {
+    constructor({ walletProvider, networkName, walletAccount, privateKey, authToken, apiBaseUrl }: {
         walletProvider: any;
         networkName: Network;
         walletAccount?: string;
         privateKey?: string;
         authToken?: string;
+        apiBaseUrl?: string;
     });
     getLoginAuthToken(): Promise<string>;
     login(): Promise<void>;
@@ -26,6 +30,13 @@ export declare class ElementOrders extends OrdersAPI {
         newAsset: Asset;
     }>;
     createSellOrder({ asset, quantity, paymentToken, listingTime, expirationTime, startAmount, endAmount, buyerAddress }: SellOrderParams): Promise<any>;
+    createAuctionOrder({ asset, quantity, paymentToken, expirationTime, startAmount, englishAuctionReservePrice }: EnglishAuctionOrderParams): Promise<any>;
+    createBiddingOrder({ asset, quantity, paymentToken, startAmount, bestAsk }: BiddingOrderParams): Promise<any>;
     createBuyOrder({ asset, quantity, paymentToken, expirationTime, startAmount }: BuyOrderParams): Promise<any>;
-    acceptOrder(bestAskOrder: any, callBack?: CallBack): Promise<any>;
+    createLowerPriceOrder({ oldOrder, parameter, asset }: {
+        oldOrder: Order;
+        parameter: any;
+        asset?: any;
+    }): Promise<any>;
+    acceptOrder(bestOrder: OrderJSON): Promise<import("../types").ETHSending>;
 }

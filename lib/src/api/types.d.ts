@@ -34,7 +34,16 @@ export interface SellOrderParams extends CreateOrderParams {
     endAmount?: number;
     buyerAddress?: string;
 }
+export interface EnglishAuctionOrderParams extends CreateOrderParams {
+    expirationTime: number;
+    startAmount: number;
+    englishAuctionReservePrice?: number;
+}
 export interface BuyOrderParams extends CreateOrderParams {
     expirationTime: number;
     startAmount: number;
+}
+export interface BiddingOrderParams extends CreateOrderParams {
+    startAmount: number;
+    bestAsk: TradeBestAskType;
 }

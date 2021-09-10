@@ -101,7 +101,6 @@ export class Fetch {
     }
 
     this.logger(`Sending request: ${finalUrl} ${JSON.stringify(finalOpts).substr(0, 100)}...`)
-
     return fetch(finalUrl, finalOpts).then(async (res: any) => this._handleApiResponse(res))
   }
 

@@ -5,6 +5,7 @@ export { getElementAssetURI, ordersCanMatch, validateOrder, checkOrder, checkMat
 export { registerProxy, approveSchemaProxy, approveTokenTransferProxy, approveERC1155TransferProxy, approveERC721TransferProxy } from './src/utils/approve';
 export { orderToJSON, getPriceParameters, getCurrentPrice, computeOrderCallData } from './src/utils/makeOrder';
 export { BigNumber, NULL_ADDRESS, NULL_BLOCK_HASH, DEFAULT_SELLER_FEE_BASIS_POINTS } from './src/utils/constants';
+export { CHAIN_ID, ID_CHAINNAME, CHAIN } from './src/api/config';
 export { PRIVATE_CONTRACTS_ADDRESSES, MAIN_CONTRACTS_ADDRESSES, RINKEBY_CONTRACTS_ADDRESSES, CONTRACTS_ADDRESSES } from './src/contracts/config';
 export { orderFromJSON, Sleep } from './src/utils';
 export { web3Sign } from './src/utils/helper';

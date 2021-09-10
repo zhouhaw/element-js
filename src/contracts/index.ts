@@ -6,6 +6,7 @@ import { AnnotatedFunctionOutput, LimitedCallSpec } from '../schema/types'
 import { tokens } from '../schema/tokens'
 import { common } from '../schema/schemas'
 import { ElementRegistrySchemas } from '../schema/schemas/common/Element/registry'
+import { ElementError } from '../base/error'
 
 export class ContractSchemas extends EventEmitter {
   public web3: Web3
@@ -72,7 +73,7 @@ export class ContractSchemas extends EventEmitter {
 
       this.Erc20Func = common.ERC20Schema.functions
       this.ElementRegistryFunc = common.ElementRegistrySchemas.functions
-      this.ElementExchangeFunc = common.ElementRegistrySchemas.functions
+      this.ElementExchangeFunc = common.ElementExchangeSchemas.functions
     } else {
       throw new Error(`${this.networkName}  abi undefined`)
     }
@@ -90,7 +91,14 @@ export class ContractSchemas extends EventEmitter {
   //发送标准交易
   public async ethSend(callData: LimitedCallSpec, from: string): Promise<ETHSending> {
     // const from = this.elementAccount
-    const gas = await this.web3.eth.estimateGas(callData)
+    const gas = await this.web3.eth.estimateGas(callData).catch((error: Error) => {
+      const stack = error.message || JSON.stringify(error)
+      console.log('estimateGas error', stack)
+      throw new ElementError({
+        code: '2004',
+        context: { funcName: 'estimateGas', stack }
+      })
+    })
     const gasPrice = await this.web3.eth.getGasPrice()
     const nonce = await this.web3.eth.getTransactionCount(from)
     const transactionObject = {
@@ -104,7 +112,10 @@ export class ContractSchemas extends EventEmitter {
     } as TransactionConfig
 
     return new Promise((resolve, reject) => {
-      const sendTx = this.web3.eth.sendTransaction(transactionObject).once('transactionHash', (txHash: string) => {
+      const sendTx = this.web3.eth.sendTransaction(transactionObject)
+      sendTx.once('transactionHash', (txHash: string) => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         resolve({ sendTx, txHash })
       })
     })

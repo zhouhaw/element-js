@@ -10,6 +10,10 @@ export declare class Account extends ContractSchemas {
     getAccountProxy(): Promise<string>;
     registerProxy(): Promise<ETHSending>;
     checkTokenTransferProxy(to: string): Promise<string>;
+    getAccountBalance(account?: string, tokenAddr?: string): Promise<{
+        ethBal: string;
+        erc20Bal: string;
+    }>;
     getTokenBalances(to: string, account?: string): Promise<string>;
     getAssetBalances(metadata: ExchangeMetadata, account?: string): Promise<string>;
     approveTokenTransferProxy(to: string): Promise<ETHSending>;
@@ -23,9 +27,7 @@ export declare class Account extends ContractSchemas {
         sell: Order;
         metadata?: string;
     }): Promise<ETHSending>;
-    orderCancel({ order }: {
-        order: Order;
-    }): Promise<ETHSending>;
+    orderCancel(order: Order): Promise<ETHSending>;
     assetTransfer(metadata: ExchangeMetadata, to: string): Promise<ETHSending>;
     accountApprove(error: ElementError): Promise<void>;
 }

@@ -2,12 +2,14 @@ import { Network, ElementAPIConfig, Order, OrderJSON, OrderType } from '../../ty
 import { orderFromJSON, Sleep } from '../../utils'
 import { API_BASE_URL, CHAIN, CHAIN_ID } from '../config'
 import { Fetch } from './base'
+export interface ChainInfo {
+  chain?: string
+  chainId?: string
+}
 
-export interface OrderVersionParams {
+export interface OrderVersionParams extends ChainInfo {
   contractAddress: string
   tokenId: string | undefined
-  chain: string
-  chainId: string
 }
 
 export interface OrderVersionData {
@@ -23,12 +25,12 @@ export interface OrderConfData {
   relayerFee: number // 平台手续费（万分比，200的实际意义代表2%)
 }
 
-export interface OrderCancelParams {
+export interface OrderCancelParams extends ChainInfo {
   hash: string // 取消订单的Hash
   signature: string
 }
 
-export interface OrderQueryParams {
+export interface OrderQueryParams extends ChainInfo {
   assetContractAddress: string //
   tokenId: string
   orderType: OrderType
@@ -47,6 +49,7 @@ export class OrdersAPI extends Fetch {
   public chain: string
   public chainId: number
   public walletChainId: string
+  public chainInfo: ChainInfo
 
   constructor(config: ElementAPIConfig, logger?: (arg: string) => void) {
     super(config.apiBaseUrl || API_BASE_URL[config.networkName].api, logger)
@@ -55,6 +58,10 @@ export class OrdersAPI extends Fetch {
     this.chain = CHAIN[_network]
     this.chainId = CHAIN_ID[_network]
     this.walletChainId = `0x${this.chainId.toString(16)}`
+    this.chainInfo = {
+      chain: CHAIN[_network],
+      chainId: this.walletChainId
+    }
 
     // Debugging: default to nothing
     this.logger = logger || ((arg: string) => arg)
@@ -79,7 +86,7 @@ export class OrdersAPI extends Fetch {
     let json
     try {
       //X-Viewer-Addr
-      json = (await this.post(`/v1/orders/post`, order)) as OrderJSON
+      json = (await this.post(`/v1/orders/post`, { ...order, ...this.chainInfo })) as OrderJSON
     } catch (error) {
       this.throwOrContinue(error, retries)
       await Sleep(3000)
@@ -91,7 +98,7 @@ export class OrdersAPI extends Fetch {
   public async ordersVersion(orderAsset: OrderVersionParams, retries = 2): Promise<OrderVersionData> {
     let json: OrderVersionData
     try {
-      json = (await this.post(`/v1/orders/orderVersionQuery`, orderAsset)) as OrderVersionData
+      json = (await this.post(`/v1/orders/orderVersionQuery`, { ...orderAsset, ...this.chainInfo })) as OrderVersionData
     } catch (error) {
       this.throwOrContinue(error, retries)
       await Sleep(3000)
@@ -103,7 +110,7 @@ export class OrdersAPI extends Fetch {
   public async ordersConfData(retries = 2): Promise<OrderConfData> {
     let json: OrderConfData
     try {
-      json = (await this.post(`/v1/orders/confData`)) as OrderConfData
+      json = (await this.post(`/v1/orders/confData`, this.chainInfo)) as OrderConfData
     } catch (error) {
       this.throwOrContinue(error, retries)
       await Sleep(3000)
@@ -115,7 +122,7 @@ export class OrdersAPI extends Fetch {
   public async ordersHidden(cancelParams: OrderCancelParams, retries = 2): Promise<any> {
     let json
     try {
-      json = await this.post(`/v1/orders/cancel`, cancelParams)
+      json = await this.post(`/v1/orders/cancel`, { ...cancelParams, ...this.chainInfo })
     } catch (error) {
       this.throwOrContinue(error, retries)
       await Sleep(3000)
@@ -127,7 +134,7 @@ export class OrdersAPI extends Fetch {
   public async ordersQuery(queryParams: OrderQueryParams, retries = 2): Promise<Array<OrderJSON>> {
     let json
     try {
-      json = await this.post(`/v1/orders/query`, queryParams)
+      json = await this.post(`/v1/orders/query`, { ...queryParams, ...this.chainInfo })
     } catch (error) {
       this.throwOrContinue(error, retries)
       await Sleep(3000)

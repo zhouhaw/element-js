@@ -132,6 +132,16 @@ export class Account extends ContractSchemas {
     return this.ethCall(callData, accountApprove?.outputs)
   }
 
+  public async getAccountBalance(account?: string, tokenAddr?: string): Promise<{ ethBal: string; erc20Bal: string }> {
+    const owner = account || this.elementAccount
+    const ethBal: string = await this.web3.eth.getBalance(owner, 'latest')
+    let erc20Bal = '0'
+    if (tokenAddr && tokenAddr !== NULL_ADDRESS) {
+      erc20Bal = await this.getTokenBalances(tokenAddr, owner)
+    }
+    return { ethBal, erc20Bal }
+  }
+
   public async getTokenBalances(to: string, account?: string): Promise<string> {
     const owner = account || this.elementAccount
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -203,10 +213,10 @@ export class Account extends ContractSchemas {
     const buyOrderSigArray = orderSigEncode(buy as ECSignature)
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    const accountApprove = this.ElementExchangeFunc.orderMatch({
+    const exchangeFunc = this.ElementExchangeFunc.orderMatch({
       address: to
     })
-    const data = encodeWeb3Call(accountApprove, [
+    const data = encodeWeb3Call(exchangeFunc, [
       buyOrderParamArray,
       buyOrderSigArray,
       sellOrderParamArray,
@@ -219,20 +229,21 @@ export class Account extends ContractSchemas {
   }
 
   // 取消订单
-  public async orderCancel({ order }: { order: Order }): Promise<ETHSending> {
+  public async orderCancel(order: Order): Promise<ETHSending> {
     const to = this.elementixExchange
-    const orderParamArray = orderParamsEncode(order)
+    const orderParamArray = orderParamsEncode(order as UnhashedOrder)
     const orderSigArray = orderSigEncode(order as ECSignature)
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    const accountApprove = this.ElementExchangeFunc.orderCancel({
+    const exchangeFunc = this.ElementExchangeFunc.orderCancel({
       address: to
     })
-    const data = encodeWeb3Call(accountApprove, [orderParamArray, orderSigArray])
+    const data = encodeWeb3Call(exchangeFunc, [orderParamArray, orderSigArray])
     const callData = { to, data }
     return this.ethSend(callData, this.elementAccount)
   }
 
+  // 资产转移
   public async assetTransfer(metadata: ExchangeMetadata, to: string): Promise<ETHSending> {
     const owner = this.elementAccount
     const accountApprove = getTransferSchemas(metadata)

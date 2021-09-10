@@ -11,7 +11,7 @@ export const ERC20Schema: Schema<FungibleTradeType> = {
   deploymentBlock: 0, // Not indexed (for now; need asset-specific indexing strategy)
   name: 'ERC20',
   description: 'Items conforming to the ERC20 spec, using transferFrom.',
-  thumbnail: 'https://opensea.io/static/images/opensea-icon.png',
+  thumbnail: 'https://www.element.market/build/logo-header-c7b8d686.svg',
   website: 'https://github.com/ethereum/eips/issues/20',
   fields: [
     { name: 'Address', type: 'address', description: 'Asset Contract Address' },

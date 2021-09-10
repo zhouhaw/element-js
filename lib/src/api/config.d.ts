@@ -1,5 +1,9 @@
+import { Network } from '../../index';
 export declare const CHAIN_ID: {
     [key: string]: number;
+};
+export declare const ID_CHAINNAME: {
+    [key: number]: Network;
 };
 export declare const CHAIN: {
     [key: string]: string;

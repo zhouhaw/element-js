@@ -12,7 +12,7 @@ export const ERC1155Schema: Schema<SemiFungibleTradeType> = {
   deploymentBlock: 0, // Not indexed (for now; need asset-specific indexing strategy)
   name: 'ERC1155',
   description: 'Items conforming to the ERC1155 spec, using transferFrom.',
-  thumbnail: 'https://opensea.io/static/images/opensea-icon.png',
+  thumbnail: 'https://www.element.market/build/logo-header-c7b8d686.svg',
   website: 'https://github.com/ethereum/eips/issues/1155',
   fields: [
     { name: 'ID', type: 'uint256', description: 'Asset Token ID' },

@@ -11,6 +11,14 @@ export const CHAIN_ID: { [key: string]: number } = {
   [Network.Mumbai]: 80001
 }
 
+export const ID_CHAINNAME: { [key: number]: Network } = {
+  100: Network.Private,
+  1: Network.Main,
+  4: Network.Rinkeby,
+  137: Network.Polygon,
+  80001: Network.Mumbai
+}
+
 export const CHAIN: { [key: string]: string } = {
   [Network.Private]: 'eth',
   [Network.Main]: 'eth',

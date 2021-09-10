@@ -25,6 +25,8 @@ export {
 export { orderToJSON, getPriceParameters, getCurrentPrice, computeOrderCallData } from './src/utils/makeOrder'
 export { BigNumber, NULL_ADDRESS, NULL_BLOCK_HASH, DEFAULT_SELLER_FEE_BASIS_POINTS } from './src/utils/constants'
 
+export { CHAIN_ID, ID_CHAINNAME, CHAIN } from './src/api/config'
+
 export {
   PRIVATE_CONTRACTS_ADDRESSES,
   MAIN_CONTRACTS_ADDRESSES,

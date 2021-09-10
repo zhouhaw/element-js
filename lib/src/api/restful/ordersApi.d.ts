@@ -1,10 +1,12 @@
 import { ElementAPIConfig, OrderJSON, OrderType } from '../../types';
 import { Fetch } from './base';
-export interface OrderVersionParams {
+export interface ChainInfo {
+    chain?: string;
+    chainId?: string;
+}
+export interface OrderVersionParams extends ChainInfo {
     contractAddress: string;
     tokenId: string | undefined;
-    chain: string;
-    chainId: string;
 }
 export interface OrderVersionData {
     isTradable: boolean;
@@ -17,11 +19,11 @@ export interface OrderConfData {
     offerMinEth: number;
     relayerFee: number;
 }
-export interface OrderCancelParams {
+export interface OrderCancelParams extends ChainInfo {
     hash: string;
     signature: string;
 }
-export interface OrderQueryParams {
+export interface OrderQueryParams extends ChainInfo {
     assetContractAddress: string;
     tokenId: string;
     orderType: OrderType;
@@ -38,6 +40,7 @@ export declare class OrdersAPI extends Fetch {
     chain: string;
     chainId: number;
     walletChainId: string;
+    chainInfo: ChainInfo;
     constructor(config: ElementAPIConfig, logger?: (arg: string) => void);
     /**
      * Send an order to the orderbook.

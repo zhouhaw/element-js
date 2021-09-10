@@ -70,64 +70,64 @@ export class Orders extends Contracts {
     return assignOrdersToSides(signedOrder, unsignData)
   }
 
-  // 撮合订单
-  async orderMatch(
-    {
-      buy,
-      sell,
-      accountAddress,
-      metadata = '0x'
-    }: {
-      buy: Order
-      sell: Order
-      accountAddress: string
-      metadata?: string
-    },
-    callBack?: CallBack
-  ): Promise<any> {
-    await checkMatchOrder(this, buy, sell)
-
-    const sellOrderParamArray = orderParamsEncode(sell as UnhashedOrder)
-    const sellOrderSigArray = orderSigEncode(sell as ECSignature)
-    const buyOrderParamArray = orderParamsEncode(buy as UnhashedOrder)
-    const buyOrderSigArray = orderSigEncode(buy as ECSignature)
-    callBack?.next(OrderCheckStatus.StartOrderMatch, { buy, sell })
-
-    const value = buy.paymentToken !== NULL_ADDRESS ? 0 : buy.basePrice
-
-    // metadata = '0x'
-
-    const data = await this.exchange.methods
-      .orderMatch(buyOrderParamArray, buyOrderSigArray, sellOrderParamArray, sellOrderSigArray, metadata)
-      .encodeABI()
-    const gas = await this.web3.eth
-      .estimateGas({ to: this.exchange.options.address, data, value })
-      .catch((error: any) => {
-        throw new ElementError({ code: '1003', context: { msg: error.message } })
-      })
-
-    return this.exchange.methods
-      .orderMatch(buyOrderParamArray, buyOrderSigArray, sellOrderParamArray, sellOrderSigArray, metadata)
-      .send({
-        gas,
-        value,
-        from: accountAddress
-      })
-      .on('transactionHash', (txHash: string) => {
-        callBack?.next(OrderCheckStatus.OrderMatchTxHash, { txHash, buy, sell, accountAddress })
-      })
-      .on('receipt', (receipt: string) => {
-        callBack?.next(OrderCheckStatus.EndOrderMatch, { receipt, buy, sell })
-      })
-      .on('error', console.error) // 如果是 out of gas 错误, 第二个参数为交易收据
-      .catch((error: any) => {
-        if (error.code == '4001') {
-          throw new ElementError(error)
-        } else {
-          throw new ElementError({ code: '1004', context: { msg: error.message } })
-        }
-      })
-  }
+  // // 撮合订单
+  // async orderMatch(
+  //   {
+  //     buy,
+  //     sell,
+  //     accountAddress,
+  //     metadata = '0x'
+  //   }: {
+  //     buy: Order
+  //     sell: Order
+  //     accountAddress: string
+  //     metadata?: string
+  //   },
+  //   callBack?: CallBack
+  // ): Promise<any> {
+  //   await checkMatchOrder(this, buy, sell)
+  //
+  //   const sellOrderParamArray = orderParamsEncode(sell as UnhashedOrder)
+  //   const sellOrderSigArray = orderSigEncode(sell as ECSignature)
+  //   const buyOrderParamArray = orderParamsEncode(buy as UnhashedOrder)
+  //   const buyOrderSigArray = orderSigEncode(buy as ECSignature)
+  //   callBack?.next(OrderCheckStatus.StartOrderMatch, { buy, sell })
+  //
+  //   const value = buy.paymentToken !== NULL_ADDRESS ? 0 : buy.basePrice
+  //
+  //   // metadata = '0x'
+  //
+  //   const data = await this.exchange.methods
+  //     .orderMatch(buyOrderParamArray, buyOrderSigArray, sellOrderParamArray, sellOrderSigArray, metadata)
+  //     .encodeABI()
+  //   const gas = await this.web3.eth
+  //     .estimateGas({ to: this.exchange.options.address, data, value })
+  //     .catch((error: any) => {
+  //       throw new ElementError({ code: '1003', context: { msg: error.message } })
+  //     })
+  //
+  //   return this.exchange.methods
+  //     .orderMatch(buyOrderParamArray, buyOrderSigArray, sellOrderParamArray, sellOrderSigArray, metadata)
+  //     .send({
+  //       gas,
+  //       value,
+  //       from: accountAddress
+  //     })
+  //     .on('transactionHash', (txHash: string) => {
+  //       callBack?.next(OrderCheckStatus.OrderMatchTxHash, { txHash, buy, sell, accountAddress })
+  //     })
+  //     .on('receipt', (receipt: string) => {
+  //       callBack?.next(OrderCheckStatus.EndOrderMatch, { receipt, buy, sell })
+  //     })
+  //     .on('error', console.error) // 如果是 out of gas 错误, 第二个参数为交易收据
+  //     .catch((error: any) => {
+  //       if (error.code == '4001') {
+  //         throw new ElementError(error)
+  //       } else {
+  //         throw new ElementError({ code: '1004', context: { msg: error.message } })
+  //       }
+  //     })
+  // }
 
   public async creatSignedOrder(
     { unHashOrder }: { unHashOrder: UnhashedOrder },
@@ -251,47 +251,67 @@ export class Orders extends Contracts {
     return this.creatSignedOrder({ unHashOrder: sellOrder }, callBack)
   }
 
-  public async cancelOrder(
-    { order, accountAddress }: { order: Order; accountAddress: string },
-    callBack?: CallBack
-  ): Promise<any> {
-    if (order.maker.toLowerCase() !== accountAddress.toLowerCase()) {
-      throw new ElementError({ code: '1000', message: 'CancelOrder order.maker not equle accountAddress' })
-    }
+  // public async cancelOrder(
+  //   { order, accountAddress }: { order: Order; accountAddress: string },
+  //   callBack?: CallBack
+  // ): Promise<any> {
+  //   if (order.maker.toLowerCase() !== accountAddress.toLowerCase()) {
+  //     throw new ElementError({ code: '1000', message: 'CancelOrder order.maker not equle accountAddress' })
+  //   }
+  //
+  //   // await checkOrderCancelledOrFinalized(this, order)
+  //
+  //   const orderParamArray = orderParamsEncode(order)
+  //   const orderSigArray = orderSigEncode(order as ECSignature)
+  //   // callBack?.next(OrderCheckStatus.StartCancelOrder)
+  //   return this.exchange.methods
+  //     .cancelOrder(orderParamArray, orderSigArray)
+  //     .send({
+  //       from: order.maker
+  //     })
+  //     .on('transactionHash', (txHash: string) => {
+  //       // callBack?.next(OrderCheckStatus.StartCancelOrder, { txHash, order, accountAddress })
+  //       console.log('transactionHash：', txHash)
+  //       this.emit('transactionHash', { txHash, order, accountAddress })
+  //     })
+  //     .on('confirmation', (receipt: any) => {
+  //       console.log('confirmation：', receipt)
+  //     })
+  //     .on('receipt', (receipt: any) => {
+  //       // callBack?.next(OrderCheckStatus.EndCancelOrder, { receipt, order })
+  //       console.log('receipt：', receipt)
+  //       this.emit('transactionHash', { receipt, order })
+  //     })
+  //     .on('error', (error: any, receipt: any) => {
+  //       // 如果是 out of gas 错误, 第二个参数为交易收据
+  //       console.log(error)
+  //     })
+  //     .catch((error: any) => {
+  //       if (error.code == '4001') {
+  //         throw new ElementError(error)
+  //       } else {
+  //         throw new ElementError({ code: '1000', message: 'CancelOrder failure' })
+  //       }
+  //     })
+  // }
 
-    // await checkOrderCancelledOrFinalized(this, order)
+  //计算当前 订单的总价格
+  public async getOrderCurrentPrice(order: Order): Promise<string> {
+    return this.exchangeHelper.methods
+      .calculateFinalPrice(
+        order.side?.toString(),
+        order.saleKind?.toString(),
+        order.basePrice?.toString(),
+        order.extra?.toString(),
+        order.listingTime?.toString(),
+        order.expirationTime?.toString()
+      )
+      .call()
+  }
 
-    const orderParamArray = orderParamsEncode(order)
-    const orderSigArray = orderSigEncode(order as ECSignature)
-    // callBack?.next(OrderCheckStatus.StartCancelOrder)
-    return this.exchange.methods
-      .cancelOrder(orderParamArray, orderSigArray)
-      .send({
-        from: order.maker
-      })
-      .on('transactionHash', (txHash: string) => {
-        // callBack?.next(OrderCheckStatus.StartCancelOrder, { txHash, order, accountAddress })
-        console.log('transactionHash：', txHash)
-        this.emit('transactionHash', { txHash, order, accountAddress })
-      })
-      .on('confirmation', (receipt: any) => {
-        console.log('confirmation：', receipt)
-      })
-      .on('receipt', (receipt: any) => {
-        // callBack?.next(OrderCheckStatus.EndCancelOrder, { receipt, order })
-        console.log('receipt：', receipt)
-        this.emit('transactionHash', { receipt, order })
-      })
-      .on('error', (error: any, receipt: any) => {
-        // 如果是 out of gas 错误, 第二个参数为交易收据
-        console.log(error)
-      })
-      .catch((error: any) => {
-        if (error.code == '4001') {
-          throw new ElementError(error)
-        } else {
-          throw new ElementError({ code: '1000', message: 'CancelOrder failure' })
-        }
-      })
+  public async getOrderCancelledOrFinalized(order: Order): Promise<boolean> {
+    const orderParamValueArray = orderParamsEncode(order as UnhashedOrder)
+    const hash = await this.exchangeHelper.methods.hashToSign(orderParamValueArray).call()
+    return this.exchange.methods.cancelledOrFinalized(hash).call()
   }
 }

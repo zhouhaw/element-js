@@ -25,10 +25,10 @@ export declare class ContractSchemas extends EventEmitter {
         accountProxy?: ((asset: import("../schema/schemas/common/Element/registry").Registry) => import("../schema/types").AnnotatedFunctionABI) | undefined;
     };
     ElementExchangeFunc: {
-        orderMatch?: ((asset: import("../schema/schemas/common/Element/registry").Registry) => import("../schema/types").AnnotatedFunctionABI) | undefined;
-        orderCancel?: ((asset: import("../schema/schemas/common/Element/registry").Registry) => import("../schema/types").AnnotatedFunctionABI) | undefined;
-        registerProxy?: ((asset: import("../schema/schemas/common/Element/registry").Registry) => import("../schema/types").AnnotatedFunctionABI) | undefined;
-        accountProxy?: ((asset: import("../schema/schemas/common/Element/registry").Registry) => import("../schema/types").AnnotatedFunctionABI) | undefined;
+        orderMatch?: ((asset: import("../schema/schemas/common/Element/exchange").Exchange) => import("../schema/types").AnnotatedFunctionABI) | undefined;
+        orderCancel?: ((asset: import("../schema/schemas/common/Element/exchange").Exchange) => import("../schema/types").AnnotatedFunctionABI) | undefined;
+        registerProxy?: ((asset: import("../schema/schemas/common/Element/exchange").Exchange) => import("../schema/types").AnnotatedFunctionABI) | undefined;
+        accountProxy?: ((asset: import("../schema/schemas/common/Element/exchange").Exchange) => import("../schema/types").AnnotatedFunctionABI) | undefined;
     };
     constructor(web3: any, apiConfig?: ElementAPIConfig);
     ethCall(callData: LimitedCallSpec, outputs: AnnotatedFunctionOutput[]): Promise<any>;

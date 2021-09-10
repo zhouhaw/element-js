@@ -10,7 +10,7 @@ export const ERC721Schema: Schema<NonFungibleContractType> = {
   deploymentBlock: 0, // Not indexed (for now; need asset-specific indexing strategy)
   name: 'ERC721',
   description: 'Items conforming to the ERC721 spec, using transferFrom.',
-  thumbnail: 'https://opensea.io/static/images/opensea-icon.png',
+  thumbnail: 'https://www.element.market/build/logo-header-c7b8d686.svg',
   website: 'http://erc721.org/',
   fields: [
     { name: 'ID', type: 'uint256', description: 'Asset Token ID' },

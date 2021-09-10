@@ -32,12 +32,6 @@ export declare class Orders extends Contracts {
         buy: Order;
         sell: Order;
     };
-    orderMatch({ buy, sell, accountAddress, metadata }: {
-        buy: Order;
-        sell: Order;
-        accountAddress: string;
-        metadata?: string;
-    }, callBack?: CallBack): Promise<any>;
     creatSignedOrder({ unHashOrder }: {
         unHashOrder: UnhashedOrder;
     }, callBack?: CallBack): Promise<OrderJSON>;
@@ -66,8 +60,6 @@ export declare class Orders extends Contracts {
         buyerAddress?: string;
         buyerEmail?: string;
     }, callBack?: CallBack): Promise<OrderJSON>;
-    cancelOrder({ order, accountAddress }: {
-        order: Order;
-        accountAddress: string;
-    }, callBack?: CallBack): Promise<any>;
+    getOrderCurrentPrice(order: Order): Promise<string>;
+    getOrderCancelledOrFinalized(order: Order): Promise<boolean>;
 }

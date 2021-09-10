@@ -12,16 +12,19 @@ import {
   CallBack,
   Order,
   orderFromJSON,
-  elementSignInSign
+  elementSignInSign,
+  UnsignedOrder,
+  computeOrderCallData,
+  makeBigNumber
 } from '../../index'
 import { OrderVersionData, OrderVersionParams, OrdersAPI, OrderCancelParams } from './restful/ordersApi'
 import { Account } from '../account'
-import { UsersApi, GqlApi } from './graphql'
+import { UsersApi, GqlApi, AssetsApi } from './graphql'
 
 import Web3 from 'web3'
-import { BuyOrderParams, SellOrderParams } from './types'
+import { BuyOrderParams, SellOrderParams, EnglishAuctionOrderParams, BiddingOrderParams } from './types'
 
-export type { SellOrderParams }
+export type { BuyOrderParams, SellOrderParams, EnglishAuctionOrderParams, BiddingOrderParams }
 
 const checkOrderHash = (order: any): Order => {
   const hashOrder =
@@ -39,7 +42,10 @@ const checkOrderHash = (order: any): Order => {
 export class ElementOrders extends OrdersAPI {
   public orders: any
   public account: Account
-  public gqlApi: UsersApi
+  public gqlApi: {
+    usersApi: UsersApi
+    assetsApi: AssetsApi
+  }
   public walletProvider: Web3
   public accountAddress = ''
 
@@ -49,15 +55,17 @@ export class ElementOrders extends OrdersAPI {
     networkName,
     walletAccount,
     privateKey,
-    authToken
+    authToken,
+    apiBaseUrl
   }: {
     walletProvider: any
     networkName: Network
     walletAccount?: string
     privateKey?: string
     authToken?: string
+    apiBaseUrl?: string
   }) {
-    super({ networkName, authToken })
+    super({ networkName, authToken, apiBaseUrl })
     if (privateKey) {
       const account = walletProvider.eth.accounts.wallet.add(privateKey)
       walletProvider.eth.defaultAccount = account.address
@@ -65,24 +73,29 @@ export class ElementOrders extends OrdersAPI {
     this.accountAddress = walletAccount || walletProvider.eth.defaultAccount.toLowerCase()
     this.orders = new Orders(walletProvider, { networkName })
     this.account = new Account(walletProvider, { networkName })
-    this.gqlApi = new GqlApi.usersApi({ networkName, account: this.accountAddress })
+
+    this.gqlApi = {
+      usersApi: new GqlApi.usersApi({ networkName, account: this.accountAddress, apiBaseUrl }),
+      assetsApi: new GqlApi.assetsApi({ networkName, account: this.accountAddress, apiBaseUrl })
+    }
+
     this.walletProvider = walletProvider
   }
 
   // 接口登录Token
   public async getLoginAuthToken(): Promise<string> {
     const accountAddress = this.accountAddress
-    const nonce = await this.gqlApi.getNewNonce()
+    const nonce = await this.gqlApi.usersApi.getNewNonce()
     const { message, signature } = await elementSignInSign(this.walletProvider, nonce, accountAddress)
-    this.authToken = await this.gqlApi.getSignInToken({ message, signature })
+    this.authToken = await this.gqlApi.usersApi.getSignInToken({ message, signature })
     return this.authToken
   }
 
   public async login(): Promise<void> {
     const accountAddress = this.accountAddress
-    const nonce = await this.gqlApi.getNewNonce()
+    const nonce = await this.gqlApi.usersApi.getNewNonce()
     const { message, signature } = await elementSignInSign(this.walletProvider, nonce, accountAddress)
-    this.authToken = await this.gqlApi.getSignInToken({ message, signature })
+    this.authToken = await this.gqlApi.usersApi.getSignInToken({ message, signature })
   }
 
   // 取消订单签名
@@ -120,7 +133,6 @@ export class ElementOrders extends OrdersAPI {
         newAsset = { ...assetData, data: '' }
       }
     }
-    // console.log('newAsset', newAsset)
     return { orderVersion, newAsset }
   }
 
@@ -135,12 +147,12 @@ export class ElementOrders extends OrdersAPI {
     endAmount,
     buyerAddress
   }: SellOrderParams): Promise<any> {
-    const paymentTokenObj: Token = paymentToken
+    // const paymentTokenObj: Token = paymentToken
     const { orderVersion, newAsset } = await this.getAssetOrderVersion(asset)
     const sellParams = {
       asset: newAsset,
       quantity,
-      paymentTokenObj,
+      paymentTokenObj: paymentToken,
       accountAddress: this.accountAddress,
       startAmount,
       endAmount,
@@ -154,7 +166,66 @@ export class ElementOrders extends OrdersAPI {
     if (!sellData) return
     const order = { ...sellData, version: orderVersion.orderVersion } as OrderJSON
 
-    return this.ordersPost({ order: { ...order, chain: this.chain, chainId: this.walletChainId } })
+    return this.ordersPost({ order })
+  }
+  // 创建英拍 卖单
+  public async createAuctionOrder({
+    asset,
+    quantity,
+    paymentToken,
+    expirationTime,
+    startAmount,
+    englishAuctionReservePrice
+  }: EnglishAuctionOrderParams): Promise<any> {
+    const { orderVersion, newAsset } = await this.getAssetOrderVersion(asset)
+    const sellParams = {
+      asset: newAsset,
+      quantity,
+      paymentTokenObj: paymentToken,
+      accountAddress: this.accountAddress,
+      startAmount,
+      englishAuctionReservePrice,
+      expirationTime,
+      waitForHighestBid: true
+    }
+    const sellData = await this.orders.createSellOrder(sellParams)
+    if (!sellData) return
+    const order = { ...sellData, version: orderVersion.orderVersion } as OrderJSON
+    return this.ordersPost({ order })
+  }
+  //------------------ 买单---------------
+
+  // 创建竞价 买单
+  public async createBiddingOrder({
+    asset,
+    quantity,
+    paymentToken,
+    startAmount,
+    bestAsk
+  }: BiddingOrderParams): Promise<any> {
+    if (bestAsk?.bestAskOrderType === 0) return
+
+    const askOrder: any = bestAsk ? JSON.parse(bestAsk?.bestAskOrderString) : false
+
+    const sellOrder: Order = orderFromJSON(askOrder)
+
+    const paymentTokenObj: Token = { ...paymentToken, decimals: paymentToken?.decimals } as Token
+
+    const { orderVersion, newAsset } = await this.getAssetOrderVersion(asset)
+
+    const biddingParams = {
+      asset: newAsset,
+      accountAddress: this.accountAddress,
+      startAmount, // 订单总价
+      paymentTokenObj,
+      expirationTime: sellOrder?.expirationTime.toNumber(),
+      quantity: sellOrder?.quantity.toNumber(),
+      sellOrder
+    }
+    const buyData = await this.orders.createBuyOrder(biddingParams)
+    if (!buyData) return
+    const order = { ...buyData, version: orderVersion.orderVersion } as OrderJSON
+    return this.ordersPost({ order })
   }
 
   // 创建报价订单
@@ -165,7 +236,6 @@ export class ElementOrders extends OrdersAPI {
     expirationTime,
     startAmount
   }: BuyOrderParams): Promise<any> {
-    // const paymentTokenObj: Token = { ...paymentToken, decimals: paymentToken?.decimal } as Token
     const { orderVersion, newAsset } = await this.getAssetOrderVersion(asset)
     const buyParams = {
       asset: newAsset,
@@ -175,229 +245,66 @@ export class ElementOrders extends OrdersAPI {
       expirationTime,
       quantity
     }
-
     const buyData = await this.orders.createBuyOrder(buyParams)
-
     if (!buyData) return
     const order = { ...buyData, version: orderVersion.orderVersion } as OrderJSON
-    return this.ordersPost({ order: { ...order, chain: this.chain, chainId: this.walletChainId } })
+    return this.ordersPost({ order })
   }
 
-  // // 接受买单/购买-----------------order match
-  public async acceptOrder(bestAskOrder: any, callBack?: CallBack) {
-    const accountAddress = this.accountAddress
-    const signedOrder = checkOrderHash(bestAskOrder)
+  //
+  // // 创建降价单
+  public async createLowerPriceOrder({
+    oldOrder,
+    parameter,
+    asset
+  }: {
+    oldOrder: Order
+    parameter: any
+    asset?: any
+  }): Promise<any> {
+    // const { accountAddress, orderData, networkName, chainName, walletChainId } = await newOrder()
+    const unsignedOrder: UnsignedOrder = { ...oldOrder, ...parameter } as UnsignedOrder
 
+    const { dataToCall, replacementPattern } = computeOrderCallData(
+      unsignedOrder,
+      this.orders.networkName,
+      this.accountAddress
+    )
+
+    const unHashOrder = { ...unsignedOrder, dataToCall, replacementPattern, makerReferrerFee: makeBigNumber(0) }
+
+    const signOrder = await this.orders.creatSignedOrder({ unHashOrder })
+    if (!signOrder) return
+
+    const { orderVersion, newAsset } = await this.getAssetOrderVersion(asset)
+
+    const order = { ...signOrder, version: orderVersion.orderVersion } as OrderJSON
+    return this.ordersPost({ order })
+  }
+
+  //撮合 接受买单/购买-----------------order match
+  public async acceptOrder(bestOrder: OrderJSON) {
+    const accountAddress = this.accountAddress
+    const signedOrder = checkOrderHash(bestOrder)
     let recipientAddress = ''
-    if (bestAskOrder.side === OrderSide.Sell) {
+    if (bestOrder.side === OrderSide.Sell) {
       recipientAddress = accountAddress
     }
-    if (bestAskOrder.side === OrderSide.Buy) {
-      recipientAddress = bestAskOrder.maker
+    if (bestOrder.side === OrderSide.Buy) {
+      recipientAddress = bestOrder.maker
     }
     const { buy, sell } = this.orders.makeMatchingOrder({ signedOrder, accountAddress, recipientAddress })
 
-    const res = await this.orders.orderMatch(
-      {
-        buy,
-        sell,
-        accountAddress
-      },
-      callBack
-    )
+    const res = await this.account.orderMatch({
+      buy,
+      sell
+    })
     return res
   }
 }
 
 // -------------------------------- 创建订单--检查-签名 -------------------------------------
 
-// export interface EnglishAuctionOrderParams extends CreateOrderParams {
-//   expirationTime: number
-//   startAmount: number
-//   englishAuctionReservePrice?: number
-// }
-//
-// export interface BiddingOrderParams extends CreateOrderParams {
-//   startAmount: number
-//   bestAsk: TradeBestAskType
-// }
-//
-
-//
-// export interface BuyOrderParams extends CreateOrderParams {
-//   expirationTime: number
-//   startAmount: number
-// }
-
-// // 创建英拍 卖单
-// const createAuctionOrder = async (
-//   { asset, quantity, paymentToken, expirationTime, startAmount, englishAuctionReservePrice }: EnglishAuctionOrderParams,
-//   callBack?: CallBack
-// ): Promise<any> => {
-//   const { accountAddress, orderData, walletChainId, chainName } = await newOrder()
-//
-//   const paymentTokenObj: Token = { ...paymentToken, decimals: paymentToken?.decimals } as Token
-//   const { orderVersion, newAsset } = await getAssetOrderVersion({
-//     assetData: asset,
-//     chain: chainName,
-//     chainId: walletChainId
-//   })
-//
-//   const sellParams = {
-//     asset: newAsset,
-//     quantity,
-//     paymentTokenObj,
-//     accountAddress,
-//     startAmount,
-//     englishAuctionReservePrice,
-//     expirationTime,
-//     waitForHighestBid: true
-//   }
-//   callBack?.next(OrderCheckStatus.StartOrderHashSign)
-//
-//   const sellData = await orderData.createSellOrder(sellParams)
-//   if (!sellData) return
-//   callBack?.next(OrderCheckStatus.EndOrderHashSign)
-//
-//   const order = { ...sellData, version: orderVersion.orderVersion } as OrderJSON
-//   return postOrder(order)
-// }
-//
-// // 创建竞价 买单
-// const createBiddingOrder = async (
-//   { asset, quantity, paymentToken, startAmount, bestAsk }: BiddingOrderParams,
-//   callBack?: CallBack
-// ): Promise<any> => {
-//   const { accountAddress, orderData, walletChainId, chainName } = await newOrder()
-//   if (bestAsk?.bestAskOrderType === 0) return
-//
-//   const askOrder: any = bestAsk ? JSON.parse(bestAsk?.bestAskOrderString) : false
-//
-//   const sellOrder: Order = orderFromJSON(askOrder)
-//
-//   const paymentTokenObj: Token = { ...paymentToken, decimals: paymentToken?.decimals } as Token
-//
-//   const { orderVersion, newAsset } = await getAssetOrderVersion({
-//     assetData: asset,
-//     chain: chainName,
-//     chainId: walletChainId
-//   })
-//
-//   const biddingParams = {
-//     asset: newAsset,
-//     accountAddress,
-//     startAmount, // 订单总价
-//     paymentTokenObj,
-//     expirationTime: sellOrder?.expirationTime.toNumber(),
-//     quantity: sellOrder?.quantity.toNumber(),
-//     sellOrder
-//   }
-//   const buyData = await orderData.createBuyOrder(biddingParams)
-//   if (!buyData) return
-//   const order = { ...buyData, version: orderVersion.orderVersion } as OrderJSON
-//   return postOrder(order)
-// }
-//
-// // 创建卖单 一口价，荷兰拍
-// const createSellOrder = async ({
-//   asset,
-//   quantity,
-//   paymentToken,
-//   listingTime,
-//   expirationTime,
-//   startAmount,
-//   endAmount
-// }: SellOrderParams): Promise<any> => {
-//   const { accountAddress, orderData, walletChainId, chainName } = await newOrder()
-//   const paymentTokenObj: Token = { ...paymentToken, decimals: paymentToken?.decimals } as Token
-//
-//   const { orderVersion, newAsset } = await getAssetOrderVersion({
-//     assetData: asset,
-//     chain: chainName,
-//     chainId: walletChainId
-//   })
-//   const sellParams = {
-//     asset: newAsset,
-//     quantity,
-//     paymentTokenObj,
-//     accountAddress,
-//     startAmount,
-//     endAmount,
-//     listingTime,
-//     expirationTime
-//   }
-//
-//   const sellData = await orderData.createSellOrder(sellParams)
-//
-//   if (!sellData) return
-//   const order = { ...sellData, version: orderVersion.orderVersion } as OrderJSON
-//   return postOrder(order)
-// }
-//
-// // 创建报价订单
-// const createBuyOrder = async ({
-//   asset,
-//   quantity,
-//   paymentToken,
-//   expirationTime,
-//   startAmount
-// }: BuyOrderParams): Promise<any> => {
-//   const { accountAddress, orderData, walletChainId, chainName } = await newOrder()
-//   const paymentTokenObj: Token = { ...paymentToken, decimals: paymentToken?.decimals } as Token
-//   const { orderVersion, newAsset } = await getAssetOrderVersion({
-//     assetData: asset,
-//     chain: chainName,
-//     chainId: walletChainId
-//   })
-//
-//   const buyParams = {
-//     asset: newAsset,
-//     accountAddress,
-//     startAmount, // 订单总价
-//     paymentTokenObj,
-//     expirationTime,
-//     quantity
-//   }
-//
-//   const buyData = await orderData.createBuyOrder(buyParams)
-//
-//   if (!buyData) return
-//   const order = { ...buyData, version: orderVersion.orderVersion } as OrderJSON
-//   return postOrder(order)
-// }
-//
-// // 创建降价单
-// const createLowerPriceOrder = async ({
-//   oldOrder,
-//   parameter,
-//   asset
-// }: {
-//   oldOrder: Order
-//   parameter: any
-//   asset?: any
-// }): Promise<any> => {
-//   const { accountAddress, orderData, networkName, chainName, walletChainId } = await newOrder()
-//   const unsignedOrder: UnsignedOrder = { ...oldOrder, ...parameter } as UnsignedOrder
-//
-//   const { dataToCall, replacementPattern } = computeOrderCallData(unsignedOrder, networkName, accountAddress)
-//
-//   const unHashOrder = { ...unsignedOrder, dataToCall, replacementPattern, makerReferrerFee: makeBigNumber(0) }
-//
-//   const signOrder = await orderData.creatSignedOrder({ unHashOrder })
-//   if (!signOrder) return
-//
-//   const { orderVersion } = await getAssetOrderVersion({
-//     assetData: {
-//       tokenAddress: unsignedOrder.metadata.asset.address,
-//       tokenId: unsignedOrder.metadata.asset.id
-//     } as Asset,
-//     chain: chainName,
-//     chainId: walletChainId
-//   })
-//
-//   const order = { ...signOrder, version: orderVersion.orderVersion } as OrderJSON
-//   return postOrder(order)
-// }
 //
 // export const createOrder = async ({
 //   orderType,
