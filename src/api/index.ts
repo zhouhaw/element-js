@@ -23,6 +23,7 @@ import { UsersApi, GqlApi, AssetsApi } from './graphql'
 
 import Web3 from 'web3'
 import { BuyOrderParams, SellOrderParams, EnglishAuctionOrderParams, BiddingOrderParams } from './types'
+import { ElementAPIConfig } from '../types'
 
 export type { BuyOrderParams, SellOrderParams, EnglishAuctionOrderParams, BiddingOrderParams }
 
@@ -50,35 +51,29 @@ export class ElementOrders extends OrdersAPI {
   public accountAddress = ''
 
   // 初始化SDK
-  constructor({
-    walletProvider,
-    networkName,
-    walletAccount,
-    privateKey,
-    authToken,
-    apiBaseUrl
-  }: {
-    walletProvider: any
-    networkName: Network
-    walletAccount?: string
-    privateKey?: string
-    authToken?: string
-    apiBaseUrl?: string
-  }) {
-    super({ networkName, authToken, apiBaseUrl })
-    if (privateKey) {
-      const account = walletProvider.eth.accounts.wallet.add(privateKey)
+  constructor(
+    walletProvider: Web3,
+    apiConfig: ElementAPIConfig,
+    walletAccount?: {
+      address?: string
+      privateKey?: string
+    }
+  ) {
+    super(apiConfig)
+    const networkName = apiConfig.networkName
+    const apiUrl = apiConfig.apiBaseUrl
+    if (walletAccount?.privateKey) {
+      const account = walletProvider.eth.accounts.wallet.add(walletAccount?.privateKey)
       walletProvider.eth.defaultAccount = account.address
     }
-    this.accountAddress = walletAccount || walletProvider.eth.defaultAccount.toLowerCase()
-    this.orders = new Orders(walletProvider, { networkName })
-    this.account = new Account(walletProvider, { networkName })
+    this.accountAddress = walletAccount?.address || walletProvider.eth.defaultAccount?.toLowerCase() || ''
+    this.orders = new Orders(walletProvider, apiConfig)
+    this.account = new Account(walletProvider, apiConfig)
 
     this.gqlApi = {
-      usersApi: new GqlApi.usersApi({ networkName, account: this.accountAddress, apiBaseUrl }),
-      assetsApi: new GqlApi.assetsApi({ networkName, account: this.accountAddress, apiBaseUrl })
+      usersApi: new GqlApi.usersApi({ networkName, account: this.accountAddress, apiBaseUrl: apiUrl }),
+      assetsApi: new GqlApi.assetsApi({ networkName, account: this.accountAddress, apiBaseUrl: apiUrl })
     }
-
     this.walletProvider = walletProvider
   }
 

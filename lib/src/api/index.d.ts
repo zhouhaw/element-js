@@ -1,9 +1,10 @@
-import { Asset, Network, OrderJSON, Order } from '../../index';
+import { Asset, OrderJSON, Order } from '../../index';
 import { OrderVersionData, OrdersAPI, OrderCancelParams } from './restful/ordersApi';
 import { Account } from '../account';
 import { UsersApi, AssetsApi } from './graphql';
 import Web3 from 'web3';
 import { BuyOrderParams, SellOrderParams, EnglishAuctionOrderParams, BiddingOrderParams } from './types';
+import { ElementAPIConfig } from '../types';
 export type { BuyOrderParams, SellOrderParams, EnglishAuctionOrderParams, BiddingOrderParams };
 export declare class ElementOrders extends OrdersAPI {
     orders: any;
@@ -14,13 +15,9 @@ export declare class ElementOrders extends OrdersAPI {
     };
     walletProvider: Web3;
     accountAddress: string;
-    constructor({ walletProvider, networkName, walletAccount, privateKey, authToken, apiBaseUrl }: {
-        walletProvider: any;
-        networkName: Network;
-        walletAccount?: string;
+    constructor(walletProvider: Web3, apiConfig: ElementAPIConfig, walletAccount?: {
+        address?: string;
         privateKey?: string;
-        authToken?: string;
-        apiBaseUrl?: string;
     });
     getLoginAuthToken(): Promise<string>;
     login(): Promise<void>;

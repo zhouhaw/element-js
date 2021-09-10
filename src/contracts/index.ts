@@ -5,7 +5,6 @@ import { ElementAPIConfig, ETHSending, Network, Token, TransactionConfig } from 
 import { AnnotatedFunctionOutput, LimitedCallSpec } from '../schema/types'
 import { tokens } from '../schema/tokens'
 import { common } from '../schema/schemas'
-import { ElementRegistrySchemas } from '../schema/schemas/common/Element/registry'
 import { ElementError } from '../base/error'
 
 export class ContractSchemas extends EventEmitter {
