@@ -1,6 +1,6 @@
 import { ElementError } from './base/error';
 import { ContractSchemas } from './contracts/index';
-import { ETHSending, PromiEvent, TransactionReceipt, BuyOrderApprove, ElementAPIConfig, ExchangeMetadata, Order, OrderJSON, SellOrderApprove, UnsignedOrder } from './types';
+import { ETHSending, BuyOrderApprove, ElementAPIConfig, ExchangeMetadata, Order, OrderJSON, SellOrderApprove, UnsignedOrder } from './types';
 import { Web3 } from './api/restful/ethApi';
 export declare class Account extends ContractSchemas {
     elementAccount: string;
@@ -18,10 +18,7 @@ export declare class Account extends ContractSchemas {
     getAssetBalances(metadata: ExchangeMetadata, account?: string): Promise<string>;
     approveTokenTransferProxy(to: string): Promise<ETHSending>;
     checkAssetTransferProxy(metadata: ExchangeMetadata): Promise<boolean>;
-    approveAssetTransferProxy(metadata: ExchangeMetadata): Promise<{
-        sendTx: PromiEvent<TransactionReceipt>;
-        txHash: string;
-    }>;
+    approveAssetTransferProxy(metadata: ExchangeMetadata): Promise<ETHSending>;
     orderMatch({ buy, sell, metadata }: {
         buy: Order;
         sell: Order;
@@ -29,5 +26,5 @@ export declare class Account extends ContractSchemas {
     }): Promise<ETHSending>;
     orderCancel(order: Order): Promise<ETHSending>;
     assetTransfer(metadata: ExchangeMetadata, to: string): Promise<ETHSending>;
-    accountApprove(error: ElementError): Promise<void>;
+    accountApprove(error: ElementError): Promise<ETHSending>;
 }

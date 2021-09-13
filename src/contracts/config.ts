@@ -1,6 +1,10 @@
 import { Network } from '../../index'
 
 export const NULL_ADDRESS = '0x0000000000000000000000000000000000000000'
+export const GasPrice_NOW = {
+  url: 'https://www.gasnow.org/api/v3/gas/price',
+  type: 'fast' //standard
+}
 export enum POLYGON_CONTRACTS_ADDRESSES {
   ElementixProxyRegistry = '0x26aFE7885cdCFF35ADE8498Bd183577dC98E3fcc',
   ElementixTokenTransferProxy = '?',

@@ -1,11 +1,20 @@
 import { EventEmitter } from 'events'
 import Web3 from 'web3'
-import { CONTRACTS_ADDRESSES, NULL_ADDRESS } from './config'
+import { CONTRACTS_ADDRESSES, GasPrice_NOW, NULL_ADDRESS } from './config'
 import { ElementAPIConfig, ETHSending, Network, Token, TransactionConfig } from '../types'
 import { AnnotatedFunctionOutput, LimitedCallSpec } from '../schema/types'
 import { tokens } from '../schema/tokens'
 import { common } from '../schema/schemas'
 import { ElementError } from '../base/error'
+
+import unfetch from 'isomorphic-unfetch'
+
+let fetch: any
+if (typeof window === 'undefined') {
+  fetch = unfetch
+} else {
+  fetch = window.fetch.bind(window)
+}
 
 export class ContractSchemas extends EventEmitter {
   public web3: Web3
@@ -87,9 +96,19 @@ export class ContractSchemas extends EventEmitter {
     return params
   }
 
+  public async getGasPrice(): Promise<number> {
+    if (this.networkName == Network.Main) {
+      const response: any = await fetch(GasPrice_NOW.url)
+      const res = await response.json()
+      if (res.code === 200) return res.data[GasPrice_NOW.type]
+    }
+    return Number(this.web3.eth.getGasPrice())
+  }
+
   //发送标准交易
   public async ethSend(callData: LimitedCallSpec, from: string): Promise<ETHSending> {
     // const from = this.elementAccount
+    const gasPrice = await this.getGasPrice()
     const gas = await this.web3.eth.estimateGas(callData).catch((error: Error) => {
       const stack = error.message || JSON.stringify(error)
       console.log('estimateGas error', stack)
@@ -98,7 +117,7 @@ export class ContractSchemas extends EventEmitter {
         context: { funcName: 'estimateGas', stack }
       })
     })
-    const gasPrice = await this.web3.eth.getGasPrice()
+
     const nonce = await this.web3.eth.getTransactionCount(from)
     const transactionObject = {
       from,
@@ -111,11 +130,11 @@ export class ContractSchemas extends EventEmitter {
     } as TransactionConfig
 
     return new Promise((resolve, reject) => {
-      const sendTx = this.web3.eth.sendTransaction(transactionObject)
-      sendTx.once('transactionHash', (txHash: string) => {
+      const txSend = this.web3.eth.sendTransaction(transactionObject)
+      txSend.once('transactionHash', (txHash: string) => {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        resolve({ sendTx, txHash })
+        resolve({ txSend, txHash })
       })
     })
     // .on('receipt', (receipt: any) => {

@@ -342,7 +342,7 @@ export interface ElementCollection extends ElementFees {
 }
 
 export interface ETHSending {
-  sendTx: PromiEvent<TransactionReceipt>
+  txSend: PromiEvent<TransactionReceipt>
   txHash: string
 }
 

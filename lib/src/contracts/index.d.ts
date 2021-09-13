@@ -32,5 +32,6 @@ export declare class ContractSchemas extends EventEmitter {
     };
     constructor(web3: any, apiConfig?: ElementAPIConfig);
     ethCall(callData: LimitedCallSpec, outputs: AnnotatedFunctionOutput[]): Promise<any>;
+    getGasPrice(): Promise<number>;
     ethSend(callData: LimitedCallSpec, from: string): Promise<ETHSending>;
 }

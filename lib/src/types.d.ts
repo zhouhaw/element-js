@@ -252,7 +252,7 @@ export interface ElementCollection extends ElementFees {
     transferFeePaymentToken: ElemetnFungibleToken | null;
 }
 export interface ETHSending {
-    sendTx: PromiEvent<TransactionReceipt>;
+    txSend: PromiEvent<TransactionReceipt>;
     txHash: string;
 }
 export interface BuyOrderApprove {

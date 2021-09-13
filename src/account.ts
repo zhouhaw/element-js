@@ -186,9 +186,7 @@ export class Account extends ContractSchemas {
     return res
   }
 
-  public async approveAssetTransferProxy(
-    metadata: ExchangeMetadata
-  ): Promise<{ sendTx: PromiEvent<TransactionReceipt>; txHash: string }> {
+  public async approveAssetTransferProxy(metadata: ExchangeMetadata): Promise<ETHSending> {
     const operator = this.elementixTokenTransferProxy
     const accountApprove = getApproveSchemas(metadata)
     const data = encodeParamsCall(accountApprove, { owner: operator, replace: true })
@@ -252,26 +250,26 @@ export class Account extends ContractSchemas {
     return this.ethSend(callData, owner)
   }
 
-  public async accountApprove(error: ElementError) {
+  public async accountApprove(error: ElementError): Promise<ETHSending> {
     console.log('orderErrorHandler', error)
     switch (String(error.code)) {
       case '1001': // initialize
-        await this.registerProxy()
+        return await this.registerProxy()
         break
       case '1101': // 批准任何erc20 token
-        await this.approveTokenTransferProxy(error.data.erc20Address)
+        return await this.approveTokenTransferProxy(error.data.erc20Address)
         break
       case '1102': // checkApproveERC1155TransferProxy
-        await this.approveAssetTransferProxy(error.data.order.metadata)
+        return await this.approveAssetTransferProxy(error.data.order.metadata)
         break
       case '1106': // checkApproveERC721TransferProxy
-        await this.approveAssetTransferProxy(error.data.order.metadata)
+        return await this.approveAssetTransferProxy(error.data.order.metadata)
         break
       case '1108': // CryptoKitties
-        await this.approveAssetTransferProxy(error.data.order.metadata)
+        return await this.approveAssetTransferProxy(error.data.order.metadata)
         break
       default:
-        console.log('orderErrorHandler error', error)
+        throw error
     }
   }
 }

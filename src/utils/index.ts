@@ -12,8 +12,9 @@ export async function Sleep(ms: number) {
 
 export const orderFromJSON = (order: any): Order => {
   const createdDate = new Date() // `${order.created_date}Z`
+  const orderHash = order.hash || order.orderHash
   const fromJSON: Order = {
-    hash: order.hash,
+    hash: orderHash,
     cancelledOrFinalized: order.cancelled || order.finalized,
     markedInvalid: order.marked_invalid,
     metadata: order.metadata,
@@ -66,5 +67,3 @@ export const orderFromJSON = (order: any): Order => {
 
   return fromJSON
 }
-
-

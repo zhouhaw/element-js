@@ -1,4 +1,8 @@
 export declare const NULL_ADDRESS = "0x0000000000000000000000000000000000000000";
+export declare const GasPrice_NOW: {
+    url: string;
+    type: string;
+};
 export declare enum POLYGON_CONTRACTS_ADDRESSES {
     ElementixProxyRegistry = "0x26aFE7885cdCFF35ADE8498Bd183577dC98E3fcc",
     ElementixTokenTransferProxy = "?",

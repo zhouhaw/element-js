@@ -15,9 +15,17 @@ export async function registerProxy({
 }): Promise<boolean> {
   const proxy = await proxyRegistryContract.methods.proxies(account).call()
   if (proxy === NULL_ADDRESS) {
+    const data = await proxyRegistryContract.methods.registerProxy().encodeABI()
+    const gas = await proxyRegistryContract.web3.eth
+      .estimateGas({ to: proxyRegistryContract.options.address, data, value: 0 })
+      .catch((error: any) => {
+        throw new ElementError({ code: '1003', context: { msg: error.message } })
+      })
+
     const res = await proxyRegistryContract.methods
       .registerProxy()
       .send({
+        gas,
         from: account
       })
       .on('transactionHash', (txHash: string) => {
@@ -54,9 +62,17 @@ export async function approveTokenTransferProxy({
   const tokenTransferProxyAddr = await exchangeContract.methods.tokenTransferProxy().call()
   const allowAmount = await erc20Contract.methods.allowance(account, tokenTransferProxyAddr).call()
   if (new BigNumber(allowAmount).eq(0)) {
+    const data = await erc20Contract.methods.approve(tokenTransferProxyAddr, MAX_UINT_256.toString()).encodeABI()
+    const gas = await erc20Contract.web3.eth
+      .estimateGas({ to: erc20Contract.options.address, data, value: 0 })
+      .catch((error: any) => {
+        throw new ElementError({ code: '1003', context: { msg: error.message } })
+      })
+
     const res = await erc20Contract.methods
       .approve(tokenTransferProxyAddr, MAX_UINT_256.toString())
       .send({
+        gas,
         from: account
       })
       .on('transactionHash', (txHash: string) => {
@@ -93,9 +109,16 @@ export async function approveERC1155TransferProxy({
   const operator = await proxyRegistryContract.methods.proxies(account).call()
   const isApprove = await erc1155Contract.methods.isApprovedForAll(account, operator).call()
   if (!isApprove) {
+    const data = await erc1155Contract.methods.setApprovalForAll(operator, true).encodeABI()
+    const gas = await erc1155Contract.web3.eth
+      .estimateGas({ to: erc1155Contract.options.address, data, value: 0 })
+      .catch((error: any) => {
+        throw new ElementError({ code: '1003', context: { msg: error.message } })
+      })
+
     const res = await erc1155Contract.methods
       .setApprovalForAll(operator, true)
-      .send({ from: account })
+      .send({ gas, from: account })
       .on('transactionHash', (txHash: string) => {
         callBack?.next(OrderCheckStatus.ApproveErc1155TxHash, { txHash })
         console.log('approveERC1155TransferProxy tx txHash', txHash)
@@ -135,9 +158,17 @@ export async function approveERC721TransferProxy({
   if (!isApprove) {
     //  function setApprovalForAll(address _operator, bool _approved) external;
     // let res = await nftsContract.methods.approve(operator, tokenId).send({ from: account })
+
+    const data = await erc721Contract.methods.setApprovalForAll(operator, true).encodeABI()
+    const gas = await erc721Contract.web3.eth
+      .estimateGas({ to: erc721Contract.options.address, data, value: 0 })
+      .catch((error: any) => {
+        throw new ElementError({ code: '1003', context: { msg: error.message } })
+      })
+
     const res = await erc721Contract.methods
       .setApprovalForAll(operator, true)
-      .send({ from: account })
+      .send({ gas, from: account })
       .on('transactionHash', (txHash: string) => {
         callBack?.next(OrderCheckStatus.ApproveErc721TxHash, { txHash })
         console.log('approveERC721TransferProxy tx txHash', txHash)
