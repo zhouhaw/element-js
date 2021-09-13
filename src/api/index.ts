@@ -41,7 +41,7 @@ const checkOrderHash = (order: any): Order => {
 }
 
 export class ElementOrders extends OrdersAPI {
-  public orders: any
+  public orders: Orders
   public account: Account
   public gqlApi: {
     usersApi: UsersApi
@@ -232,6 +232,7 @@ export class ElementOrders extends OrdersAPI {
     startAmount
   }: BuyOrderParams): Promise<any> {
     const { orderVersion, newAsset } = await this.getAssetOrderVersion(asset)
+    paymentToken = paymentToken || this.orders.WETHToekn
     const buyParams = {
       asset: newAsset,
       accountAddress: this.accountAddress,
@@ -258,6 +259,18 @@ export class ElementOrders extends OrdersAPI {
     asset?: any
   }): Promise<any> {
     // const { accountAddress, orderData, networkName, chainName, walletChainId } = await newOrder()
+    const metadataAsset = oldOrder.metadata.asset
+    const assetData = {
+      tokenAddress: metadataAsset.address,
+      tokenId: metadataAsset.id,
+      schemaName: oldOrder.metadata.schema
+    } as Asset
+    const { orderVersion, newAsset } = await this.getAssetOrderVersion(assetData)
+    const sharedAsset = this.orders.elementSharedAssetAddr.toLowerCase()
+
+    if (metadataAsset.address === sharedAsset && orderVersion.uri && orderVersion.orderVersion === 1) {
+      metadataAsset.data = newAsset.data
+    }
     const unsignedOrder: UnsignedOrder = { ...oldOrder, ...parameter } as UnsignedOrder
 
     const { dataToCall, replacementPattern } = computeOrderCallData(
@@ -271,9 +284,8 @@ export class ElementOrders extends OrdersAPI {
     const signOrder = await this.orders.creatSignedOrder({ unHashOrder })
     if (!signOrder) return
 
-    const { orderVersion, newAsset } = await this.getAssetOrderVersion(asset)
-
     const order = { ...signOrder, version: orderVersion.orderVersion } as OrderJSON
+
     return this.ordersPost({ order })
   }
 

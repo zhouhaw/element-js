@@ -1,4 +1,4 @@
-import { Asset, OrderJSON, Order } from '../../index';
+import { Asset, Orders, OrderJSON, Order } from '../../index';
 import { OrderVersionData, OrdersAPI, OrderCancelParams } from './restful/ordersApi';
 import { Account } from '../account';
 import { UsersApi, AssetsApi } from './graphql';
@@ -7,7 +7,7 @@ import { BuyOrderParams, SellOrderParams, EnglishAuctionOrderParams, BiddingOrde
 import { ElementAPIConfig } from '../types';
 export type { BuyOrderParams, SellOrderParams, EnglishAuctionOrderParams, BiddingOrderParams };
 export declare class ElementOrders extends OrdersAPI {
-    orders: any;
+    orders: Orders;
     account: Account;
     gqlApi: {
         usersApi: UsersApi;

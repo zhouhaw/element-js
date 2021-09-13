@@ -1,6 +1,6 @@
 import { Asset, ECSignature, Order, OrderJSON, OrderSide, Token, UnhashedOrder } from './types'
 import { NULL_ADDRESS, NULL_BLOCK_HASH } from './utils/constants'
-import { checkOrderCancelledOrFinalized, checkMatchOrder, checkUnhashedOrder } from './utils/check'
+import { checkOrderCancelledOrFinalized, checkMatchOrder, checkUnhashedOrder, checkOrder } from './utils/check'
 import { ElementError } from './base/error'
 
 import {
@@ -313,5 +313,13 @@ export class Orders extends Contracts {
     const orderParamValueArray = orderParamsEncode(order as UnhashedOrder)
     const hash = await this.exchangeHelper.methods.hashToSign(orderParamValueArray).call()
     return this.exchange.methods.cancelledOrFinalized(hash).call()
+  }
+
+  public async checkMatchOrder(buy: Order, sell: Order) {
+    return checkMatchOrder(this, buy, sell)
+  }
+
+  public async checkOrder(order: Order) {
+    return checkOrder(this, order)
   }
 }

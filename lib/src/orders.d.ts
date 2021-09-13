@@ -62,4 +62,6 @@ export declare class Orders extends Contracts {
     }, callBack?: CallBack): Promise<OrderJSON>;
     getOrderCurrentPrice(order: Order): Promise<string>;
     getOrderCancelledOrFinalized(order: Order): Promise<boolean>;
+    checkMatchOrder(buy: Order, sell: Order): Promise<boolean>;
+    checkOrder(order: Order): Promise<boolean>;
 }

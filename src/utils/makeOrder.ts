@@ -413,6 +413,7 @@ export async function getOrderHash(web3: any, exchangeHelper: any, order: Unhash
   const orderParamValueArray = orderParamsEncode(order)
   try {
     const orderHash = await exchangeHelper.methods.hashOrder(orderParamValueArray).call()
+    if (!orderHash) throw { message: 'orderHash undefind' }
     return orderHash
   } catch (e) {
     throw new ElementError({ code: '1000', message: 'exchangeHelper.methods.hashOrder ' + e.message })
@@ -420,8 +421,10 @@ export async function getOrderHash(web3: any, exchangeHelper: any, order: Unhash
 }
 
 export async function hashAndValidateOrder(web3: any, exchangeHelper: any, order: UnhashedOrder): Promise<OrderJSON> {
-  // const orderHash = await getOrderHash(web3, exchangeHelper, order)
+  const _orderHash = await getOrderHash(web3, exchangeHelper, order)
+  console.log('orderHash_hp', _orderHash)
   const orderHash = hashOrder(web3, order)
+  console.log('orderHash_js', orderHash)
   const hashedOrder = {
     ...order,
     hash: orderHash
