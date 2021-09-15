@@ -247,8 +247,8 @@ export interface Order extends UnsignedOrder, Partial<ECSignature> {
 export interface Token {
   name: string
   symbol: string
-  decimals: number
   address: string
+  decimals: number
 }
 
 export interface ElementFungibleToken extends Token {

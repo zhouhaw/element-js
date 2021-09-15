@@ -78,7 +78,7 @@ export async function checkApproveTokenTransferProxy(
 ): Promise<boolean> {
   const tokenTransferProxyAddr = await exchangeContract.methods.tokenTransferProxy().call()
   const allowAmount = await erc20Contract.methods.allowance(account, tokenTransferProxyAddr).call()
-
+  console.log(allowAmount)
   if (new BigNumber(allowAmount).eq(0)) {
     throw new ElementError({ code: '1101', data: { erc20Address: erc20Contract.options.address } })
   }
@@ -491,7 +491,10 @@ export async function checkAssetBalance(contract: any, order: UnhashedOrder) {
       // eslint-disable-next-line no-case-declarations
       const owner = await sellNFTs.methods.ownerOf(tokenId).call()
       if (owner.toLowerCase() !== checkAddr)
-        throw new ElementError({ code: '1103', context: { assetType: metadata.schema } })
+        throw new ElementError({
+          code: '1103',
+          context: { assetType: metadata.schema, orderQuantity: order.quantity, ownerQuantity: 0 }
+        })
       balance = 1
       break
     case ElementSchemaName.CryptoKitties:
@@ -500,7 +503,10 @@ export async function checkAssetBalance(contract: any, order: UnhashedOrder) {
       // eslint-disable-next-line no-case-declarations
       const kittiyOwner = await sellNFTs.methods.ownerOf(tokenId).call()
       if (kittiyOwner.toLowerCase() !== checkAddr)
-        throw new ElementError({ code: '1103', context: { assetType: metadata.schema } })
+        throw new ElementError({
+          code: '1103',
+          context: { assetType: metadata.schema, orderQuantity: order.quantity, ownerQuantity: 0 }
+        })
       balance = 1
       break
     case ElementSchemaName.ERC1155:
@@ -516,7 +522,14 @@ export async function checkAssetBalance(contract: any, order: UnhashedOrder) {
     order.quantity = new BigNumber(order.quantity)
   }
   if (order.quantity.gt(balance.toString())) {
-    throw new ElementError({ code: '1103', context: { assetType: metadata.schema } })
+    throw new ElementError({
+      code: '1103',
+      context: {
+        assetType: metadata.schema,
+        orderQuantity: order.quantity.toString(),
+        ownerQuantity: balance.toString()
+      }
+    })
   }
 
   return Number(balance)

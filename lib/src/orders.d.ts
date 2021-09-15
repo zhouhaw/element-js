@@ -1,5 +1,6 @@
-import { Asset, Order, OrderJSON, Token, UnhashedOrder } from './types';
+import { Asset, Network, Order, OrderJSON, Token, UnhashedOrder, UnsignedOrder } from './types';
 import { Contracts } from './contracts';
+import { CallSpec } from './schema/schemaFunctions';
 export declare enum OrderCheckStatus {
     StartOrderHashSign = "startOrderHashSign",
     EndOrderHashSign = "endOrderHashSign",
@@ -64,4 +65,7 @@ export declare class Orders extends Contracts {
     getOrderCancelledOrFinalized(order: Order): Promise<boolean>;
     checkMatchOrder(buy: Order, sell: Order): Promise<boolean>;
     checkOrder(order: Order): Promise<boolean>;
+    orderToJSON(order: Order): OrderJSON;
+    orderFromJSON(order: any): Order;
+    computeOrderCallData(order: UnsignedOrder, networkName: Network, assetRecipientAddress: string): CallSpec;
 }

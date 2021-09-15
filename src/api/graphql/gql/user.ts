@@ -174,8 +174,6 @@ export const accountOrders = gql`
             }
             user {
               address
-              chain
-              chainId
               profileImageUrl
               userName
             }
@@ -194,8 +192,6 @@ export const accountOrders = gql`
             }
             user {
               address
-              chain
-              chainId
               profileImageUrl
               userName
             }

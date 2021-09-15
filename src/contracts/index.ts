@@ -97,12 +97,15 @@ export class ContractSchemas extends EventEmitter {
   }
 
   public async getGasPrice(): Promise<number> {
+    let gasPrice = 0
     if (this.networkName == Network.Main) {
       const response: any = await fetch(GasPrice_NOW.url)
       const res = await response.json()
-      if (res.code === 200) return res.data[GasPrice_NOW.type]
+      if (res.code === 200) gasPrice = res.data[GasPrice_NOW.type]
+    } else {
+      gasPrice = Number(await this.web3.eth.getGasPrice())
     }
-    return Number(this.web3.eth.getGasPrice())
+    return gasPrice
   }
 
   //发送标准交易

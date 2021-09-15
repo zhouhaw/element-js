@@ -1,7 +1,7 @@
-import { Asset, ECSignature, Order, OrderJSON, OrderSide, Token, UnhashedOrder } from './types'
-import { NULL_ADDRESS, NULL_BLOCK_HASH } from './utils/constants'
-import { checkOrderCancelledOrFinalized, checkMatchOrder, checkUnhashedOrder, checkOrder } from './utils/check'
-import { ElementError } from './base/error'
+import { Asset, ECSignature, Network, Order, OrderJSON, OrderSide, Token, UnhashedOrder, UnsignedOrder } from './types'
+import { NULL_ADDRESS } from './utils/constants'
+import { getElementAssetURI, checkMatchOrder, checkUnhashedOrder, checkOrder } from './utils/check'
+import { orderToJSON, orderFromJSON, computeOrderCallData } from './utils/makeOrder'
 
 import {
   _makeBuyOrder,
@@ -14,6 +14,7 @@ import {
 import { orderParamsEncode, orderSigEncode } from './utils/helper'
 
 import { Contracts } from './contracts'
+import { CallSpec } from './schema/schemaFunctions'
 
 export enum OrderCheckStatus {
   StartOrderHashSign = 'startOrderHashSign',
@@ -136,9 +137,9 @@ export class Orders extends Contracts {
     await checkUnhashedOrder(this, unHashOrder)
 
     try {
-      callBack?.next(OrderCheckStatus.StartOrderHashSign, { unHashOrder })
+      // callBack?.next(OrderCheckStatus.StartOrderHashSign, { unHashOrder })
       const signSellOrder = await hashAndValidateOrder(this.web3, this.exchangeHelper, unHashOrder)
-      callBack?.next(OrderCheckStatus.EndOrderHashSign, { signSellOrder })
+      // callBack?.next(OrderCheckStatus.EndOrderHashSign, { signSellOrder })
       return signSellOrder
     } catch (error) {
       if (error.data) {
@@ -247,7 +248,6 @@ export class Orders extends Contracts {
       feeRecipientAddr: this.feeRecipientAddress,
       buyerAddress: buyerAddress || NULL_ADDRESS
     })
-
     return this.creatSignedOrder({ unHashOrder: sellOrder }, callBack)
   }
 
@@ -321,5 +321,17 @@ export class Orders extends Contracts {
 
   public async checkOrder(order: Order) {
     return checkOrder(this, order)
+  }
+
+  public orderToJSON(order: Order): OrderJSON {
+    return orderToJSON(order)
+  }
+
+  public orderFromJSON(order: any): Order {
+    return orderFromJSON(order)
+  }
+
+  public computeOrderCallData(order: UnsignedOrder, networkName: Network, assetRecipientAddress: string): CallSpec {
+    return computeOrderCallData(order, networkName, assetRecipientAddress)
   }
 }

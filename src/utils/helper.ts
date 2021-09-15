@@ -118,10 +118,10 @@ export function hashOrder(web3: any, order: UnhashedOrder): string {
       { type: 'address', value: order.exchange },
       { type: 'address', value: order.maker },
       { type: 'address', value: order.taker },
-      { type: 'uint', value: order.makerRelayerFee },
-      { type: 'uint', value: order.takerRelayerFee },
-      { type: 'uint', value: order.takerProtocolFee },
-      { type: 'uint', value: order.takerProtocolFee },
+      { type: 'uint256', value: order.makerRelayerFee },
+      { type: 'uint256', value: order.takerRelayerFee },
+      { type: 'uint256', value: order.takerProtocolFee },
+      { type: 'uint256', value: order.takerProtocolFee },
       { type: 'address', value: order.feeRecipient },
       { type: 'uint8', value: order.feeMethod },
       { type: 'uint8', value: order.side },
@@ -133,11 +133,11 @@ export function hashOrder(web3: any, order: UnhashedOrder): string {
       { type: 'address', value: order.staticTarget },
       { type: 'bytes', value: order.staticExtradata },
       { type: 'address', value: order.paymentToken },
-      { type: 'uint', value: order.basePrice },
-      { type: 'uint', value: order.extra },
-      { type: 'uint', value: order.listingTime },
-      { type: 'uint', value: order.expirationTime },
-      { type: 'uint', value: order.salt }
+      { type: 'uint256', value: order.basePrice },
+      { type: 'uint256', value: order.extra },
+      { type: 'uint256', value: order.listingTime },
+      { type: 'uint256', value: order.expirationTime },
+      { type: 'uint256', value: order.salt }
     )
     .toString('hex')
 }

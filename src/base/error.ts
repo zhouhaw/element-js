@@ -53,7 +53,7 @@ export const ErrorCodes: ElementErrorCodes = [
   },
   {
     code: '1103', // nft 余额不足
-    message: '{{assetType}} balanceOf equal 0 !'
+    message: '{{assetType}} balanceOf insufficient order quantity  {{orderQuantity}} owner quantity {{ownerQuantity}}!'
   },
   {
     code: '1104', // ERC20，ETH 余额为0

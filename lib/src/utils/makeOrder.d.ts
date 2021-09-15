@@ -1,6 +1,7 @@
 import { Asset, ECSignature, ElementAsset, ElementSchemaName, Network, Order, OrderJSON, OrderSide, UnhashedOrder, UnsignedOrder } from '../types';
 import { Schema, Token } from '../schema/types';
 import { BigNumber } from './constants';
+import { CallSpec } from '../schema/schemaFunctions';
 export declare function getSchema(network: Network, schemaName: ElementSchemaName): Schema<any>;
 export declare function getElementAsset(schema: Schema<ElementAsset>, asset: Asset, quantity?: BigNumber): ElementAsset;
 export declare function getSchemaAndAsset(networkName: Network, asset: Asset, quantity: number): {
@@ -68,8 +69,8 @@ export declare function _getStaticCallTargetAndExtraData({ networkName, asset, u
     staticTarget: string;
     staticExtradata: string;
 }>;
-export declare const computeOrderParams: (order: UnsignedOrder, networkName: Network, assetRecipientAddress: string) => import("../schema/schemaFunctions").CallSpec;
-export declare const computeOrderCallData: (order: UnsignedOrder, networkName: Network, assetRecipientAddress: string) => import("../schema/schemaFunctions").CallSpec;
+export declare const computeOrderParams: (order: UnsignedOrder, networkName: Network, assetRecipientAddress: string) => CallSpec;
+export declare const computeOrderCallData: (order: UnsignedOrder, networkName: Network, assetRecipientAddress: string) => CallSpec;
 export declare function _makeMatchingOrder({ networkName, unSignedOrder, accountAddress, assetRecipientAddress, feeRecipientAddress }: {
     networkName: Network;
     unSignedOrder: UnsignedOrder;
@@ -86,3 +87,4 @@ export declare function assignOrdersToSides(order: Order, matchingOrder: Unsigne
     buy: Order;
     sell: Order;
 };
+export declare const orderFromJSON: (order: any) => Order;

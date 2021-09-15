@@ -9,12 +9,9 @@ import {
   Token,
   OrderJSON,
   OrderSide,
-  CallBack,
   Order,
-  orderFromJSON,
   elementSignInSign,
   UnsignedOrder,
-  computeOrderCallData,
   makeBigNumber
 } from '../../index'
 import { OrderVersionData, OrderVersionParams, OrdersAPI, OrderCancelParams } from './restful/ordersApi'
@@ -22,23 +19,29 @@ import { Account } from '../account'
 import { UsersApi, GqlApi, AssetsApi } from './graphql'
 
 import Web3 from 'web3'
-import { BuyOrderParams, SellOrderParams, EnglishAuctionOrderParams, BiddingOrderParams } from './types'
+import {
+  BuyOrderParams,
+  SellOrderParams,
+  EnglishAuctionOrderParams,
+  TradeBestAskType,
+  BiddingOrderParams
+} from './types'
 import { ElementAPIConfig } from '../types'
 
-export type { BuyOrderParams, SellOrderParams, EnglishAuctionOrderParams, BiddingOrderParams }
+export type { BuyOrderParams, SellOrderParams, EnglishAuctionOrderParams, BiddingOrderParams, TradeBestAskType }
 
-const checkOrderHash = (order: any): Order => {
-  const hashOrder =
-    !order?.hash && order?.orderHash
-      ? {
-          ...order,
-          hash: order?.orderHash
-        }
-      : order
-  const signedOrder: Order = orderFromJSON(hashOrder)
-
-  return signedOrder
-}
+// const checkOrderHash = (order: any): Order => {
+//   const hashOrder =
+//     !order?.hash && order?.orderHash
+//       ? {
+//           ...order,
+//           hash: order?.orderHash
+//         }
+//       : order
+//   const signedOrder: Order = orderFromJSON(hashOrder)
+//
+//   return signedOrder
+// }
 
 export class ElementOrders extends OrdersAPI {
   public orders: Orders
@@ -202,17 +205,17 @@ export class ElementOrders extends OrdersAPI {
 
     const askOrder: any = bestAsk ? JSON.parse(bestAsk?.bestAskOrderString) : false
 
-    const sellOrder: Order = orderFromJSON(askOrder)
+    const sellOrder: Order = this.orders.orderFromJSON(askOrder)
 
-    const paymentTokenObj: Token = { ...paymentToken, decimals: paymentToken?.decimals } as Token
+    // const paymentTokenObj: Token = { ...paymentToken, decimals: paymentToken?.decimals } as Token
 
     const { orderVersion, newAsset } = await this.getAssetOrderVersion(asset)
-
+    paymentToken = paymentToken || this.orders.WETHToekn
     const biddingParams = {
       asset: newAsset,
       accountAddress: this.accountAddress,
       startAmount, // 订单总价
-      paymentTokenObj,
+      paymentTokenObj: paymentToken,
       expirationTime: sellOrder?.expirationTime.toNumber(),
       quantity: sellOrder?.quantity.toNumber(),
       sellOrder
@@ -273,7 +276,7 @@ export class ElementOrders extends OrdersAPI {
     }
     const unsignedOrder: UnsignedOrder = { ...oldOrder, ...parameter } as UnsignedOrder
 
-    const { dataToCall, replacementPattern } = computeOrderCallData(
+    const { dataToCall, replacementPattern } = this.orders.computeOrderCallData(
       unsignedOrder,
       this.orders.networkName,
       this.accountAddress
@@ -292,7 +295,7 @@ export class ElementOrders extends OrdersAPI {
   //撮合 接受买单/购买-----------------order match
   public async acceptOrder(bestOrder: OrderJSON) {
     const accountAddress = this.accountAddress
-    const signedOrder = checkOrderHash(bestOrder)
+    const signedOrder = this.orders.orderFromJSON(bestOrder)
     let recipientAddress = ''
     if (bestOrder.side === OrderSide.Sell) {
       recipientAddress = accountAddress

@@ -3,9 +3,9 @@ import { OrderVersionData, OrdersAPI, OrderCancelParams } from './restful/orders
 import { Account } from '../account';
 import { UsersApi, AssetsApi } from './graphql';
 import Web3 from 'web3';
-import { BuyOrderParams, SellOrderParams, EnglishAuctionOrderParams, BiddingOrderParams } from './types';
+import { BuyOrderParams, SellOrderParams, EnglishAuctionOrderParams, TradeBestAskType, BiddingOrderParams } from './types';
 import { ElementAPIConfig } from '../types';
-export type { BuyOrderParams, SellOrderParams, EnglishAuctionOrderParams, BiddingOrderParams };
+export type { BuyOrderParams, SellOrderParams, EnglishAuctionOrderParams, BiddingOrderParams, TradeBestAskType };
 export declare class ElementOrders extends OrdersAPI {
     orders: Orders;
     account: Account;

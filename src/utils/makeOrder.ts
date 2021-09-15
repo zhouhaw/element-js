@@ -27,6 +27,7 @@ import {
 import { CONTRACTS_ADDRESSES } from '../contracts/config'
 import { validateOrder } from './check'
 import { getSchemaList, hashOrder, makeBigNumber, orderParamsEncode, toBaseUnitAmount, web3Sign } from './helper'
+import { CallSpec } from '../schema/schemaFunctions'
 
 export function getSchema(network: Network, schemaName: ElementSchemaName): Schema<any> {
   const schemaName_ = schemaName
@@ -421,10 +422,14 @@ export async function getOrderHash(web3: any, exchangeHelper: any, order: Unhash
 }
 
 export async function hashAndValidateOrder(web3: any, exchangeHelper: any, order: UnhashedOrder): Promise<OrderJSON> {
-  const _orderHash = await getOrderHash(web3, exchangeHelper, order)
-  console.log('orderHash_hp', _orderHash)
-  const orderHash = hashOrder(web3, order)
-  console.log('orderHash_js', orderHash)
+  const orderHash = await getOrderHash(web3, exchangeHelper, order)
+  console.log('orderHash_hp', orderHash)
+  try {
+    const _orderHash = hashOrder(web3, order)
+    console.log('orderHash_js', _orderHash)
+  } catch (e) {
+    console.log(e)
+  }
   const hashedOrder = {
     ...order,
     hash: orderHash
@@ -593,7 +598,11 @@ export const computeOrderParams = (order: UnsignedOrder, networkName: Network, a
   }
 }
 
-export const computeOrderCallData = (order: UnsignedOrder, networkName: Network, assetRecipientAddress: string) => {
+export const computeOrderCallData = (
+  order: UnsignedOrder,
+  networkName: Network,
+  assetRecipientAddress: string
+): CallSpec => {
   if ('asset' in order.metadata) {
     const schema = getSchema(networkName, order.metadata.schema)
     const asset: any = order.metadata.asset
@@ -685,4 +694,62 @@ export function assignOrdersToSides(order: Order, matchingOrder: UnsignedOrder):
     }
   }
   return { buy, sell }
+}
+
+export const orderFromJSON = (order: any): Order => {
+  const createdDate = new Date() // `${order.created_date}Z`
+  const orderHash = order.hash || order.orderHash
+  const fromJSON: Order = {
+    hash: orderHash,
+    cancelledOrFinalized: order.cancelled || order.finalized,
+    markedInvalid: order.marked_invalid,
+    metadata: order.metadata,
+    quantity: new BigNumber(order.quantity || 1),
+    exchange: order.exchange,
+    makerAccount: order.maker,
+    takerAccount: order.taker,
+    // Use string address to conform to Element Order schema
+    maker: order.maker,
+    taker: order.taker,
+    makerRelayerFee: new BigNumber(order.makerRelayerFee),
+    takerRelayerFee: new BigNumber(order.takerRelayerFee),
+    makerProtocolFee: new BigNumber(order.makerProtocolFee),
+    takerProtocolFee: new BigNumber(order.takerProtocolFee),
+    makerReferrerFee: new BigNumber(order.makerReferrerFee || 0),
+    waitingForBestCounterOrder: order.feeRecipient == NULL_ADDRESS,
+    feeMethod: order.feeMethod,
+    feeRecipientAccount: order.feeRecipient,
+    feeRecipient: order.feeRecipient,
+    side: order.side,
+    saleKind: order.saleKind,
+    target: order.target,
+    howToCall: order.howToCall,
+    dataToCall: order.dataToCall,
+    replacementPattern: order.replacementPattern,
+    staticTarget: order.staticTarget,
+    staticExtradata: order.staticExtradata,
+    paymentToken: order.paymentToken,
+    basePrice: new BigNumber(order.basePrice),
+    extra: new BigNumber(order.extra),
+    currentBounty: new BigNumber(order.currentBounty || 0),
+    currentPrice: new BigNumber(order.currentPrice || 0),
+
+    createdTime: new BigNumber(Math.round(createdDate.getTime() / 1000)),
+    listingTime: new BigNumber(order.listingTime),
+    expirationTime: new BigNumber(order.expirationTime),
+
+    salt: new BigNumber(order.salt),
+    v: Number.parseInt(order.v),
+    r: order.r,
+    s: order.s,
+
+    paymentTokenContract: order.paymentToken || undefined,
+    asset: order.asset || undefined,
+    assetBundle: order.assetBundle || undefined
+  }
+
+  // Use client-side price calc, to account for buyer fee (not added by server) and latency
+  // fromJSON.currentPrice = estimateCurrentPrice(fromJSON)
+
+  return fromJSON
 }
