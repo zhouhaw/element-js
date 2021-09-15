@@ -14,4 +14,8 @@ export declare class AssetsApi extends GraphqlApi {
         contractAddress: string;
         tokenId: string;
     }): Promise<any>;
+    refreshMeta(params: {
+        contractAddress: string;
+        tokenId: string;
+    }): Promise<any>;
 }

@@ -31,12 +31,12 @@ export declare class GraphqlApi implements ElementAPIConfig {
      * X-Api-Sign	验证签名
      */
     private getAPISign;
-    identityRequest({ funcName, gql, params }: {
+    blockChainRequest({ funcName, gql, params }: {
         funcName: string;
         gql: string;
         params: any;
     }): Promise<any>;
-    blockChainRequest({ funcName, gql, params }: {
+    putRequest({ funcName, gql, params }: {
         funcName: string;
         gql: string;
         params: any;

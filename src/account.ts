@@ -173,7 +173,7 @@ export class Account extends ContractSchemas {
 
   public async checkAssetTransferProxy(metadata: ExchangeMetadata): Promise<boolean> {
     const owner = this.elementAccount
-    const operator = this.elementixTokenTransferProxy
+    const operator = await this.getAccountProxy()
     const accountApprove = getIsApproveSchemas(metadata)
     const data = encodeParamsCall(accountApprove, { owner, replace: operator })
     const callData = { to: accountApprove.target, data }
@@ -187,7 +187,8 @@ export class Account extends ContractSchemas {
   }
 
   public async approveAssetTransferProxy(metadata: ExchangeMetadata): Promise<ETHSending> {
-    const operator = this.elementixTokenTransferProxy
+    // const operator = this.elementixTokenTransferProxy
+    const operator = await this.getAccountProxy()
     const accountApprove = getApproveSchemas(metadata)
     const data = encodeParamsCall(accountApprove, { owner: operator, replace: true })
     const callData = { to: accountApprove.target, data }

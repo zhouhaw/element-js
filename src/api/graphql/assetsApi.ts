@@ -1,5 +1,5 @@
 import { ElementAPIConfig, Network, Token } from '../../types'
-import { exploreAssetsList, assetsDetail } from './gql/asset'
+import { exploreAssetsList, assetsDetail, refreshMeta } from './gql/asset'
 import { GraphqlApi } from './base'
 
 export class AssetsApi extends GraphqlApi {
@@ -19,4 +19,19 @@ export class AssetsApi extends GraphqlApi {
   public async assetsDetail(params: { contractAddress: string; tokenId: string }) {
     return await this.blockChainRequest({ funcName: 'assetsDetail', gql: assetsDetail, params })
   }
+
+  public async refreshMeta(params: { contractAddress: string; tokenId: string }) {
+    return await this.putRequest({ funcName: 'refreshMeta', gql: refreshMeta, params })
+  }
 }
+
+// {
+//   input: {
+//     blockChain: {
+//       chain: 'eth',
+//           chainId: '0x1'
+//     },
+//     contractAddress: '0x2debd05a915b8a79c8ef878db40e94e807646dd4',
+//         tokenId: '7'
+//   }
+// }

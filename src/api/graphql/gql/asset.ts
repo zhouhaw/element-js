@@ -306,3 +306,11 @@ export const assetsDetail = gql`
     }
   }
 `
+
+export const refreshMeta = gql`
+  mutation refreshMeta($input: AssetIdentityInput!) {
+    assets {
+      refreshMeta(input: $input)
+    }
+  }
+`

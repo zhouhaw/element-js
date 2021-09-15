@@ -74,19 +74,19 @@ export class GraphqlApi implements ElementAPIConfig {
     return headers
   }
 
-  public identityRequest({ funcName, gql, params }: { funcName: string; gql: string; params: any }) {
-    const variables = {
-      ...params,
-      identity: {
-        blockChain: {
-          chain: this.chain,
-          chainId: this.walletChainId
-        }
-      }
-    }
-    this.gqlClient = this.gqlClient.setHeader('X-Query-Args', funcName)
-    return this.gqlClient.request(gql, variables)
-  }
+  // public identityRequest({ funcName, gql, params }: { funcName: string; gql: string; params: any }) {
+  //   const variables = {
+  //     ...params,
+  //     identity: {
+  //       blockChain: {
+  //         chain: this.chain,
+  //         chainId: this.walletChainId
+  //       }
+  //     }
+  //   }
+  //   this.gqlClient = this.gqlClient.setHeader('X-Query-Args', funcName)
+  //   return this.gqlClient.request(gql, variables)
+  // }
 
   public blockChainRequest({ funcName, gql, params }: { funcName: string; gql: string; params: any }) {
     const variables = {
@@ -94,6 +94,20 @@ export class GraphqlApi implements ElementAPIConfig {
       blockChain: {
         chain: this.chain,
         chainId: this.walletChainId
+      }
+    }
+    this.gqlClient = this.gqlClient.setHeader('X-Query-Args', funcName)
+    return this.gqlClient.request(gql, variables)
+  }
+
+  public putRequest({ funcName, gql, params }: { funcName: string; gql: string; params: any }) {
+    const variables = {
+      input: {
+        ...params,
+        blockChain: {
+          chain: this.chain,
+          chainId: this.walletChainId
+        }
       }
     }
     this.gqlClient = this.gqlClient.setHeader('X-Query-Args', funcName)
